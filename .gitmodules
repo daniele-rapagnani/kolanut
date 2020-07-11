@@ -1,0 +1,9 @@
+[submodule "src/libs/SDL"]
+	path = src/kolanut/libs/SDL
+	url = git@github.com:SDL-mirror/SDL.git
+[submodule "src/libs/melonscript-vm"]
+	path = src/kolanut/libs/melonscript-vm
+	url = git@bitbucket.org:drapagnani/melonscript-vm.git
+[submodule "src/kolanut/libs/linalg"]
+	path = src/kolanut/libs/linalg
+	url = git@github.com:sgorsten/linalg.git

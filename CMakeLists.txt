@@ -1,0 +1,53 @@
+cmake_minimum_required(VERSION 3.7)
+project(kolanut)
+
+if (APPLE)
+    set(CMAKE_MACOSX_RPATH 0)
+    set(ENABLE_CUSTOM_COMPILER_FLAGS Off)
+endif (APPLE)
+
+set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
+
+add_subdirectory(src/kolanut/libs/melonscript-vm)
+add_subdirectory(src/kolanut/libs/SDL)
+
+add_definitions(-Werror=incompatible-pointer-types)
+add_definitions(-Werror=implicit-function-declaration)
+add_definitions(-Werror=return-type)
+add_definitions(-Werror=int-conversion)
+add_definitions(-Werror=macro-redefined)
+add_definitions(-Wdouble-promotion)
+add_definitions(-Wno-format)
+
+include_directories(
+    src/
+    src/kolanut/libs/melonscript-vm/src/
+    src/kolanut/libs/SDL/include/
+    src/kolanut/libs/linalg/
+    src/kolanut/libs/stb/
+)
+
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
+
+set(
+    SRC_FILES
+    src/kolanut/graphics/Graphics.cpp
+    src/kolanut/graphics/sdl/RendererSDL.cpp
+    src/kolanut/graphics/sdl/TextureSDL.cpp
+    src/kolanut/scripting/Scripting.cpp
+    src/kolanut/scripting/melon/SCriptingEngineMelon.cpp
+    src/kolanut/events/Events.cpp
+    src/kolanut/events/sdl/EventSystemSDL.cpp
+    src/kolanut/core/Kolanut.cpp
+    src/kolanut/main.cpp
+)
+
+add_executable(
+    kolanut
+    ${SRC_FILES}
+)
+
+set(LINKLIBS melonscript-vm external cjson SDL2)
+
+target_link_libraries(kolanut ${LINKLIBS})
