@@ -10,6 +10,7 @@ class EventSystemSDL : public EventSystem
 public:
     bool init(const Config& conf) override;
     bool poll() override;
+    uint64_t getTimeMS() override;
 };
 
 } // namespace events

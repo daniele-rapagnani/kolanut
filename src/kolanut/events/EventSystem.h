@@ -3,6 +3,7 @@
 #include "kolanut/events/Events.h"
 
 #include <functional>
+#include <cstdint>
 
 namespace kola {
 namespace events {
@@ -16,6 +17,7 @@ public:
 public:
     virtual bool init(const Config& conf) = 0;
     virtual bool poll() = 0;
+    virtual uint64_t getTimeMS() = 0;
 
     void setKeyPressedCallback(KeyPressedCallback cb)
     { this->keyPressedCb = cb; }

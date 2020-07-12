@@ -1,6 +1,7 @@
 #pragma once
 
 #include <memory>
+#include <string>
 
 namespace kola {
 namespace scripting {
@@ -16,6 +17,8 @@ enum class Engine
 struct Config
 {
     Engine scripting = Engine::MELON;
+    std::string scriptsDir = "assets/scripts";
+    std::string bootScript = "boot";
 };
 
 std::shared_ptr<ScriptingEngine> createScriptingEngine(const Config& config);

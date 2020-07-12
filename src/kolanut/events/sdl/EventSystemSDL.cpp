@@ -28,5 +28,10 @@ bool EventSystemSDL::poll()
     return true;
 }
 
+uint64_t EventSystemSDL::getTimeMS()
+{
+    return SDL_GetTicks();
+}
+
 } // namespace events
 } // namespace kola

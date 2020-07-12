@@ -40,6 +40,10 @@ set(
     src/kolanut/events/Events.cpp
     src/kolanut/events/sdl/EventSystemSDL.cpp
     src/kolanut/core/Kolanut.cpp
+    
+    src/kolanut/scripting/melon/modules/KolanutModule.cpp
+    src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
+
     src/kolanut/main.cpp
 )
 

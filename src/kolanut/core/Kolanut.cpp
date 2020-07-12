@@ -82,11 +82,23 @@ void Kolanut::run()
         isQuit = true;
     });
 
+    this->scripting->onLoad();
+
+    uint64_t lastFrameTime = this->eventSystem->getTimeMS();
+    uint64_t newFrameTime;
+    float dt = 1.0f/60.0f; // @todo: 60Hz hardcoded
+
     while(!isQuit)
     {
         this->eventSystem->poll();
         this->renderer->clear();
+        this->scripting->onLoop(dt);
         this->renderer->flip();
+
+
+        newFrameTime = this->eventSystem->getTimeMS();
+        dt = static_cast<float>(newFrameTime - lastFrameTime) / 1000.0f;
+        lastFrameTime = newFrameTime;
     }
 }
 
