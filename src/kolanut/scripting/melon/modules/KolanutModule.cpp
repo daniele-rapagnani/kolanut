@@ -47,6 +47,12 @@ static TByte loadSprite(VM* vm)
         renderer->loadTexture(melM_strDataFromObj(file->pack.obj))
     ;
 
+    if (!texture)
+    {
+        melM_vstackPushNull(&vm->stack);
+        return 1;
+    }
+
     kola::melon::ffi::pushInstance(vm, texture, "kolanut", "Texture");
     return 1;
 }

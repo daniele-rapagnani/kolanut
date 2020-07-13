@@ -1,5 +1,9 @@
 #include "kolanut/core/Logging.h"
+#include "kolanut/graphics/Renderer.h"
+#include "kolanut/graphics/Texture.h"
+#include "kolanut/core/DIContainer.h"
 #include "kolanut/scripting/melon/bindings/Texture.h"
+#include "kolanut/scripting/melon/ffi/OOP.h"
 #include "kolanut/scripting/melon/ffi/Modules.h"
 
 #include <cassert>
@@ -10,15 +14,33 @@ namespace bindings {
 
 extern "C" {
 
-TByte test(VM* vm)
+TByte draw(VM* vm)
 {
-    knM_logDebug("CAZZ");
+    melM_this(vm, thisObj);
+    melM_arg(vm, x, MELON_TYPE_NUMBER, 0);
+    melM_arg(vm, y, MELON_TYPE_NUMBER, 1);
+    melM_argOptional(vm, angle, MELON_TYPE_NUMBER, 2);
+    melM_argOptional(vm, sx, MELON_TYPE_NUMBER, 3);
+    melM_argOptional(vm, sy, MELON_TYPE_NUMBER, 4);
+
+    float anglef = angle->type == MELON_TYPE_NULL ? 0.0f : angle->pack.value.number;
+    float sxf = sx->type == MELON_TYPE_NULL ? 1.0f : sx->pack.value.number;
+    float syf = sy->type == MELON_TYPE_NULL ? 1.0f : sy->pack.value.number;
+
+    std::shared_ptr<graphics::Texture> tex = 
+        ffi::getInstance<graphics::Texture>(vm, thisObj->pack.obj)
+    ;
+
+    di::get<graphics::Renderer>()->draw(
+        tex, { x->pack.value.number, y->pack.value.number }, anglef, { sxf, syf }
+    );
+
     return 0;
 }
 
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
-    { "test", 0, 0, &test },
+    { "draw", 7, 0, &draw, 1 },
     { NULL, 0, 0, NULL }
 };
 
