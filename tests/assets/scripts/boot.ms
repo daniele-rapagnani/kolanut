@@ -1,8 +1,7 @@
 
 kolanut.onLoad = => {
     io.print("Game loading");
-};
-
-kolanut.onLoop = |dt| => {
-    io.print(dt);
+    
+    let t = kolanut.loadSprite("assets/kitten.jpeg");
+    t.test();
 };

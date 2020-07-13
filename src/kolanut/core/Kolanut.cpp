@@ -10,29 +10,28 @@ namespace kola {
 
 namespace {
 template <typename T, typename C>
-bool initSubsystem(
+std::shared_ptr<T> initSubsystem(
     const char* name,
-    std::shared_ptr<T>& inst, 
     std::function<std::shared_ptr<T>(const C&)> createFunc,
     const C& conf
 )
 {
-    inst = createFunc(conf);
+    std::shared_ptr<T> inst = createFunc(conf);
     assert(inst);
 
     if (!inst)
     {
         knM_logFatal("Can't create " << name << ".");
-        return false;
+        return nullptr;
     }
 
     if (!inst->init(conf))
     {
         knM_logFatal("Can't initialize " << name << ".");
-        return false;
+        return nullptr;
     }
 
-    return true;
+    return inst;
 }
 
 } // namespace
@@ -41,36 +40,33 @@ bool Kolanut::init(const Config& conf)
 {
     knM_logDebug("Initializing Kolanut");
 
-    if (!initSubsystem<events::EventSystem, events::Config>(
-        "event system",
-        this->eventSystem,
-        events::createEventSystem,
-        conf.events
-    ))
-    {
-        return false;
-    }
+    di::registerType<scripting::ScriptingEngine>(
+        std::bind(
+            initSubsystem<scripting::ScriptingEngine, scripting::Config>,
+            "scripting",
+            scripting::createScriptingEngine,
+            conf.scripting
+        )
+    );
 
-    if (!initSubsystem<scripting::ScriptingEngine, scripting::Config>(
-        "scripting",
-        this->scripting,
-        scripting::createScriptingEngine,
-        conf.scripting
-    ))
-    {
-        return false;
-    }
+    di::registerType<events::EventSystem>(
+        std::bind(
+            initSubsystem<events::EventSystem, events::Config>,
+            "event system",
+            events::createEventSystem,
+            conf.events
+        )
+    );
 
-    if (!initSubsystem<graphics::Renderer, graphics::Config>(
-        "renderer",
-        this->renderer,
-        graphics::createRenderer,
-        conf.graphics
-    ))
-    {
-        return false;
-    }
-    
+    di::registerType<graphics::Renderer>(
+        std::bind(
+            initSubsystem<graphics::Renderer, graphics::Config>,
+            "graphics",
+            graphics::createRenderer,
+            conf.graphics
+        )
+    );
+
     return true;
 }
 
@@ -78,28 +74,47 @@ void Kolanut::run()
 {
     bool isQuit = false;
 
-    this->eventSystem->setQuitCallback([&isQuit] {
-        isQuit = true;
+    getEventSystem()->setQuitCallback([&isQuit, this] {
+        if (this->getScriptingEngine()->onQuit())
+        {
+            isQuit = true;
+        }
     });
 
-    this->scripting->onLoad();
+    getScriptingEngine()->onLoad();
 
-    uint64_t lastFrameTime = this->eventSystem->getTimeMS();
+    uint64_t lastFrameTime = getEventSystem()->getTimeMS();
     uint64_t newFrameTime;
     float dt = 1.0f/60.0f; // @todo: 60Hz hardcoded
 
     while(!isQuit)
     {
-        this->eventSystem->poll();
-        this->renderer->clear();
-        this->scripting->onLoop(dt);
-        this->renderer->flip();
+        getEventSystem()->poll();
+        getScriptingEngine()->onUpdate(dt);
 
+        getRenderer()->clear();
+        getScriptingEngine()->onDraw();
+        getRenderer()->flip();
 
-        newFrameTime = this->eventSystem->getTimeMS();
+        newFrameTime = getEventSystem()->getTimeMS();
         dt = static_cast<float>(newFrameTime - lastFrameTime) / 1000.0f;
         lastFrameTime = newFrameTime;
     }
+}
+
+std::shared_ptr<events::EventSystem> Kolanut::getEventSystem() const
+{ 
+    return di::get<events::EventSystem>(); 
+}
+
+std::shared_ptr<scripting::ScriptingEngine> Kolanut::getScriptingEngine() const
+{ 
+    return di::get<scripting::ScriptingEngine>(); 
+}
+
+std::shared_ptr<graphics::Renderer> Kolanut::getRenderer() const
+{ 
+    return di::get<graphics::Renderer>(); 
 }
 
 } // namespace kola

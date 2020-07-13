@@ -3,6 +3,7 @@
 #include "kolanut/graphics/Graphics.h"
 #include "kolanut/scripting/Scripting.h"
 #include "kolanut/events/Events.h"
+#include "kolanut/core/DIContainer.h"
 
 #include <memory>
 
@@ -22,10 +23,10 @@ public:
     bool init(const Config& conf);
     void run();
 
-private:
-    std::shared_ptr<graphics::Renderer> renderer = nullptr;
-    std::shared_ptr<scripting::ScriptingEngine> scripting = nullptr;
-    std::shared_ptr<events::EventSystem> eventSystem = nullptr;
+protected:
+    std::shared_ptr<events::EventSystem> getEventSystem() const;
+    std::shared_ptr<scripting::ScriptingEngine> getScriptingEngine() const;
+    std::shared_ptr<graphics::Renderer> getRenderer() const;
 };
 
 } // namespace kola

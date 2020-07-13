@@ -37,6 +37,9 @@ set(
     src/kolanut/graphics/sdl/TextureSDL.cpp
     src/kolanut/scripting/Scripting.cpp
     src/kolanut/scripting/melon/SCriptingEngineMelon.cpp
+    src/kolanut/scripting/melon/ffi/OOP.cpp
+    src/kolanut/scripting/melon/bindings/Texture.cpp
+    src/kolanut/scripting/melon/bindings/Bindings.cpp
     src/kolanut/events/Events.cpp
     src/kolanut/events/sdl/EventSystemSDL.cpp
     src/kolanut/core/Kolanut.cpp

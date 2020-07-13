@@ -14,7 +14,9 @@ class ScriptingEngineMelon : public ScriptingEngine
 public:
     bool init(const Config& config) override;
     void onLoad() override;
-    void onLoop(float dt) override;
+    void onUpdate(float dt) override;
+    void onDraw() override;
+    bool onQuit() override;
 
 private:
     VMConfig vmConfig;

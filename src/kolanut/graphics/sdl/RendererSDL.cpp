@@ -73,6 +73,8 @@ bool RendererSDL::init(const Config& config)
 
 std::shared_ptr<Texture> RendererSDL::loadTexture(const std::string& file)
 {
+    knM_logDebug("Loading texture: " << file);
+    
     std::shared_ptr<TextureSDL> texture = std::make_shared<TextureSDL>();
     
     if (!texture->load(file))
