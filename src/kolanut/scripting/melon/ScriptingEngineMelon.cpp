@@ -1,6 +1,8 @@
 #include "kolanut/core/Logging.h"
 #include "kolanut/scripting/melon/ScriptingEngineMelon.h"
 #include "kolanut/scripting/melon/modules/KolanutModule.h"
+#include "kolanut/scripting/melon/modules/VectorModule.h"
+#include "kolanut/scripting/melon/modules/SpriteModule.h"
 #include "kolanut/scripting/melon/ffi/FFI.h"
 #include "kolanut/scripting/melon/bindings/Bindings.h"
 
@@ -19,7 +21,9 @@ namespace scripting {
 namespace {
 
 Module KOLANUT_MODULES[] = {
-    { "kolanut", kolanutModuleInit },
+    { "Vector", vectorModuleInit },
+    { "Sprite", spriteModuleInit },
+    { "Kolanut", kolanutModuleInit },
     { NULL, NULL }
 };
 
@@ -40,7 +44,6 @@ bool ScriptingEngineMelon::init(const Config& config)
         knM_logFatal("Can't init kolanut's melon modules");
         return false;
     }
-
     melon::bindings::registerBindings(&this->vm);
 
     std::string bootScript = config.scriptsDir + "/" + config.bootScript + ".ms";
@@ -56,23 +59,23 @@ bool ScriptingEngineMelon::init(const Config& config)
 
 void ScriptingEngineMelon::onLoad()
 {
-    melon::ffi::callModuleClosure(vm, "kolanut", "onLoad");
+    melon::ffi::callModuleClosure(vm, "Kolanut", "onLoad");
 }
 
 void ScriptingEngineMelon::onUpdate(float dt)
 {
-    melon::ffi::callModuleClosure(vm, "kolanut", "onUpdate", dt);
+    melon::ffi::callModuleClosure(vm, "Kolanut", "onUpdate", dt);
 }
 
 void ScriptingEngineMelon::onDraw()
 {
-    melon::ffi::callModuleClosure(vm, "kolanut", "onDraw");
+    melon::ffi::callModuleClosure(vm, "Kolanut", "onDraw");
 }
 
 bool ScriptingEngineMelon::onQuit()
 {
     bool res = true;
-    melon::ffi::callModuleClosureRet(vm, "kolanut", "onQuit", res);
+    melon::ffi::callModuleClosureRet(vm, "Kolanut", "onQuit", res);
     return res;
 }
 

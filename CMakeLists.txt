@@ -36,7 +36,7 @@ set(
     src/kolanut/graphics/sdl/RendererSDL.cpp
     src/kolanut/graphics/sdl/TextureSDL.cpp
     src/kolanut/scripting/Scripting.cpp
-    src/kolanut/scripting/melon/SCriptingEngineMelon.cpp
+    src/kolanut/scripting/melon/ScriptingEngineMelon.cpp
     src/kolanut/scripting/melon/ffi/OOP.cpp
     src/kolanut/scripting/melon/bindings/Texture.cpp
     src/kolanut/scripting/melon/bindings/Bindings.cpp
@@ -45,6 +45,9 @@ set(
     src/kolanut/core/Kolanut.cpp
     
     src/kolanut/scripting/melon/modules/KolanutModule.cpp
+    src/kolanut/scripting/melon/modules/SourceModule.cpp
+    src/kolanut/scripting/melon/modules/VectorModule.cpp
+    src/kolanut/scripting/melon/modules/SpriteModule.cpp
     src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
 
     src/kolanut/main.cpp

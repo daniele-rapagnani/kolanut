@@ -48,7 +48,7 @@ static const ModuleFunction funcs[] = {
 
 void registerTextureBindings(VM* vm)
 {
-    Value* val = ffi::getModule(*vm, "kolanut");
+    Value* val = ffi::getModule(*vm, "Kolanut");
     assert(val);
 
     Value key;

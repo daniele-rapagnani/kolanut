@@ -1,41 +1,41 @@
+let SpriteRenderer = import("ecs/components/SpriteRenderer");
+let Transform = import("ecs/components/Transform");
+let Rigidbody = import("ecs/components/Rigidbody");
 
-let Sprite = {
-    create = |name| => {
-        return { 
-            x = 0.0,
-            y = 0.0,
-            angle = 0.0,
-            scaleX = 1.0,
-            scaleY = 1.0,
-            texture = kolanut.loadSprite(name)
-        } @ Sprite;
-    },
+let SpriteRenderSystem = import("ecs/systems/SpriteRenderSystem");
+let RigidbodySystem = import("ecs/systems/RigidbodySystem");
+let Entity = import("ecs/Entity");
 
-    draw = => {
-        this.texture->draw(
-            this.x, this.y,
-            this.angle,
-            this.scaleX, this.scaleY
-        );
+let entities = [];
+
+let systems = {
+    update = [],
+    draw = []
+};
+
+systems.update[] = RigidbodySystem.create();
+systems.draw[] = SpriteRenderSystem.create();
+
+Kolanut.onLoad = => {
+    let kitten = Entity.create();
+
+    kitten->addComponent(Transform.create());
+    kitten->addComponent(SpriteRenderer.create("assets/kitten.jpeg"));
+    kitten->addComponent(Rigidbody.create());
+
+    kitten->getComponent("Rigidbody")->setForce(Vector.create(500.0, 200.0));
+
+    entities[] = kitten;
+};
+
+Kolanut.onUpdate = |dt| => {
+    for (let system in systems.update) {
+        system->update(dt, entities);
     }
 };
 
-let kitten = null;
-
-kolanut.onLoad = => {
-    io.print("Game loading");
-    
-    kitten = Sprite.create("assets/kitten.jpeg");
-};
-
-kolanut.onUpdate = |dt| => {
-    kitten.x = kitten.x + 50.0 * dt;
-    kitten.y = kitten.y + 70.0 * dt;
-    kitten.angle = kitten.angle + 45.0 * dt;
-    kitten.scaleX = kitten.scaleX + 0.4 * dt;
-    kitten.scaleY = kitten.scaleX;
-};
-
-kolanut.onDraw = => {
-    kitten->draw();
+Kolanut.onDraw = => {
+    for (let system in systems.draw) {
+        system->update(0.0, entities);
+    }
 };

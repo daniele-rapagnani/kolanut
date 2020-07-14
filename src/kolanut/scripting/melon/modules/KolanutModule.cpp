@@ -53,7 +53,7 @@ static TByte loadSprite(VM* vm)
         return 1;
     }
 
-    kola::melon::ffi::pushInstance(vm, texture, "kolanut", "Texture");
+    kola::melon::ffi::pushInstance(vm, texture, "Kolanut", "Texture");
     return 1;
 }
 
