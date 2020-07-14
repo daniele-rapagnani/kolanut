@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kolanut/events/Events.h"
+#include "kolanut/events/KeyCodes.h"
 
 #include <functional>
 #include <cstdint>
@@ -11,12 +12,13 @@ namespace events {
 class EventSystem
 {
 public:
-    using KeyPressedCallback = std::function<void(void)>;
+    using KeyPressedCallback = std::function<void(KeyCode, bool)>;
     using QuitCallback = std::function<void(void)>;
 
 public:
     virtual bool init(const Config& conf) = 0;
     virtual bool poll() = 0;
+    virtual bool isKeyPressed(KeyCode key) = 0;
     virtual uint64_t getTimeMS() = 0;
 
     void setKeyPressedCallback(KeyPressedCallback cb)

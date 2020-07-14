@@ -27,6 +27,8 @@ Module KOLANUT_MODULES[] = {
     { NULL, NULL }
 };
 
+#include "kolanut/scripting/melon/KeyCodesNames.inl"
+
 } // namesace
 
 bool ScriptingEngineMelon::init(const Config& config)
@@ -77,6 +79,12 @@ bool ScriptingEngineMelon::onQuit()
     bool res = true;
     melon::ffi::callModuleClosureRet(vm, "Kolanut", "onQuit", res);
     return res;
+}
+
+void ScriptingEngineMelon::onKeyPressed(events::KeyCode key, bool pressed)
+{
+    const char* keyName = KEYCODE_NAMES[static_cast<unsigned int>(key)];
+    melon::ffi::callModuleClosure(vm, "Kolanut", "onKeyPressed", keyName, pressed);
 }
 
 } // namespace scripting

@@ -35,6 +35,11 @@ static TByte onQuit(VM* vm)
     return 1;
 }
 
+static TByte onKeyPressed(VM* vm)
+{
+    return 0;
+}
+
 static TByte loadSprite(VM* vm)
 {
     melM_arg(vm, file, MELON_TYPE_STRING, 0);
@@ -63,6 +68,7 @@ static const ModuleFunction funcs[] = {
     { "onUpdate", 0, 0, &onUpdate },
     { "onDraw", 0, 0, &onDraw },
     { "onQuit", 0, 0, &onQuit },
+    { "onKeyPressed", 2, 0, &onQuit },
     
     { "loadSprite", 1, 0, &loadSprite },
 

@@ -81,6 +81,12 @@ void Kolanut::run()
         }
     });
 
+    getEventSystem()->setKeyPressedCallback(
+        [this] (events::KeyCode key, bool pressed) {
+            this->getScriptingEngine()->onKeyPressed(key, pressed);
+        }
+    );
+
     getScriptingEngine()->onLoad();
 
     uint64_t lastFrameTime = getEventSystem()->getTimeMS();

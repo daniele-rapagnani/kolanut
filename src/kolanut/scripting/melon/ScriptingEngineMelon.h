@@ -17,6 +17,7 @@ public:
     void onUpdate(float dt) override;
     void onDraw() override;
     bool onQuit() override;
+    void onKeyPressed(events::KeyCode key, bool pressed) override;
 
 private:
     VMConfig vmConfig;
