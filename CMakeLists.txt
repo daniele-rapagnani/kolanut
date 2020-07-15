@@ -48,6 +48,7 @@ set(
     src/kolanut/scripting/melon/modules/SourceModule.cpp
     src/kolanut/scripting/melon/modules/VectorModule.cpp
     src/kolanut/scripting/melon/modules/SpriteModule.cpp
+    src/kolanut/scripting/melon/modules/RectModule.cpp
     src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
 
     src/kolanut/main.cpp

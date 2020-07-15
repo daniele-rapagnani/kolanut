@@ -1,3 +1,5 @@
+let Component = import("./Component");
+
 let Rigidbody = {
     create = => {
         return {
@@ -16,6 +18,6 @@ let Rigidbody = {
     getType = => {
         return "Rigidbody";
     }
-};
+} @ Component.create();
 
 return Rigidbody;

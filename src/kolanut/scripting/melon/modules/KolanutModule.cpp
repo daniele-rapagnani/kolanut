@@ -1,5 +1,6 @@
 #include "kolanut/scripting/melon/modules/KolanutModule.h"
 #include "kolanut/scripting/melon/ffi/OOP.h"
+#include "kolanut/scripting/melon/ffi/PushVectors.h"
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/core/DIContainer.h"
 
@@ -58,7 +59,18 @@ static TByte loadSprite(VM* vm)
         return 1;
     }
 
-    kola::melon::ffi::pushInstance(vm, texture, "Kolanut", "Texture");
+    kola::melon::ffi::pushInstance(vm, "Kolanut", "Texture", texture);
+    return 1;
+}
+
+static TByte getScreenSize(VM* vm)
+{
+    std::shared_ptr<kola::graphics::Renderer> renderer = 
+        kola::di::get<kola::graphics::Renderer>()
+    ;
+
+    kola::melon::ffi::push(vm, renderer->getResolution());
+
     return 1;
 }
 
@@ -71,6 +83,7 @@ static const ModuleFunction funcs[] = {
     { "onKeyPressed", 2, 0, &onQuit },
     
     { "loadSprite", 1, 0, &loadSprite },
+    { "getScreenSize", 0, 0, &getScreenSize },
 
     { NULL, 0, 0, NULL }
 };

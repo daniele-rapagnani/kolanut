@@ -3,6 +3,7 @@
 #include "kolanut/scripting/melon/modules/KolanutModule.h"
 #include "kolanut/scripting/melon/modules/VectorModule.h"
 #include "kolanut/scripting/melon/modules/SpriteModule.h"
+#include "kolanut/scripting/melon/modules/RectModule.h"
 #include "kolanut/scripting/melon/ffi/FFI.h"
 #include "kolanut/scripting/melon/bindings/Bindings.h"
 
@@ -23,6 +24,7 @@ namespace {
 Module KOLANUT_MODULES[] = {
     { "Vector", vectorModuleInit },
     { "Sprite", spriteModuleInit },
+    { "Rect", rectModuleInit },
     { "Kolanut", kolanutModuleInit },
     { NULL, NULL }
 };

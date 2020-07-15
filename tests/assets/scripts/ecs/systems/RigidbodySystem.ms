@@ -30,6 +30,6 @@ let RigidbodySystem = {
             }
         );
     }
-} @ System;
+} @ System.create();
 
 return RigidbodySystem;

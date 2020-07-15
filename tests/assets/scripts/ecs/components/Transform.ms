@@ -1,3 +1,5 @@
+let Component = import("./Component");
+
 let Transform = {
     create = => {
         return { 
@@ -10,6 +12,6 @@ let Transform = {
     getType = => {
         return "Transform";
     }
-};
+} @ Component.create();
 
 return Transform;

@@ -31,8 +31,16 @@ inline Value* getValueFromModule(
     const std::string& key
 )
 {
-    GCItem* moduleStr = melNewString(&vm, module.c_str(), module.size());
-    melM_vstackPushGCItem(&vm.stack, moduleStr);
+    if (!module.empty())
+    {
+        GCItem* moduleStr = melNewString(&vm, module.c_str(), module.size());
+        melM_vstackPushGCItem(&vm.stack, moduleStr);
+    }
+    else
+    {
+        melM_vstackPushNull(&vm.stack);
+    }
+    
 
     GCItem* keyStrs = melNewString(&vm, key.c_str(), key.size());
     melM_vstackPushGCItem(&vm.stack, keyStrs);

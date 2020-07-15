@@ -11,16 +11,17 @@ let SpriteRenderSystem = {
             ["Transform", "SpriteRenderer"],
             |components| => {
                 let tr = components.Transform;
-                components.SpriteRenderer.sprite->draw(
-                    tr.position.x,
-                    tr.position.y,
+                let sr = components.SpriteRenderer;
+
+                sr.sprite->drawRect(
+                    tr.position,
                     tr.angle, 
-                    tr.scale.x,
-                    tr.scale.y
+                    tr.scale,
+                    sr.rect
                 );
             }
         );
     }
-} @ System;
+} @ System.create();
 
 return SpriteRenderSystem;

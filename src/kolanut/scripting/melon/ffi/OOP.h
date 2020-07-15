@@ -1,6 +1,7 @@
 #pragma once
 
 #include "kolanut/core/Logging.h"
+#include "kolanut/scripting/melon/ffi/PushPrimitives.h"
 #include "kolanut/scripting/melon/ffi/Closures.h"
 
 extern "C" {
@@ -35,20 +36,11 @@ inline void ensureInstanceSymbol(VM* vm)
 }
 
 template <typename T>
-bool pushInstance(VM* vm, std::shared_ptr<T> nativeInst, const std::string& module, const std::string& className)
+bool pushInstance(VM* vm, GCItem* prototype, std::shared_ptr<T> nativeInst)
 {
-    Value* classObj = getValueFromModule(*vm, MELON_TYPE_OBJECT, module, className);
-
-    if (!classObj)
-    {
-        knM_logError("Can't find base class '" << className << "'");
-        return false;
-    }
-
     GCItem* inst = melNewObject(vm);
     melM_vstackPushGCItem(&vm->stack, inst);
-
-    melSetPrototypeObject(vm, inst, classObj->pack.obj);
+    melSetPrototypeObject(vm, inst, prototype);
 
     ensureInstanceSymbol(vm);
 
@@ -62,6 +54,72 @@ bool pushInstance(VM* vm, std::shared_ptr<T> nativeInst, const std::string& modu
     melSetValueObject(vm, inst, &instanceSymbol, &instVal);
 
     return true;
+}
+
+template <typename T>
+bool pushInstance(VM* vm, const std::string& module, const std::string& className, std::shared_ptr<T> nativeInst)
+{
+    Value* classObj = getValueFromModule(*vm, MELON_TYPE_OBJECT, module, className);
+
+    if (!classObj || classObj->type != MELON_TYPE_OBJECT)
+    {
+        knM_logError("Can't find base class '" << className << "'");
+        return false;
+    }
+
+    return pushInstance(vm, classObj->pack.obj, nativeInst);
+}
+
+template <typename ...Types>
+bool createInstance(
+    VM* vm, 
+    const std::string& module, 
+    const std::string& className,
+    const std::string& constructor,
+    Types ...args
+)
+{
+    Value* classObj = getValueFromModule(*vm, MELON_TYPE_OBJECT, module, className);
+
+    if (!classObj)
+    {
+        knM_logError("Can't find class '" << className << "'");
+        return false;
+    }
+
+    push(vm, constructor);
+    Value* cs = melGetValueObject(vm, classObj->pack.obj, melM_stackTop(&vm->stack));
+    melM_stackPop(&vm->stack);
+
+    if (cs->type != MELON_TYPE_CLOSURE)
+    {
+        knM_logError("Class '" << className << "' has no constructor '" << constructor << "'");
+        return false;
+    }
+
+    callClosure(*vm, cs, 1, args...);
+
+    return true;
+}
+
+template <typename T>
+bool getInstanceField(VM* vm, GCItem* obj, const std::string& name, T& res)
+{
+    if (obj->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    melM_vstackPushGCItem(&vm->stack, melNewString(vm, name.c_str(), name.size()));
+    Value* val = melResolveValueObject(vm, obj, melM_stackTop(&vm->stack));
+    melM_stackPop(&vm->stack);
+
+    if (!val)
+    {
+        return false;
+    }
+
+    return convert(vm, res, val);
 }
 
 template <typename T>

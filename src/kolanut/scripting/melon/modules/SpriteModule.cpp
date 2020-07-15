@@ -19,14 +19,21 @@ namespace kola {
 namespace scripting {
 
 const char* SPRITE_MODULE_SOURCE = R"##ENDSOURCE##(
-return {
+let Sprite = {
     create = |name| => {
-        return { 
+        let s = { 
             pos = Vector.create(0.0, 0.0),
             angle = 0.0,
             scale = Vector.create(1.0, 1.0),
             texture = Kolanut.loadSprite(name)
         } @ Sprite;
+
+        if (s.texture) {
+            s.size = s.texture->getSize();
+            s.rect = Rect.create(0.0, 0.0, s.size.x, s.size.y);
+        }
+
+        return s;
     },
 
     draw = => {
@@ -37,6 +44,8 @@ return {
         );
     }
 };
+
+return Sprite;
 )##ENDSOURCE##";
 
 } // namespace scripting

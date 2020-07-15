@@ -25,6 +25,46 @@ inline TByte push<bool>(VM* vm, const bool& val)
 }
 
 template <>
+inline TByte push<unsigned long>(VM* vm, const unsigned long& val)
+{
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* stackVal = melM_stackAllocRaw(&vm->stack);
+    stackVal->type = MELON_TYPE_INTEGER;
+    stackVal->pack.value.integer = val;
+
+    return 1;
+}
+
+template <>
+inline TByte push<long long>(VM* vm, const long long& val)
+{
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* stackVal = melM_stackAllocRaw(&vm->stack);
+    stackVal->type = MELON_TYPE_INTEGER;
+    stackVal->pack.value.integer = val;
+
+    return 1;
+}
+
+template <>
+inline TByte push<long>(VM* vm, const long& val)
+{
+    return push<long long>(vm, val);
+}
+
+template <>
+inline TByte push<int>(VM* vm, const int& val)
+{
+    return push<long long>(vm, val);
+}
+
+template <>
+inline TByte push<unsigned int>(VM* vm, const unsigned int& val)
+{
+    return push<unsigned long>(vm, val);
+}
+
+template <>
 inline TByte push<double>(VM* vm, const double& val)
 {
     melM_stackEnsure(&vm->stack, vm->stack.top + 1);
@@ -48,6 +88,16 @@ inline TByte push<const char*>(VM* vm, const char* const& val)
     Value* stackVal = melM_stackAllocRaw(&vm->stack);
     stackVal->type = MELON_TYPE_STRING;
     stackVal->pack.obj = melNewString(vm, val, strlen(val));
+    return 1;
+}
+
+template <>
+inline TByte push<std::string>(VM* vm, const std::string& val)
+{
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* stackVal = melM_stackAllocRaw(&vm->stack);
+    stackVal->type = MELON_TYPE_STRING;
+    stackVal->pack.obj = melNewString(vm, val.c_str(), val.size());
     return 1;
 }
 

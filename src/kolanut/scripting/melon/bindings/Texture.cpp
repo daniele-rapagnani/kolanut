@@ -5,6 +5,8 @@
 #include "kolanut/scripting/melon/bindings/Texture.h"
 #include "kolanut/scripting/melon/ffi/OOP.h"
 #include "kolanut/scripting/melon/ffi/Modules.h"
+#include "kolanut/scripting/melon/ffi/PopVectors.h"
+#include "kolanut/scripting/melon/ffi/PushVectors.h"
 
 #include <cassert>
 
@@ -17,30 +19,74 @@ extern "C" {
 TByte draw(VM* vm)
 {
     melM_this(vm, thisObj);
-    melM_arg(vm, x, MELON_TYPE_NUMBER, 0);
-    melM_arg(vm, y, MELON_TYPE_NUMBER, 1);
-    melM_argOptional(vm, angle, MELON_TYPE_NUMBER, 2);
-    melM_argOptional(vm, sx, MELON_TYPE_NUMBER, 3);
-    melM_argOptional(vm, sy, MELON_TYPE_NUMBER, 4);
+    melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 0);
+    melM_argOptional(vm, angle, MELON_TYPE_NUMBER, 1);
+    melM_argOptional(vm, scaleVal, MELON_TYPE_OBJECT, 2);
 
-    float anglef = angle->type == MELON_TYPE_NULL ? 0.0f : angle->pack.value.number;
-    float sxf = sx->type == MELON_TYPE_NULL ? 1.0f : sx->pack.value.number;
-    float syf = sy->type == MELON_TYPE_NULL ? 1.0f : sy->pack.value.number;
+    Vec2f position = {};
+    Vec2f scale = {};
+
+    kola::melon::ffi::convert(vm, position, positionVal);
+    kola::melon::ffi::convert(vm, scale, scaleVal);
 
     std::shared_ptr<graphics::Texture> tex = 
         ffi::getInstance<graphics::Texture>(vm, thisObj->pack.obj)
     ;
 
     di::get<graphics::Renderer>()->draw(
-        tex, { x->pack.value.number, y->pack.value.number }, anglef, { sxf, syf }
+        tex, position, angle->pack.value.number, scale
     );
 
     return 0;
 }
 
+TByte drawRect(VM* vm)
+{
+    melM_this(vm, thisObj);
+    melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 0);
+    melM_argOptional(vm, angle, MELON_TYPE_NUMBER, 1);
+    melM_argOptional(vm, scaleVal, MELON_TYPE_OBJECT, 2);
+    melM_argOptional(vm, rectVal, MELON_TYPE_OBJECT, 3);
+
+    Vec2f position = {};
+    Vec2f scale = {};
+    Vec4i rect = {};
+
+    kola::melon::ffi::convert(vm, position, positionVal);
+    kola::melon::ffi::convert(vm, scale, scaleVal);
+    kola::melon::ffi::convert(vm, rect, rectVal);
+
+    std::shared_ptr<graphics::Texture> tex = 
+        ffi::getInstance<graphics::Texture>(vm, thisObj->pack.obj)
+    ;
+
+    di::get<graphics::Renderer>()->draw(
+        tex, 
+        position, 
+        angle->pack.value.number, 
+        scale,
+        rect
+    );
+
+    return 0;
+}
+
+TByte getSize(VM* vm)
+{
+    melM_this(vm, thisObj);
+
+    std::shared_ptr<graphics::Texture> tex = 
+        ffi::getInstance<graphics::Texture>(vm, thisObj->pack.obj)
+    ;
+
+    return ffi::push(vm, tex->getSize());
+}
+
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
-    { "draw", 7, 0, &draw, 1 },
+    { "draw", 4, 0, &draw, 1 },
+    { "drawRect", 5, 0, &drawRect, 1 },
+    { "getSize", 1, 0, &getSize, 1 },
     { NULL, 0, 0, NULL }
 };
 

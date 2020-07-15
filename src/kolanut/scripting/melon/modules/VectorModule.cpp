@@ -19,9 +19,12 @@ namespace kola {
 namespace scripting {
 
 const char* VECTOR_MODULE_SOURCE = R"##ENDSOURCE##(
-return {
+let Vector = {
     create = |x, y| => {
-        return { x = x, y = y } @ Vector;
+        return { 
+            x = number.fromNumber(x), 
+            y = number.fromNumber(y) 
+        } @ Vector;
     },
     [object.symbols.sumOperator] = |other| => {
         return Vector.create(this.x + other.x, this.y + other.y);
@@ -87,6 +90,8 @@ return {
         return this.x * other.x + this.y * other.y;
     }
 };
+
+return Vector;
 )##ENDSOURCE##";
 
 } // namespace scripting

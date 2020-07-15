@@ -34,6 +34,8 @@ public:
     void clear() override;
     void flip() override;
 
+    Vec2i getResolution() override;
+
     SDL_Renderer* getRenderer() const
     { return this->renderer; }
 

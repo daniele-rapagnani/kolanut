@@ -3,8 +3,10 @@
 import glob
 import os
 
-CPP_TEMPLATE = "SourceModuleTemplate.cpp.temp"
-H_TEMPLATE = "SourceModuleTemplate.h.temp"
+here = os.path.dirname(os.path.realpath(__file__))
+
+CPP_TEMPLATE = os.path.join(here, "SourceModuleTemplate.cpp.temp")
+H_TEMPLATE = os.path.join(here, "SourceModuleTemplate.h.temp")
 
 class SourceData:
     name = None
@@ -24,6 +26,7 @@ def render(data, templ, out):
     for att in dir(data):
         template = template.replace("@@" + att + "@@", getattr(data, att))
 
+    print("Writing: " + out)
     out = open(out, "w")
     out.write(template)
     out.close()
@@ -35,14 +38,14 @@ def generate(data, dest):
     render(data, CPP_TEMPLATE, baseName + ".cpp")
     render(data, H_TEMPLATE, baseName + ".h")
 
-files = glob.glob("*.ms")
+files = glob.glob(os.path.join(here, "*.ms"))
 
 datas = []
 
 for file in files:
     fh = open(file, "r")
     data = SourceData()
-    data.name = os.path.splitext(file)[0]
+    data.name = os.path.splitext(os.path.basename(file))[0]
     data.ucname = data.name.upper()
     data.lcname = data.name.lower()
     data.ucfname = data.name.lower().capitalize()
@@ -52,5 +55,5 @@ for file in files:
     datas.append(data)
 
 for data in datas:
-    generate(data, "../")
+    generate(data, os.path.join(here, ".."))
 

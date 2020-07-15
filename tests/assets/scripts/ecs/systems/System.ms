@@ -14,11 +14,16 @@ let System = {
             for (let c in components) {
                 let fc = e->getComponent(c);
 
-                if (fc == null) {
+                if (fc == null || !fc.enabled) {
                     continue;
                 }
 
                 foundComps[fc.getType()] = fc;
+            }
+
+            if (#foundComps != #components)
+            {
+                continue;
             }
 
             update(foundComps);

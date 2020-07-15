@@ -129,8 +129,8 @@ void RendererSDL::draw(
     };
 
     SDL_Rect dstRect = { 
-        static_cast<int>((position.x + rect.x) * scale.x), 
-        static_cast<int>((position.y + rect.y) * scale.y), 
+        static_cast<int>((position.x) * scale.x), 
+        static_cast<int>((position.y) * scale.y), 
         static_cast<int>(rect.z * scale.x),
         static_cast<int>(rect.w * scale.y) 
     };
@@ -156,6 +156,16 @@ void RendererSDL::flip()
 {
     assert(this->renderer);
     SDL_RenderPresent(this->renderer);
+}
+
+Vec2i RendererSDL::getResolution()
+{
+    assert(this->renderer);
+
+    int w, h;
+    SDL_GetRendererOutputSize(this->renderer, &w, &h);
+
+    return { w, h };
 }
 
 } // namespace graphics
