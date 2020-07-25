@@ -5,7 +5,7 @@ let RigidbodySystem = {
         return { } @ RigidbodySystem;
     },
 
-    update = |dt, entities| => {
+    update = |dt, entities| -> {
         this.updateWithComponents(
             entities,
             ["Transform", "Rigidbody"],

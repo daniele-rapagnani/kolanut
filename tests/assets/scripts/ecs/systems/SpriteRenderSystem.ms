@@ -5,7 +5,7 @@ let SpriteRenderSystem = {
         return { } @ SpriteRenderSystem;
     },
 
-    update = |dt, entities| => {
+    update = |dt, entities| -> {
         this.updateWithComponents(
             entities, 
             ["Transform", "SpriteRenderer"],
@@ -14,9 +14,10 @@ let SpriteRenderSystem = {
                 let sr = components.SpriteRenderer;
 
                 sr.sprite->drawRect(
-                    tr.position,
-                    tr.angle, 
-                    tr.scale,
+                    tr.worldPosition,
+                    tr.worldAngle, 
+                    tr.worldScale,
+                    tr.origin,
                     sr.rect
                 );
             }

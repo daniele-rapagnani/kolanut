@@ -18,7 +18,7 @@ let System = {
                     continue;
                 }
 
-                foundComps[fc.getType()] = fc;
+                foundComps[fc->getType()] = fc;
             }
 
             if (#foundComps != #components)

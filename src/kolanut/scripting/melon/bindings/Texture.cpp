@@ -22,19 +22,26 @@ TByte draw(VM* vm)
     melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 0);
     melM_argOptional(vm, angle, MELON_TYPE_NUMBER, 1);
     melM_argOptional(vm, scaleVal, MELON_TYPE_OBJECT, 2);
+    melM_argOptional(vm, originVal, MELON_TYPE_OBJECT, 3);
 
     Vec2f position = {};
     Vec2f scale = {};
+    Vec2f origin = {};
 
     kola::melon::ffi::convert(vm, position, positionVal);
     kola::melon::ffi::convert(vm, scale, scaleVal);
+    kola::melon::ffi::convert(vm, origin, originVal);
 
     std::shared_ptr<graphics::Texture> tex = 
         ffi::getInstance<graphics::Texture>(vm, thisObj->pack.obj)
     ;
 
     di::get<graphics::Renderer>()->draw(
-        tex, position, angle->pack.value.number, scale
+        tex, 
+        position, 
+        angle->pack.value.number, 
+        scale,
+        origin
     );
 
     return 0;
@@ -46,14 +53,17 @@ TByte drawRect(VM* vm)
     melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 0);
     melM_argOptional(vm, angle, MELON_TYPE_NUMBER, 1);
     melM_argOptional(vm, scaleVal, MELON_TYPE_OBJECT, 2);
-    melM_argOptional(vm, rectVal, MELON_TYPE_OBJECT, 3);
+    melM_argOptional(vm, originVal, MELON_TYPE_OBJECT, 3);
+    melM_argOptional(vm, rectVal, MELON_TYPE_OBJECT, 4);
 
     Vec2f position = {};
     Vec2f scale = {};
+    Vec2f origin = {};
     Vec4i rect = {};
 
     kola::melon::ffi::convert(vm, position, positionVal);
     kola::melon::ffi::convert(vm, scale, scaleVal);
+    kola::melon::ffi::convert(vm, origin, originVal);
     kola::melon::ffi::convert(vm, rect, rectVal);
 
     std::shared_ptr<graphics::Texture> tex = 
@@ -65,6 +75,7 @@ TByte drawRect(VM* vm)
         position, 
         angle->pack.value.number, 
         scale,
+        origin,
         rect
     );
 
@@ -84,8 +95,8 @@ TByte getSize(VM* vm)
 
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
-    { "draw", 4, 0, &draw, 1 },
-    { "drawRect", 5, 0, &drawRect, 1 },
+    { "draw", 5, 0, &draw, 1 },
+    { "drawRect", 6, 0, &drawRect, 1 },
     { "getSize", 1, 0, &getSize, 1 },
     { NULL, 0, 0, NULL }
 };

@@ -19,14 +19,16 @@ public:
         std::shared_ptr<Texture> t, 
         Vec2f position, 
         float angle, 
-        Vec2f scale
+        Vec2f scale,
+        Vec2f origin
     ) = 0;
 
     virtual void draw(
         std::shared_ptr<Texture> t, 
         Vec2f position, 
         float angle, 
-        Vec2f scale, 
+        Vec2f scale,
+        Vec2f origin,
         Vec4i rect
     ) = 0;
     

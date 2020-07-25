@@ -11,11 +11,11 @@ let Rigidbody = {
         } @ Rigidbody;
     },
 
-    setForce = |force| => {
+    setForce = |force| -> {
         this.acceleration = force / this.mass;
     },
 
-    getType = => {
+    getType = -> {
         return "Rigidbody";
     }
 } @ Component.create();

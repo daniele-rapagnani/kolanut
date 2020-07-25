@@ -15,7 +15,7 @@ let Sprite = {
         return s;
     },
 
-    draw = => {
+    draw = -> {
         this.texture->draw(
             this.pos.x, this.pos.y,
             this.angle,

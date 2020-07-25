@@ -12,7 +12,7 @@ let SpriteRenderer = {
         return s;
     },
 
-    getType = => {
+    getType = -> {
         return "SpriteRenderer";
     }
 } @ Component.create();

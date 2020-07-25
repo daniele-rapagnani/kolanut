@@ -22,13 +22,13 @@ const char* RECT_MODULE_SOURCE = R"##ENDSOURCE##(
 let Rect = {
     create = |x, y, w, h| => {
         return { 
-            x = number.fromNumber(x), 
-            y = number.fromNumber(y), 
-            w = number.fromNumber(w), 
-            h = number.fromNumber(h) 
+            x = x, 
+            y = y, 
+            w = w, 
+            h = h 
         } @ Rect;
     },
-    [object.symbols.sumOperator] = |other| => {
+    [object.symbols.sumOperator] = |other| -> {
         if (@other == Rect)
         {
             return Rect.create(
@@ -50,7 +50,7 @@ let Rect = {
 
         return false;
     },
-    [object.symbols.mulOperator] = |other| => {
+    [object.symbols.mulOperator] = |other| -> {
         return Rect.create(
             this.x * other, 
             this.y * other, 
@@ -58,7 +58,7 @@ let Rect = {
             this.h * other
         );
     },
-    [object.symbols.divOperator] = |other| => {
+    [object.symbols.divOperator] = |other| -> {
         return Rect.create(
             this.x / other, 
             this.y / other, 
@@ -66,10 +66,10 @@ let Rect = {
             this.h / other
         );
     },
-    [object.symbols.sizeOperator] = => {
+    [object.symbols.sizeOperator] = -> {
         return this.w * this.h;
     },
-    [object.symbols.compareOperator] = |other| => {
+    [object.symbols.compareOperator] = |other| -> {
         if (!types.isObject(other))
         {
             return 1;

@@ -6,6 +6,7 @@ let FrameAnimation = import("ecs/components/FrameAnimation");
 let SpriteRenderSystem = import("ecs/systems/SpriteRenderSystem");
 let RigidbodySystem = import("ecs/systems/RigidbodySystem");
 let FrameAnimationSystem = import("ecs/systems/FrameAnimationSystem");
+let SceneGraphSystem = import("ecs/systems/SceneGraphSystem");
 let Entity = import("ecs/Entity");
 
 let input = {
@@ -23,54 +24,85 @@ let systems = {
 };
 
 systems.update[] = RigidbodySystem.create();
+systems.update[] = SceneGraphSystem.create();
 systems.update[] = FrameAnimationSystem.create();
 systems.draw[] = SpriteRenderSystem.create();
 
-let kitten = null;
+func makeGoblin => {
+    let goblin = Entity.create();
+
+    let tr = Transform.create();
+    let rb = Rigidbody.create();
+    let fa = FrameAnimation.create(Rect.create(0, 0, 16, 16));
+    let sr = SpriteRenderer.create("assets/red_square.png");
+
+    goblin->addComponent(tr);
+    // goblin->addComponent(SpriteRenderer.create("assets/goblin_run_anim_strip_6.png"));
+    goblin->addComponent(sr);
+    // goblin->addComponent(fa);
+    goblin->addComponent(rb);
+    
+    fa.duration = 0.15;
+    // tr.scale = tr.scale * 3.0;
+    rb.maxVelocity = Vector.create(200.0, 200.0);
+
+    // tr.origin.x = fa.frameSize.w * 0.50;
+    // tr.origin.y = fa.frameSize.h * 0.50;
+    tr.origin.x = sr.sprite->getSize().x * 0.50;
+    tr.origin.y = sr.sprite->getSize().y * 0.50;
+
+    return goblin;
+}
 
 Kolanut.onKeyPressed = |key, pressed| => {
     input[key] = pressed;
 };
 
+let player = null;
+
 Kolanut.onLoad = => {
-    let ss = Kolanut.getScreenSize();
+    let g1 = makeGoblin();
+    let g2 = makeGoblin();
 
-    kitten = Entity.create();
-
-    let tr = Transform.create();
-    let rb = Rigidbody.create();
-    let fa = FrameAnimation.create(Rect.create(0, 0, 16, 16));
-
-    kitten->addComponent(tr);
-    kitten->addComponent(SpriteRenderer.create("assets/goblin_run_anim_strip_6.png"));
-    kitten->addComponent(fa);
-    kitten->addComponent(rb);
+    g2.Transform.parent = g1.Transform;
     
-    fa.duration = 0.15;
-    tr.scale = tr.scale * 3.0;
-    rb.maxVelocity = Vector.create(200.0, 200.0);
+    let sr = Kolanut.getScreenSize();
+    g1.Transform.position = Vector.create(sr.x * 0.5, sr.y * 0.5);
+    let g1s = g1.SpriteRenderer.sprite->getSize();
+    g2.Transform.position = g1s;
 
-    entities[] = kitten;
+    entities[] = g1;
+    entities[] = g2;
+
+    player = g1;
 };
 
 Kolanut.onUpdate = |dt| => {
     if (input.left) {
-        kitten->getComponent("Rigidbody")->setForce(Vector.create(-500.0, 0.0));
+        player.Rigidbody->setForce(Vector.create(-500.0, 0.0));
     }
     else if (input.right) {
-        kitten->getComponent("Rigidbody")->setForce(Vector.create(500.0, 0.0));
+        player.Rigidbody->setForce(Vector.create(500.0, 0.0));
     }
     
     if (input.down) {
-        kitten->getComponent("Rigidbody")->setForce(Vector.create(0.0, 500.0));
+        player.Rigidbody->setForce(Vector.create(0.0, 500.0));
     }
     else if (input.up) {
-        kitten->getComponent("Rigidbody")->setForce(Vector.create(0.0, -500.0));
+        player.Rigidbody->setForce(Vector.create(0.0, -500.0));
     }
 
     if (!input.left && !input.right && !input.up && !input.down) {
-        kitten->getComponent("Rigidbody")->setForce(Vector.create(0.0, 0.0));
+        player.Rigidbody->setForce(Vector.create(0.0, 0.0));
     }
+
+    // player->getComponent("Transform").scale =
+    //     player->getComponent("Transform").scale * 1.01
+    // ;
+
+    player.Transform.angle =
+        player.Transform.angle + 90.0 * dt
+    ;
 
     for (let system in systems.update) {
         system->update(dt, entities);

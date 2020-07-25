@@ -94,7 +94,8 @@ void RendererSDL::draw(
     std::shared_ptr<Texture> t, 
     Vec2f position, 
     float angle, 
-    Vec2f scale
+    Vec2f scale,
+    Vec2f origin
 )
 {
     Sizei ts = t->getSize();
@@ -104,6 +105,7 @@ void RendererSDL::draw(
         position,
         angle,
         scale,
+        origin,
         Vec4i { 0, 0, ts.x, ts.y }
     );
 }
@@ -112,7 +114,8 @@ void RendererSDL::draw(
     std::shared_ptr<Texture> t, 
     Vec2f position, 
     float angle, 
-    Vec2f scale, 
+    Vec2f scale,
+    Vec2f origin,
     Vec4i rect
 )
 {
@@ -125,14 +128,24 @@ void RendererSDL::draw(
         static_cast<int>(rect.x), 
         static_cast<int>(rect.y), 
         static_cast<int>(rect.z), 
-        static_cast<int>(rect.w) 
+        static_cast<int>(rect.w)
     };
 
-    SDL_Rect dstRect = { 
-        static_cast<int>((position.x) * scale.x), 
-        static_cast<int>((position.y) * scale.y), 
-        static_cast<int>(rect.z * scale.x),
-        static_cast<int>(rect.w * scale.y) 
+    float w = rect.z * scale.x;
+    float h = rect.w * scale.y;
+    float x = position.x - origin.x * scale.x;
+    float y = position.y - origin.y * scale.y;
+
+    SDL_Rect dstRect = {
+        static_cast<int>(x), 
+        static_cast<int>(y), 
+        static_cast<int>(w),
+        static_cast<int>(h) 
+    };
+
+    SDL_Point rotOrigin = { 
+        static_cast<int>(origin.x * scale.x),
+        static_cast<int>(origin.y * scale.y)
     };
     
     SDL_RenderCopyEx(
@@ -141,7 +154,7 @@ void RendererSDL::draw(
         &srcRect,
         &dstRect,
         angle,
-        NULL,
+        &rotOrigin,
         SDL_FLIP_NONE
     );
 }

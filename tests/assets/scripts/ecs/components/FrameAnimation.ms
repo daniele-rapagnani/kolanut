@@ -12,7 +12,7 @@ let FrameAnimation = {
         } @ FrameAnimation;
     },
 
-    getType = => {
+    getType = -> {
         return "FrameAnimation";
     }
 } @ Component.create();

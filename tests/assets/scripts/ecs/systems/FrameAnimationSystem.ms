@@ -5,7 +5,7 @@ let FrameAnimationSystem = {
         return { } @ FrameAnimationSystem;
     },
 
-    update = |dt, entities| => {
+    update = |dt, entities| -> {
         this.updateWithComponents(
             entities,
             ["SpriteRenderer", "FrameAnimation"],
@@ -24,7 +24,7 @@ let FrameAnimationSystem = {
                     fa.frame = (fa.frame + 1) % fa.totalFrames;
                 }
 
-                sr.rect.x = fa.frameSize.w * number.fromNumber(fa.frame);
+                sr.rect.x = fa.frameSize.w * fa.frame;
                 sr.rect.w = fa.frameSize.w;
             }
         );
