@@ -7,6 +7,7 @@ let Rigidbody = {
             acceleration = Vector.create(0.0, 0.0),
             velocity = Vector.create(0.0, 0.0),
             angularVelocity = 0.0,
+            damping = 0.8,
             maxVelocity = null
         } @ Rigidbody;
     },
