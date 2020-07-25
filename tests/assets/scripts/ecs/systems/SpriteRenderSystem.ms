@@ -14,9 +14,9 @@ let SpriteRenderSystem = {
                 let sr = components.SpriteRenderer;
 
                 sr.sprite->drawRect(
-                    tr.worldPosition,
-                    tr.worldAngle, 
-                    tr.worldScale,
+                    tr.position,
+                    tr.angle, 
+                    tr.scale,
                     tr.origin,
                     sr.rect
                 );

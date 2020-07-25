@@ -38,6 +38,7 @@ set(
     src/kolanut/scripting/Scripting.cpp
     src/kolanut/scripting/melon/ScriptingEngineMelon.cpp
     src/kolanut/scripting/melon/ffi/OOP.cpp
+    src/kolanut/scripting/melon/bindings/Camera.cpp
     src/kolanut/scripting/melon/bindings/Texture.cpp
     src/kolanut/scripting/melon/bindings/Bindings.cpp
     src/kolanut/events/Events.cpp

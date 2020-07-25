@@ -61,12 +61,15 @@ inline bool convert(VM* vm, bool& res, Value* val)
 template <>
 inline bool convert(VM* vm, float& res, Value* val)
 {
-    if (val->type != MELON_TYPE_NUMBER)
+    if (val->type != MELON_TYPE_NUMBER && val->type != MELON_TYPE_INTEGER)
     {
         return false;
     }
 
-    res = val->pack.value.number;
+    res = val->type == MELON_TYPE_NUMBER ? 
+        val->pack.value.number 
+        : val->pack.value.integer
+    ;
     return true;
 }
 

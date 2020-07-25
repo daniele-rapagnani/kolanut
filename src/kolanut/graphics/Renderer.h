@@ -17,20 +17,25 @@ public:
     
     virtual void draw(
         std::shared_ptr<Texture> t, 
-        Vec2f position, 
+        const Vec2f& position, 
         float angle, 
-        Vec2f scale,
-        Vec2f origin
+        const Vec2f& scale,
+        const Vec2f& origin
     ) = 0;
 
     virtual void draw(
         std::shared_ptr<Texture> t, 
-        Vec2f position, 
+        const Vec2f& position, 
         float angle, 
-        Vec2f scale,
-        Vec2f origin,
-        Vec4i rect
+        const Vec2f& scale,
+        const Vec2f& origin,
+        const Vec4i& rect
     ) = 0;
+
+    virtual void setCameraPosition(const Vec2f& pos) = 0;
+    virtual void setCameraZoom(float zoom) = 0;
+    virtual Vec2f getCameraPosition() = 0;
+    virtual float getCameraZoom() = 0;
     
     virtual void clear() = 0;
     virtual void flip() = 0;

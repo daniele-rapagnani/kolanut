@@ -92,10 +92,10 @@ std::shared_ptr<Texture> RendererSDL::loadTexture(const std::string& file)
 
 void RendererSDL::draw(
     std::shared_ptr<Texture> t, 
-    Vec2f position, 
+    const Vec2f& position, 
     float angle, 
-    Vec2f scale,
-    Vec2f origin
+    const Vec2f& scale,
+    const Vec2f& origin
 )
 {
     Sizei ts = t->getSize();
@@ -112,11 +112,11 @@ void RendererSDL::draw(
 
 void RendererSDL::draw(
     std::shared_ptr<Texture> t, 
-    Vec2f position, 
+    const Vec2f& position, 
     float angle, 
-    Vec2f scale,
-    Vec2f origin,
-    Vec4i rect
+    const Vec2f& scale,
+    const Vec2f& origin,
+    const Vec4i& rect
 )
 {
     assert(t);
@@ -133,8 +133,8 @@ void RendererSDL::draw(
 
     float w = rect.z * scale.x;
     float h = rect.w * scale.y;
-    float x = position.x - origin.x * scale.x;
-    float y = position.y - origin.y * scale.y;
+    float x = position.x - this->cameraPos.x - origin.x * scale.x;
+    float y = position.y - this->cameraPos.y - origin.y * scale.y;
 
     SDL_Rect dstRect = {
         static_cast<int>(x), 
@@ -169,6 +169,28 @@ void RendererSDL::flip()
 {
     assert(this->renderer);
     SDL_RenderPresent(this->renderer);
+}
+
+void RendererSDL::setCameraPosition(const Vec2f& pos)
+{
+    this->cameraPos = pos;
+}
+
+void RendererSDL::setCameraZoom(float zoom)
+{
+    assert(this->renderer);
+    SDL_RenderSetScale(this->renderer, zoom, zoom);
+    this->cameraZoom = zoom;
+}
+
+Vec2f RendererSDL::getCameraPosition()
+{
+    return this->cameraPos;
+}
+
+float RendererSDL::getCameraZoom()
+{
+    return this->cameraZoom;
 }
 
 Vec2i RendererSDL::getResolution()

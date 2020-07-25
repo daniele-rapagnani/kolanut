@@ -18,19 +18,19 @@ public:
     
     void draw(
         std::shared_ptr<Texture> t, 
-        Vec2f position, 
+        const Vec2f& position, 
         float angle, 
-        Vec2f scale,
-        Vec2f origin
+        const Vec2f& scale,
+        const Vec2f& origin
     ) override;
 
     void draw(
         std::shared_ptr<Texture> t, 
-        Vec2f position, 
+        const Vec2f& position, 
         float angle, 
-        Vec2f scale,
-        Vec2f origin, 
-        Vec4i rect
+        const Vec2f& scale,
+        const Vec2f& origin, 
+        const Vec4i& rect
     ) override;
 
     void clear() override;
@@ -38,12 +38,20 @@ public:
 
     Vec2i getResolution() override;
 
+    void setCameraPosition(const Vec2f& pos) override;
+    void setCameraZoom(float zoom) override;
+    Vec2f getCameraPosition() override;
+    float getCameraZoom() override;
+
     SDL_Renderer* getRenderer() const
     { return this->renderer; }
 
 private:
     SDL_Window* window = nullptr;
     SDL_Renderer* renderer = nullptr;
+
+    Vec2f cameraPos = {};
+    float cameraZoom = 1.0f;
 };
 
 } // namespace graphics
