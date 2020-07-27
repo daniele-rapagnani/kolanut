@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="104" height="100" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="6">
+ <editorsettings>
+  <export target="map.tmx" format="tmx"/>
+ </editorsettings>
+ <tileset firstgid="1" source="Forest 16 Colors.tsx"/>
+ <layer id="1" name="Tile Layer 1" width="104" height="100">
+  <data encoding="base64" compression="zlib">
+   eJzt0TsKgDAQBND4BU2T+5/WFBY2kSAsBHwPptuBhUkJAAAAAIiy1myN7C+9qWZ+ZIl987eOmrORfN+Ux31p9HIiQs8+PT37xLDP2OwzNvuMzT4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBXF0cMA18=
+  </data>
+ </layer>
+ <objectgroup id="2" name="Objects">
+  <object id="1" name="Player Spawn" type="Player Spawn" x="17.5998" y="101.757">
+   <point/>
+  </object>
+  <object id="2" name="Goblin" type="Enemy Spawn" x="266.479" y="192.367">
+   <point/>
+  </object>
+  <object id="4" name="Goblin" type="Enemy Spawn" x="99.1103" y="191.237">
+   <point/>
+  </object>
+ </objectgroup>
+</map>

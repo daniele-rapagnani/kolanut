@@ -7,3 +7,9 @@
 [submodule "src/kolanut/libs/linalg"]
 	path = src/kolanut/libs/linalg
 	url = git@github.com:sgorsten/linalg.git
+[submodule "src/kolanut/libs/tmxparser"]
+	path = src/kolanut/libs/tmxparser
+	url = https://github.com/sainteos/tmxparser
+[submodule "src/kolanut/libs/tinyxml2"]
+	path = src/kolanut/libs/tinyxml2
+	url = git@github.com:leethomason/tinyxml2.git

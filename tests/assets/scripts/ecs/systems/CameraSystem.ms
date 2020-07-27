@@ -10,7 +10,10 @@ let CameraSystem = {
             entities,
             ["Transform", "Camera"],
             |components| => {
-                Kolanut.Camera.setPosition(components.Transform.position);
+                Kolanut.Camera.setPosition(
+                    components.Transform.position
+                    - components.Transform.origin * (1.0 / components.Transform.scale.x)
+                );
                 Kolanut.Camera.setZoom(components.Transform.scale.x);
             }
         );

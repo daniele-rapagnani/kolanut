@@ -16,7 +16,7 @@ namespace bindings {
 
 extern "C" {
 
-TByte draw(VM* vm)
+static TByte draw(VM* vm)
 {
     melM_this(vm, thisObj);
     melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 0);
@@ -47,7 +47,7 @@ TByte draw(VM* vm)
     return 0;
 }
 
-TByte drawRect(VM* vm)
+static TByte drawRect(VM* vm)
 {
     melM_this(vm, thisObj);
     melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 0);
@@ -82,7 +82,7 @@ TByte drawRect(VM* vm)
     return 0;
 }
 
-TByte getSize(VM* vm)
+static TByte getSize(VM* vm)
 {
     melM_this(vm, thisObj);
 
@@ -105,25 +105,7 @@ static const ModuleFunction funcs[] = {
 
 void registerTextureBindings(VM* vm)
 {
-    Value* val = ffi::getModule(*vm, "Kolanut");
-    assert(val);
-
-    Value key;
-    key.type = MELON_TYPE_STRING;
-    key.pack.obj = melNewString(vm, "Texture", strlen("Texture"));
-    melM_stackPush(&vm->stack, &key);
-
-    if (melNewModule(vm, funcs) != 0)
-    {
-        knM_logError("Can't create module for Texture");
-        return;
-    }
-
-    Value* mod = melM_stackTop(&vm->stack);
-    melSetValueObject(vm, val->pack.obj, &key, mod);
-
-    // Pop key and module
-    melM_stackPopCount(&vm->stack, 2);
+    ffi::newSubmodule(vm, "Kolanut", "Texture", funcs);
 }
 
 } // namespace binding

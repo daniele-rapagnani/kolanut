@@ -6,100 +6,145 @@ extern "C" {
 #include <melon/modules/modules.h>
 }
 
+#include <cstdint>
+
 namespace kola {
 namespace melon {
 namespace ffi {
 
 template <typename T>
-TByte push(VM* vm, const T& val) = delete;
+class Push
+{
+    static TByte push(VM* vm, const T& val) = delete;
+};
 
 template <>
-inline TByte push<bool>(VM* vm, const bool& val)
+class Push<bool>
 {
-    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
-    Value* stackVal = melM_stackAllocRaw(&vm->stack);
-    stackVal->type = MELON_TYPE_BOOL;
-    stackVal->pack.value.boolean = val ? 1 : 0;
+public:
+    static TByte push(VM* vm, const bool& val)
+    {
+        melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+        Value* stackVal = melM_stackAllocRaw(&vm->stack);
+        stackVal->type = MELON_TYPE_BOOL;
+        stackVal->pack.value.boolean = val ? 1 : 0;
 
-    return 1;
-}
+        return 1;
+    }
+};
 
 template <>
-inline TByte push<unsigned long>(VM* vm, const unsigned long& val)
+class Push<unsigned long>
 {
-    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
-    Value* stackVal = melM_stackAllocRaw(&vm->stack);
-    stackVal->type = MELON_TYPE_INTEGER;
-    stackVal->pack.value.integer = val;
+public:
+    static TByte push(VM* vm, const unsigned long& val)
+    {
+        melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+        Value* stackVal = melM_stackAllocRaw(&vm->stack);
+        stackVal->type = MELON_TYPE_INTEGER;
+        stackVal->pack.value.integer = val;
 
-    return 1;
-}
+        return 1;
+    }
+};
 
 template <>
-inline TByte push<long long>(VM* vm, const long long& val)
+class Push<long long>
 {
-    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
-    Value* stackVal = melM_stackAllocRaw(&vm->stack);
-    stackVal->type = MELON_TYPE_INTEGER;
-    stackVal->pack.value.integer = val;
+public:
+    static TByte push(VM* vm, const long long& val)
+    {
+        melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+        Value* stackVal = melM_stackAllocRaw(&vm->stack);
+        stackVal->type = MELON_TYPE_INTEGER;
+        stackVal->pack.value.integer = val;
 
-    return 1;
-}
+        return 1;
+    }
+};
 
 template <>
-inline TByte push<long>(VM* vm, const long& val)
+class Push<long>
 {
-    return push<long long>(vm, val);
-}
+public:
+    static TByte push(VM* vm, const long& val)
+    {
+        return Push<long long>::push(vm, val);
+    }
+};
 
 template <>
-inline TByte push<int>(VM* vm, const int& val)
+class Push<int>
 {
-    return push<long long>(vm, val);
-}
+public:
+    static TByte push(VM* vm, const int& val)
+    {
+        return Push<long long>::push(vm, val);
+    }
+};
 
 template <>
-inline TByte push<unsigned int>(VM* vm, const unsigned int& val)
+class Push<unsigned int>
 {
-    return push<unsigned long>(vm, val);
-}
+public:
+    static TByte push(VM* vm, const unsigned int& val)
+    {
+        return Push<unsigned long>::push(vm, val);
+    }
+};
 
 template <>
-inline TByte push<double>(VM* vm, const double& val)
+class Push<double>
 {
-    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
-    Value* stackVal = melM_stackAllocRaw(&vm->stack);
-    stackVal->type = MELON_TYPE_NUMBER;
-    stackVal->pack.value.number = val;
+public:
+    static TByte push(VM* vm, const double& val)
+    {
+        melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+        Value* stackVal = melM_stackAllocRaw(&vm->stack);
+        stackVal->type = MELON_TYPE_NUMBER;
+        stackVal->pack.value.number = val;
 
-    return 1;
-}
-
-template <>
-inline TByte push<float>(VM* vm, const float& val)
-{
-    return push<double>(vm, static_cast<double>(val));
-}
+        return 1;
+    }
+};
 
 template <>
-inline TByte push<const char*>(VM* vm, const char* const& val)
+class Push<float>
 {
-    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
-    Value* stackVal = melM_stackAllocRaw(&vm->stack);
-    stackVal->type = MELON_TYPE_STRING;
-    stackVal->pack.obj = melNewString(vm, val, strlen(val));
-    return 1;
-}
+public:
+    static TByte push(VM* vm, const float& val)
+    {
+        return Push<double>::push(vm, static_cast<double>(val));
+    }
+};
 
 template <>
-inline TByte push<std::string>(VM* vm, const std::string& val)
+class Push<const char*>
 {
-    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
-    Value* stackVal = melM_stackAllocRaw(&vm->stack);
-    stackVal->type = MELON_TYPE_STRING;
-    stackVal->pack.obj = melNewString(vm, val.c_str(), val.size());
-    return 1;
-}
+public:
+    static TByte push(VM* vm, const char* const& val)
+    {
+        melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+        Value* stackVal = melM_stackAllocRaw(&vm->stack);
+        stackVal->type = MELON_TYPE_STRING;
+        stackVal->pack.obj = melNewString(vm, val, strlen(val));
+        return 1;
+    }
+};
+
+template <>
+class Push<std::string>
+{
+public:
+    static TByte push(VM* vm, const std::string& val)
+    {
+        melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+        Value* stackVal = melM_stackAllocRaw(&vm->stack);
+        stackVal->type = MELON_TYPE_STRING;
+        stackVal->pack.obj = melNewString(vm, val.c_str(), val.size());
+        return 1;
+    }
+};
 
 template <typename ...Types>
 TByte push(VM* vm, Types ...args)
@@ -107,7 +152,7 @@ TByte push(VM* vm, Types ...args)
     TByte pushedTotal = 0;
 
     TByte results[] = {
-        push(vm, std::forward<Types>(args))...
+        Push<Types>::push(vm, std::forward<Types>(args))...
     };
 
     for (TSize i = 0; i < sizeof(results); i++)
@@ -119,10 +164,14 @@ TByte push(VM* vm, Types ...args)
 }
 
 template <>
-inline TByte push(VM* vm)
+class Push<void>
 {
-    return 0;
-}
+public:
+    static TByte push(VM* vm)
+    {
+        return 0;
+    }
+};
 
 } // namespace ffi
 } // namespace melon

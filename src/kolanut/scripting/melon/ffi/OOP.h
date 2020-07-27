@@ -38,6 +38,12 @@ inline void ensureInstanceSymbol(VM* vm)
 template <typename T>
 bool pushInstance(VM* vm, GCItem* prototype, std::shared_ptr<T> nativeInst)
 {
+    if (!nativeInst)
+    {
+        melM_vstackPushNull(&vm->stack);
+        return true;
+    }
+
     GCItem* inst = melNewObject(vm);
     melM_vstackPushGCItem(&vm->stack, inst);
     melSetPrototypeObject(vm, inst, prototype);
@@ -59,6 +65,12 @@ bool pushInstance(VM* vm, GCItem* prototype, std::shared_ptr<T> nativeInst)
 template <typename T>
 bool pushInstance(VM* vm, const std::string& module, const std::string& className, std::shared_ptr<T> nativeInst)
 {
+    if (!nativeInst)
+    {
+        melM_vstackPushNull(&vm->stack);
+        return true;
+    }
+
     Value* classObj = getValueFromModule(*vm, MELON_TYPE_OBJECT, module, className);
 
     if (!classObj || classObj->type != MELON_TYPE_OBJECT)
@@ -120,6 +132,28 @@ bool getInstanceField(VM* vm, GCItem* obj, const std::string& name, T& res)
     }
 
     return convert(vm, res, val);
+}
+
+template <typename T>
+bool setInstanceField(VM* vm, GCItem* obj, const std::string& name, T&& res)
+{
+    if (obj->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    melM_vstackPushGCItem(&vm->stack, melNewString(vm, name.c_str(), name.size()));
+
+    if (!push(vm, res))
+    {
+        melM_stackPop(&vm->stack);
+        return false;
+    }
+
+    melSetValueObject(vm, obj, melM_stackOffset(&vm->stack, 1), melM_stackTop(&vm->stack));
+    melM_stackPopCount(&vm->stack, 2);
+
+    return true;
 }
 
 template <typename T>

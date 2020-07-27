@@ -57,6 +57,34 @@ inline Value* getValueFromModule(
     return val;
 }
 
+inline void newSubmodule(
+    VM* vm,
+    const std::string& parentModule, 
+    const std::string& name,
+    const ModuleFunction* funcs
+)
+{
+    Value* val = ffi::getModule(*vm, parentModule);
+    assert(val);
+
+    Value key;
+    key.type = MELON_TYPE_STRING;
+    key.pack.obj = melNewString(vm, name.c_str(), name.size());
+    melM_stackPush(&vm->stack, &key);
+
+    if (melNewModule(vm, funcs) != 0)
+    {
+        knM_logError("Can't create module for Texture");
+        return;
+    }
+
+    Value* mod = melM_stackTop(&vm->stack);
+    melSetValueObject(vm, val->pack.obj, &key, mod);
+
+    // Pop key and module
+    melM_stackPopCount(&vm->stack, 2);
+}
+
 } // namespace ffi
 } // namespace melon
 } // namespace kola

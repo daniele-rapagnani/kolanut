@@ -124,6 +124,22 @@ void RendererSDL::draw(
 
     std::shared_ptr<TextureSDL> sdlTex = std::static_pointer_cast<TextureSDL>(t);
 
+    Vec2f normScale = scale;
+    Uint8 flipped = 0;
+
+    if (normScale.x < 0)
+    {
+        flipped |= SDL_FLIP_HORIZONTAL;
+    }
+
+    if (normScale.y < 0)
+    {
+        flipped |= SDL_FLIP_VERTICAL;
+    }
+
+    normScale.x = abs(normScale.x);
+    normScale.y = abs(normScale.y);
+
     SDL_Rect srcRect = { 
         static_cast<int>(rect.x), 
         static_cast<int>(rect.y), 
@@ -131,10 +147,10 @@ void RendererSDL::draw(
         static_cast<int>(rect.w)
     };
 
-    float w = rect.z * scale.x;
-    float h = rect.w * scale.y;
-    float x = position.x - this->cameraPos.x - origin.x * scale.x;
-    float y = position.y - this->cameraPos.y - origin.y * scale.y;
+    float w = rect.z * normScale.x;
+    float h = rect.w * normScale.y;
+    float x = position.x - this->cameraPos.x - origin.x * normScale.x;
+    float y = position.y - this->cameraPos.y - origin.y * normScale.y;
 
     SDL_Rect dstRect = {
         static_cast<int>(x), 
@@ -144,8 +160,8 @@ void RendererSDL::draw(
     };
 
     SDL_Point rotOrigin = { 
-        static_cast<int>(origin.x * scale.x),
-        static_cast<int>(origin.y * scale.y)
+        static_cast<int>(origin.x * normScale.x),
+        static_cast<int>(origin.y * normScale.y)
     };
     
     SDL_RenderCopyEx(
@@ -155,7 +171,7 @@ void RendererSDL::draw(
         &dstRect,
         angle,
         &rotOrigin,
-        SDL_FLIP_NONE
+        static_cast<SDL_RendererFlip>(flipped)
     );
 }
 

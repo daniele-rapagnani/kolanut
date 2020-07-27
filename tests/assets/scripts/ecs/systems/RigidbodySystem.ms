@@ -13,11 +13,8 @@ let RigidbodySystem = {
                 let rb = components.Rigidbody;
                 let tr = components.Transform;
 
-                if (#rb.acceleration > 0.0) {
-                    rb.velocity = rb.velocity + rb.acceleration * dt;
-                } else {
-                    rb.velocity = rb.velocity * rb.damping;
-                }
+                rb.velocity = rb.velocity + (rb.gravity * dt);
+                rb.velocity = rb.velocity + rb.acceleration * dt;
 
                 if (rb.maxVelocity != null) {
                     if (rb.velocity.x > rb.maxVelocity.x) {

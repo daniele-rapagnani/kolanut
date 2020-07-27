@@ -26,7 +26,7 @@ let System = {
                 continue;
             }
 
-            update(foundComps);
+            update(foundComps, e);
         }
     }
 };

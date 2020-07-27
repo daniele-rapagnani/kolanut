@@ -16,7 +16,7 @@ namespace bindings {
 
 extern "C" {
 
-TByte setPosition(VM* vm)
+static TByte setPosition(VM* vm)
 {
     melM_arg(vm, posVal, MELON_TYPE_OBJECT, 0);
 
@@ -27,20 +27,20 @@ TByte setPosition(VM* vm)
     return 0;
 }
 
-TByte getPosition(VM* vm)
+static TByte getPosition(VM* vm)
 {
     Vec2f cPos = di::get<graphics::Renderer>()->getCameraPosition();
     return ffi::push(vm, cPos);
 }
 
-TByte setZoom(VM* vm)
+static TByte setZoom(VM* vm)
 {
     melM_arg(vm, zoomVal, MELON_TYPE_NUMBER, 0);
     di::get<graphics::Renderer>()->setCameraZoom(zoomVal->pack.value.number);
     return 0;
 }
 
-TByte getZoom(VM* vm)
+static TByte getZoom(VM* vm)
 {
     float zoom = di::get<graphics::Renderer>()->getCameraZoom();
     return ffi::push(vm, zoom);
@@ -59,25 +59,7 @@ static const ModuleFunction funcs[] = {
 
 void registerCameraBindings(VM* vm)
 {
-    Value* val = ffi::getModule(*vm, "Kolanut");
-    assert(val);
-
-    Value key;
-    key.type = MELON_TYPE_STRING;
-    key.pack.obj = melNewString(vm, "Camera", strlen("Camera"));
-    melM_stackPush(&vm->stack, &key);
-
-    if (melNewModule(vm, funcs) != 0)
-    {
-        knM_logError("Can't create module for Texture");
-        return;
-    }
-
-    Value* mod = melM_stackTop(&vm->stack);
-    melSetValueObject(vm, val->pack.obj, &key, mod);
-
-    // Pop key and module
-    melM_stackPopCount(&vm->stack, 2);
+    ffi::newSubmodule(vm, "Kolanut", "Camera", funcs);
 }
 
 } // namespace binding

@@ -14,32 +14,48 @@ namespace melon {
 namespace ffi {
 
 template <>
-inline TByte push<Vec2i>(VM* vm, const Vec2i& val)
+class Push<Vec2i>
 {
-    createInstance(vm, "", "Vector", "create", val.x, val.y);
-    return 1;
-}
+public:
+    static TByte push(VM* vm, const Vec2i& val)
+    {
+        createInstance(vm, "", "Vector", "create", val.x, val.y);
+        return 1;
+    }
+};
 
 template <>
-inline TByte push<Vec2f>(VM* vm, const Vec2f& val)
+class Push<Vec2f>
 {
-    createInstance(vm, "", "Vector", "create", val.x, val.y);
-    return 1;
-}
+public:
+    static TByte push(VM* vm, const Vec2f& val)
+    {
+        createInstance(vm, "", "Vector", "create", val.x, val.y);
+        return 1;
+    }
+};
 
 template <>
-inline TByte push<Vec4f>(VM* vm, const Vec4f& val)
+class Push<Vec4f>
 {
-    createInstance(vm, "", "Rect", "create", val.x, val.y, val.z, val.w);
-    return 1;
-}
+public:
+    static TByte push(VM* vm, const Vec4f& val)
+    {
+        createInstance(vm, "", "Rect", "create", val.x, val.y, val.z, val.w);
+        return 1;
+    }
+};
 
 template <>
-inline TByte push<Vec4i>(VM* vm, const Vec4i& val)
+class Push<Vec4i>
 {
-    createInstance(vm, "", "Rect", "create", val.x, val.y, val.z, val.w);
-    return 1;
-}
+public:
+    static TByte push(VM* vm, const Vec4i& val)
+    {
+        createInstance(vm, "", "Rect", "create", val.x, val.y, val.z, val.w);
+        return 1;
+    }
+};
 
 } // namespace ffi
 } // namespace melon
