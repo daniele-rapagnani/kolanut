@@ -1,6 +1,18 @@
 let Entity = {
     create = => {
-        return { components = {} } @ Entity;
+        let tag = null;
+        return { 
+            components = {}, 
+            world = null,
+            getTag = -> { return tag; },
+            setTag = |newTag| -> { 
+                if (this.world != null) {
+                    this.world->setEntityTag(this, newTag);
+                }
+                
+                tag = newTag;
+            }
+        } @ Entity;
     },
 
     addComponent = |component| -> {
@@ -17,7 +29,11 @@ let Entity = {
 
     [object.symbols.getPropertyOperator] = |prop| -> {
         if (!object.hasKey(Entity, prop) && !object.hasKey(this, prop)) {
-            return this->getComponent(prop);
+            let v = this->getComponent(prop);
+            
+            if (v != null) {
+                return v;
+            }
         }
 
         return false;

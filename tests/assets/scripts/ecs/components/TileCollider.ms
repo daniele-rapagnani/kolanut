@@ -8,7 +8,9 @@ let TileCollider = {
                 top = false,
                 bottom = false,
                 left = false,
-                right = false
+                right = false,
+                bottomRight = false,
+                bottomLeft = false
             }
          } @ TileCollider;
     },

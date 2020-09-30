@@ -20,7 +20,7 @@ namespace scripting {
 
 const char* VECTOR_MODULE_SOURCE = R"##ENDSOURCE##(
 let Vector = {
-    create = |x, y| => {
+    create = func vectorCreate |x, y| => {
         return { 
             x = number.fromNumber(x), 
             y = number.fromNumber(y) 

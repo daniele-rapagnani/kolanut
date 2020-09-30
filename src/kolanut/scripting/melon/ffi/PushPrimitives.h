@@ -138,10 +138,12 @@ class Push<std::string>
 public:
     static TByte push(VM* vm, const std::string& val)
     {
+        GCItem* str = melNewString(vm, val.c_str(), val.size());
+
         melM_stackEnsure(&vm->stack, vm->stack.top + 1);
         Value* stackVal = melM_stackAllocRaw(&vm->stack);
         stackVal->type = MELON_TYPE_STRING;
-        stackVal->pack.obj = melNewString(vm, val.c_str(), val.size());
+        stackVal->pack.obj = str;
         return 1;
     }
 };

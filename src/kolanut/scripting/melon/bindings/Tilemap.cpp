@@ -44,8 +44,11 @@ static TByte load(VM* vm)
         ffi::getInstance<graphics::Tilemap>(vm, thisObj->pack.obj)
     ;
 
+    String* str = melM_strFromObj(assetDir->pack.obj);
+    const char* ds = melM_strDataFromObj(assetDir->pack.obj);
+
     std::string dirStr = std::string(
-        melM_strDataFromObj(assetDir->pack.obj), 
+        melM_strDataFromObj(assetDir->pack.obj),
         melM_strFromObj(assetDir->pack.obj)->len
     );
 

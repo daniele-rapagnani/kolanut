@@ -4,8 +4,12 @@ let Rigidbody = import("ecs/components/Rigidbody");
 let FrameAnimation = import("ecs/components/FrameAnimation");
 let Camera = import("ecs/components/Camera");
 let PanController = import("ecs/components/camera/PanController");
+let Collider = import("ecs/components/Collider");
 let TileCollider = import("ecs/components/TileCollider");
 let PlatformController = import("ecs/components/game/player/PlatformController");
+let PatrolController = import("ecs/components/game/enemy/PatrolController");
+let Player = import("ecs/components/game/player/Player");
+let Enemy = import("ecs/components/game/enemy/Enemy");
 
 let SpriteRenderSystem = import("ecs/systems/SpriteRenderSystem");
 let RigidbodySystem = import("ecs/systems/RigidbodySystem");
@@ -14,37 +18,45 @@ let CameraSystem = import("ecs/systems/CameraSystem");
 let PanControllerSystem = import("ecs/systems/PanControllerSystem");
 let TilemapCollisionSystem = import("ecs/systems/TilemapCollisionSystem");
 let PlatformSystem = import("ecs/systems/PlatformSystem");
+let PatrollingSystem = import("ecs/systems/PatrollingSystem");
+let CollisionSystem = import("ecs/systems/CollisionSystem");
+let PlayerSystem = import("ecs/systems/PlayerSystem");
+
+let World = import("ecs/World");
 let Entity = import("ecs/Entity");
 
 let input = {
     left = false,
     right = false,
     up = false,
-    down = false
+    down = false,
+    space = false
 };
 
 let player = null;
 let camera = null;
 let tilemap = null;
 
-let entities = [];
+let tilemapCollisionSystem = null;
 
-let systems = {
-    update = [],
-    draw = []
-};
+let world = World.create();
 
-systems.update[] = PanControllerSystem.create();
-systems.update[] = PlatformSystem.create();
-systems.update[] = RigidbodySystem.create();
-systems.update[] = FrameAnimationSystem.create();
-systems.update[] = CameraSystem.create();
+func initSystems |world| => {
+    world->addSystem(PanControllerSystem.create(), true);
+    world->addSystem(PlatformSystem.create(), true);
+    world->addSystem(PatrollingSystem.create("Player"), true);
+    world->addSystem(RigidbodySystem.create(), true);
+    world->addSystem(FrameAnimationSystem.create(), true);
+    world->addSystem(CameraSystem.create(), true);
 
-let tilemapCollisionSystem = TilemapCollisionSystem.create();
-systems.update[] = tilemapCollisionSystem;
-systems.draw[] = SpriteRenderSystem.create();
+    world->addSystem(CollisionSystem.create(), true);
+    world->addSystem(PlayerSystem.create(), true);
+    tilemapCollisionSystem = TilemapCollisionSystem.create();
+    world->addSystem(tilemapCollisionSystem, true);
+    world->addSystem(SpriteRenderSystem.create(), false);
+}
 
-func makeCamera => {
+func makeCamera |world| => {
     let camera = Entity.create();
     camera->addComponent(Transform.create());
     camera->addComponent(Camera.create());
@@ -52,6 +64,9 @@ func makeCamera => {
 
     camera.Transform.scale.x = 2.0;
     camera.Transform.origin = Kolanut.getScreenSize() * 0.5;
+    camera.Camera.followTag = "Player";
+
+    world->addEntity(camera);
 
     return camera;
 }
@@ -70,6 +85,8 @@ func makeHero => {
     hero->addComponent(fa);
     hero->addComponent(TileCollider.create());
     hero->addComponent(PlatformController.create());
+    hero->addComponent(Collider.create());
+    hero->addComponent(Player.create());
 
     fa->addAnimation({
         name = "die",
@@ -90,6 +107,8 @@ func makeHero => {
     tr.origin.x = 8;
     tr.origin.y = 10;
 
+    hero->setTag("Player");
+
     return hero;
 }
 
@@ -104,7 +123,17 @@ func makeGoblin => {
     goblin->addComponent(tr);
     goblin->addComponent(sr);
     goblin->addComponent(fa);
-    // goblin->addComponent(rb);
+    goblin->addComponent(rb);
+    goblin->addComponent(PatrolController.create());
+    goblin->addComponent(TileCollider.create());
+    goblin->addComponent(PlatformController.create());
+    goblin->addComponent(Collider.create());
+    goblin->addComponent(Enemy.create());
+
+    goblin.PlatformController.speed = 15;
+    goblin.PlatformController.dashingRecharge = 1.0;
+    goblin.PlatformController.dashingSpeedMult = 5.0;
+    goblin.PlatformController.animations.dash = "attack";
 
     fa->addAnimation({
         name = "run",
@@ -143,10 +172,10 @@ func makeGoblin => {
 
     fa->playAnimation("idle");
 
-    rb.maxVelocity = Vector.create(200.0, 200.0);
-
     tr.origin.x = 8;
     tr.origin.y = 16;
+
+    goblin->setTag("Goblin");
 
     return goblin;
 }
@@ -155,16 +184,17 @@ let enemyFactories = {
     Goblin = makeGoblin
 };
 
-func spawn |factory, spawnPoint| => {
+func spawn |world, factory, spawnPoint| => {
     let ent = factory();
-    ent.Transform.position.x = spawnPoint.x;
-    ent.Transform.position.y = spawnPoint.y;
-    entities[] = ent;
+    ent.Transform.position.x = spawnPoint.x * 1.0;
+    ent.Transform.position.y = spawnPoint.y * 1.0;
+    
+    world->addEntity(ent);
 
     return ent;
 }
 
-func loadMap => {
+func loadMap |world| => {
     let tilemap = Kolanut.Tilemap.create();
     tilemap->load("assets/", "map.tmx");
     tilemap->instantiate(Vector.create(0, 0));
@@ -172,13 +202,13 @@ func loadMap => {
     let playerSpawn = tilemap->getObjectByName(0, "Player Spawn");
 
     if (playerSpawn != null) {
-        player = spawn(makeHero, playerSpawn);
+        player = spawn(world, makeHero, playerSpawn);
     }
 
     let spawns = tilemap->getObjectsByType(0, "Enemy Spawn");
 
     for (let spawnPoint in spawns) {
-        spawn(enemyFactories[spawnPoint.name], spawnPoint);
+        spawn(world, enemyFactories[spawnPoint.name], spawnPoint);
     }
 
     return tilemap;
@@ -189,10 +219,11 @@ Kolanut.onKeyPressed = |key, pressed| => {
 };
 
 Kolanut.onLoad = => {
-    camera = makeCamera();
-    entities[] = camera;
+    initSystems(world);
 
-    tilemap = loadMap();
+    camera = makeCamera(world);
+
+    tilemap = loadMap(world);
     tilemapCollisionSystem.tilemap = tilemap;
 };
 
@@ -200,18 +231,13 @@ Kolanut.onUpdate = |dt| => {
     player.PlatformController.controls.left = input.left;
     player.PlatformController.controls.right = input.right;
     player.PlatformController.controls.jump = input.up;
+    player.PlatformController.controls.dash = input.space;
 
-    camera.Transform.position = player.Transform.position;
-
-    for (let system in systems.update) {
-        system->update(dt, entities);
-    }
+    world->cleanup();
+    world->update(dt);
 };
 
-Kolanut.onDraw = => {
+Kolanut.onDraw = func kolanutOnDraw => {
     tilemap->draw();
-    
-    for (let system in systems.draw) {
-        system->update(0.0, entities);
-    }
+    world->draw();
 };

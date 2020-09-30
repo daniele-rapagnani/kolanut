@@ -36,6 +36,20 @@ inline void ensureInstanceSymbol(VM* vm)
 }
 
 template <typename T>
+std::shared_ptr<T>* getInstancePtr(VM* vm, GCItem* obj)
+{
+    ensureInstanceSymbol(vm);
+    Value* val = melGetValueObject(vm, obj, &instanceSymbol);
+
+    if (!val || val->type != MELON_TYPE_NATIVEPTR)
+    {
+        return nullptr;
+    }
+
+    return reinterpret_cast<std::shared_ptr<T>*>(val->pack.obj);
+}
+
+template <typename T>
 bool pushInstance(VM* vm, GCItem* prototype, std::shared_ptr<T> nativeInst)
 {
     if (!nativeInst)
@@ -58,6 +72,12 @@ bool pushInstance(VM* vm, GCItem* prototype, std::shared_ptr<T> nativeInst)
     instVal.pack.obj = reinterpret_cast<GCItem*>(ptr);
 
     melSetValueObject(vm, inst, &instanceSymbol, &instVal);
+
+    Object* obj = melM_objectFromObj(inst);
+    obj->freeCb = [] (VM* vm, GCItem* item) {
+        std::shared_ptr<T>* ptr = getInstancePtr<T>(vm, item);
+        delete ptr;
+    };
 
     return true;
 }
@@ -159,15 +179,7 @@ bool setInstanceField(VM* vm, GCItem* obj, const std::string& name, T&& res)
 template <typename T>
 std::shared_ptr<T> getInstance(VM* vm, GCItem* obj)
 {
-    ensureInstanceSymbol(vm);
-    Value* val = melGetValueObject(vm, obj, &instanceSymbol);
-
-    if (!val || val->type != MELON_TYPE_NATIVEPTR)
-    {
-        return nullptr;
-    }
-
-    return *reinterpret_cast<std::shared_ptr<T>*>(val->pack.obj);
+    return *getInstancePtr<T>(vm, obj);
 }
 
 } // namespace ffi

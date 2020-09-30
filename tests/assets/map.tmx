@@ -1,22 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="104" height="100" tilewidth="16" tileheight="16" infinite="0" nextlayerid="4" nextobjectid="6">
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="7">
  <editorsettings>
   <export target="map.tmx" format="tmx"/>
  </editorsettings>
  <tileset firstgid="1" source="Forest 16 Colors.tsx"/>
- <layer id="1" name="Tile Layer 1" width="104" height="100">
+ <layer id="1" name="Tile Layer 1" width="200" height="200">
   <data encoding="base64" compression="zlib">
-   eJzt0TsKgDAQBND4BU2T+5/WFBY2kSAsBHwPptuBhUkJAAAAAIiy1myN7C+9qWZ+ZIl987eOmrORfN+Ux31p9HIiQs8+PT37xLDP2OwzNvuMzT4AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMBXF0cMA18=
+   eJzt2jEKg0AQBdBNTAJqY+L97+oWiiKObGdc3oPf7cA0v1iYlAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuJvnnObqReAPfXN+OePViwAAALf0ynkH+ZzMPdL6X/dnp1ZtThekn98Mm/dDMNcnqE9JP0rm9IMa6QfE9ANi+gEx/YDYcjNylLM7kv2cmxMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgDITJHMEhg==
+  </data>
+ </layer>
+ <layer id="4" name="Tile Layer 2" width="200" height="200">
+  <data encoding="base64" compression="zlib">
+   eJzt1bENACAMA0GGgY6S/Wejj0QdI91N8I3lMQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAASLK6AyBY3cduqYBMdR+zpQIy+Q94q/s4LRUAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPzmAnmzAWo=
+  </data>
+ </layer>
+ <layer id="5" name="Tile Layer 3" width="200" height="200">
+  <data encoding="base64" compression="zlib">
+   eJztziEOg0AARFGuUaoKilYBClDA/e/UEVyB7Ca8l3wxbpoGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAuMMrteld+ghU6JO61F97TFOaiz2Cegzpm37XXtKatmKPoF57OtJZ+ggAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPMwf8PkDPQ==
   </data>
  </layer>
  <objectgroup id="2" name="Objects">
-  <object id="1" name="Player Spawn" type="Player Spawn" x="17.5998" y="101.757">
+  <object id="1" name="Player Spawn" type="Player Spawn" x="946.464" y="886.629">
    <point/>
   </object>
-  <object id="2" name="Goblin" type="Enemy Spawn" x="266.479" y="192.367">
+  <object id="2" name="Goblin" type="Enemy Spawn" x="1058.77" y="868.213">
    <point/>
   </object>
-  <object id="4" name="Goblin" type="Enemy Spawn" x="99.1103" y="191.237">
+  <object id="4" name="Goblin" type="Enemy Spawn" x="890.548" y="861.517">
+   <point/>
+  </object>
+  <object id="6" name="Goblin" type="Enemy Spawn" x="992" y="832">
    <point/>
   </object>
  </objectgroup>

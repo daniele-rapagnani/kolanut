@@ -5,14 +5,22 @@ let PlatformController = {
         return {
             speed = 100,
             jumpSpeed = 200,
+            dashingTime = 0.20,
+            dashingHold = 0.0,
+            dashingSpeedMult = 3.0,
+            dashingRecharge = 0.3,
+            curDashingTime = null,
+            dashSpeed = null,
             animations = {
                 run = "run",
-                idle = "idle"
+                idle = "idle",
+                dash = "dash"
             },
             controls = {
                 left = false,
                 right = false,
-                jump = false
+                jump = false,
+                dash = false
             }
         } @ PlatformController;
     },

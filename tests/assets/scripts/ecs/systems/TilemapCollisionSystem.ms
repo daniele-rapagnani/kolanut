@@ -1,8 +1,6 @@
 let System = import("./System");
 
 let TilemapCollisionSystem = {
-    TileColliderCollidingSymbol = $"colliding"$,
-
     create = |tilemap| => {
         return { tilemap = tilemap } @ TilemapCollisionSystem;
     },
@@ -21,20 +19,20 @@ let TilemapCollisionSystem = {
                     let sr = entity.SpriteRenderer;
                     let fa = entity.FrameAnimation;
 
-                    let pos = tr.position - tr.origin;
-                    let w = 0;
-                    let h = 0;
+                    let bb = null;
 
-                    if (fa != null && fa->getCurAnimation() != null) {
-                        w = fa->getCurAnimation().frameSize.w;
-                        h = fa->getCurAnimation().frameSize.h;
+                    if (fa != null) {
+                        bb = fa->getBB(tr);
                     } else {
-                        w = sr->getSize().w;
-                        h = sr->getSize().h;
+                        bb = sr->getBB(tr);
                     }
 
+                    let w = bb.right - bb.left;
+                    let h = bb.bottom - bb.top;
+                    let pos = Vector.create(bb.left, bb.top);
+
                     let bottomTile = self.tilemap->getTileAt(
-                        tc.layer, 
+                        tc.layer,
                         pos + Vector.create(w * 0.5, h + 1.0)
                     );
 
@@ -45,7 +43,17 @@ let TilemapCollisionSystem = {
                             rb.velocity.y = 0;
                         }
                     }
-                    
+
+                    let bottomLeftTile = self.tilemap->getTileAt(
+                        tc.layer,
+                        pos + Vector.create(-1.0, h + 1.0)
+                    );
+
+                    let bottomRightTile = self.tilemap->getTileAt(
+                        tc.layer,
+                        pos + Vector.create(w + 1.0, h + 1.0)
+                    );
+
                     let rightTile = self.tilemap->getTileAt(
                         tc.layer, 
                         pos + Vector.create(w + 1.0, h * 0.5)
@@ -55,7 +63,7 @@ let TilemapCollisionSystem = {
                         tr.position.x = rightTile.position.x - (w  - tr.origin.x);
                         
                         if (rb.velocity.x > 0.0) {
-                            rb.velocity.x = 0;
+                            rb.velocity.x = 0.0;
                         }
                     }
 
@@ -68,14 +76,16 @@ let TilemapCollisionSystem = {
                         tr.position.x = leftTile.position.x + leftTile.rect.w + tr.origin.x;
                         
                         if (rb.velocity.x < 0.0) {
-                            rb.velocity.x = 0;
+                            rb.velocity.x = 0.0;
                         }
                     }
 
                     tc.colliding = {
                         bottom = bottomTile != null,
                         left = leftTile != null,
-                        right = rightTile != null
+                        right = rightTile != null,
+                        bottomLeft = bottomLeftTile != null,
+                        bottomRight = bottomRightTile != null
                     };
                 }
             );

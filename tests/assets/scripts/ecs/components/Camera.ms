@@ -2,7 +2,9 @@ let Component = import("./Component");
 
 let Camera = {
     create = => {
-        return { } @ Camera;
+        return {
+            followTarget = null
+        } @ Camera;
     },
 
     getType = -> {

@@ -68,8 +68,6 @@ bool Tilemap::instantiateLayer(uint32_t layer, const Vec2f& position, const Vec2
         return false;
     }
 
-    this->mapCache.clear();
-
     const Tmx::TileLayer* layerObj = this->map.GetTileLayer(layer);
 
     for (unsigned int y = 0; y < layerObj->GetHeight(); ++y)
@@ -129,6 +127,8 @@ bool Tilemap::instantiateLayer(uint32_t layer, const Vec2f& position, const Vec2
 
 bool Tilemap::instantiate(const Vec2f& position, const Vec2f& scale)
 {
+    this->mapCache.clear();
+    
     for (unsigned int i = 0; i < getLayersCount(); ++i)
     {
         instantiateLayer(i, position, scale);

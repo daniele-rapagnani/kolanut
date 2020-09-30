@@ -20,6 +20,9 @@ TRet sourceModuleInit(VM* vm, const char* path, const char* source)
         melNewString(vm, source, strlen(source)),
         nullptr
     );
+
+    // The compiled function can still be collected by melRunModuleFunctionVM
+    melM_vstackPushGCItem(&vm->stack, func);
     
     if (!func || func->type != MELON_TYPE_FUNCTION)
     {
@@ -42,6 +45,10 @@ TRet sourceModuleInit(VM* vm, const char* path, const char* source)
         knM_logFatal("Builtin module '" << path << "' didn't return a valid object");
         return 1;
     }
+
+    // Remove the saved function and overwrite it with the module result
+    *(melM_stackOffset(&vm->stack, 1)) = *obj;
+    melM_stackPop(&vm->stack);
 
     return 0;
 }

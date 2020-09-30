@@ -1,6 +1,6 @@
 let System = {
     create = => {
-        return { } @ System;
+        return { world = null } @ System;
     },
 
     updateWithComponents = |entities, components, update| => {

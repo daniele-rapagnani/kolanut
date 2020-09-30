@@ -50,6 +50,24 @@ let FrameAnimation = {
         return this.animations[this.curAnimation];
     },
 
+    getBB = |tr| -> {
+        let ca = this->getCurAnimation();
+
+        if (ca == null) {
+            return null;
+        }
+
+        let res = {
+            left = tr.position.x - tr.origin.x,
+            top = tr.position.y - tr.origin.y
+        };
+
+        res.right = res.left + ca.frameSize.w;
+        res.bottom = res.top + ca.frameSize.h;
+
+        return res;
+    },
+
     getType = -> {
         return "FrameAnimation";
     }

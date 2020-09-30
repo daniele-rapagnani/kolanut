@@ -8,12 +8,22 @@ endif (APPLE)
 
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
+option(DEBUG_GC "" OFF)
+set(DEBUG_GC OFF)
+option(STRESS_GC "" OFF)
+set(STRESS_GC OFF)
+
 add_subdirectory(src/kolanut/libs/melonscript-vm)
+
+option(SDL_STATIC "" ON)
+option(SDL_SHARED "" ON)
+set(SDL_STATIC ON)
+set(SDL_SHARED OFF)
 add_subdirectory(src/kolanut/libs/SDL)
 
 option(BUILD_SHARED_LIBS "" OFF)
-option(BUILD_TINYXML2 "" ON)
 set(BUILD_SHARED_LIBS OFF)
+option(BUILD_TINYXML2 "" ON)
 set(BUILD_TINYXML2 ON)
 add_subdirectory(src/kolanut/libs/tmxparser)
 
@@ -24,15 +34,6 @@ add_definitions(-Werror=int-conversion)
 add_definitions(-Werror=macro-redefined)
 add_definitions(-Wdouble-promotion)
 add_definitions(-Wno-format)
-
-include_directories(
-    src/
-    src/kolanut/libs/melonscript-vm/src/
-    src/kolanut/libs/SDL/include/
-    src/kolanut/libs/linalg/
-    src/kolanut/libs/stb/
-    src/kolanut/libs/tmxparser/include
-)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
@@ -69,6 +70,13 @@ add_executable(
     ${SRC_FILES}
 )
 
-set(LINKLIBS melonscript-vm external cjson SDL2 tmxparser)
+target_include_directories(
+    kolanut PUBLIC
+    src/
+    src/kolanut/libs/linalg/
+    src/kolanut/libs/stb/
+)
+
+set(LINKLIBS melonscript-vm external cjson SDL2-static tmxparser)
 
 target_link_libraries(kolanut ${LINKLIBS})

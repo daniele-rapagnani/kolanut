@@ -1,5 +1,5 @@
 let Vector = {
-    create = |x, y| => {
+    create = func vectorCreate |x, y| => {
         return { 
             x = number.fromNumber(x), 
             y = number.fromNumber(y) 
