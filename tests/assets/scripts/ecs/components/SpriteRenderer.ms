@@ -2,7 +2,7 @@ let Component = import("./Component");
 
 let SpriteRenderer = {
     create = |image| => {
-        let s = { sprite = null } @ SpriteRenderer;
+        let s = { sprite = null, color = Color.white } @ SpriteRenderer;
         s->load(image);
         return s;
     },

@@ -42,11 +42,18 @@ set(
     SRC_FILES
     src/kolanut/graphics/Graphics.cpp
     src/kolanut/graphics/Tilemap.cpp
+    src/kolanut/graphics/Renderer.cpp
     src/kolanut/graphics/sdl/RendererSDL.cpp
     src/kolanut/graphics/sdl/TextureSDL.cpp
+    src/kolanut/graphics/Font.cpp
+    src/kolanut/graphics/sdl/FontSDL.cpp
     src/kolanut/events/Events.cpp
     src/kolanut/events/sdl/EventSystemSDL.cpp
     src/kolanut/core/Kolanut.cpp
+
+    src/kolanut/filesystem/Filesystem.cpp
+    src/kolanut/filesystem/FilesystemEngine.cpp
+    src/kolanut/filesystem/files/FilesFilesystemEngine.cpp
     
     src/kolanut/scripting/Scripting.cpp
     src/kolanut/scripting/melon/ScriptingEngineMelon.cpp
@@ -55,11 +62,13 @@ set(
     src/kolanut/scripting/melon/bindings/Texture.cpp
     src/kolanut/scripting/melon/bindings/Bindings.cpp
     src/kolanut/scripting/melon/bindings/Tilemap.cpp
+    src/kolanut/scripting/melon/bindings/Font.cpp
     src/kolanut/scripting/melon/modules/KolanutModule.cpp
     src/kolanut/scripting/melon/modules/SourceModule.cpp
     src/kolanut/scripting/melon/modules/VectorModule.cpp
     src/kolanut/scripting/melon/modules/SpriteModule.cpp
     src/kolanut/scripting/melon/modules/RectModule.cpp
+    src/kolanut/scripting/melon/modules/ColorModule.cpp
     src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
 
     src/kolanut/main.cpp

@@ -3,6 +3,7 @@
 #include "kolanut/graphics/Graphics.h"
 #include "kolanut/scripting/Scripting.h"
 #include "kolanut/events/Events.h"
+#include "kolanut/filesystem/Filesystem.h"
 #include "kolanut/core/DIContainer.h"
 
 #include <memory>
@@ -17,6 +18,7 @@ public:
         graphics::Config graphics;
         scripting::Config scripting;
         events::Config events;
+        filesystem::Config filesystem;
     };
 
 public:

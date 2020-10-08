@@ -73,6 +73,39 @@ inline bool convert(VM* vm, float& res, Value* val)
     return true;
 }
 
+template <typename T>
+inline bool convertInt(VM* vm, T& res, Value* val)
+{
+    if (val->type != MELON_TYPE_INTEGER)
+    {
+        return false;
+    }
+
+    res = val->pack.value.integer;
+    return true;
+}
+
+#define knM_defineIntConv(Type) \
+    template <> \
+    inline bool convert(VM* vm, Type& res, Value* val) \
+    { \
+        return convertInt(vm, res, val); \
+    }
+
+knM_defineIntConv(char)
+knM_defineIntConv(long)
+knM_defineIntConv(unsigned long)
+knM_defineIntConv(uint64_t)
+knM_defineIntConv(int64_t)
+knM_defineIntConv(uint32_t)
+knM_defineIntConv(int32_t)
+knM_defineIntConv(uint16_t)
+knM_defineIntConv(int16_t)
+knM_defineIntConv(uint8_t)
+knM_defineIntConv(int8_t)
+
+#undef knM_defineIntConv
+
 } // namespace ffi
 } // namespace melon
 } // namespace kola

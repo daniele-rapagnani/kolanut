@@ -98,6 +98,50 @@ inline bool convert(VM* vm, Vec4i& res, Value* val)
     return true;
 }
 
+template <>
+inline bool convert(VM* vm, Colori& res, Value* val)
+{
+    if (val->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    if (
+        !getInstanceField(vm, val->pack.obj, "r", res.x)
+        || !getInstanceField(vm, val->pack.obj, "g", res.y)
+        || !getInstanceField(vm, val->pack.obj, "b", res.z)
+        || !getInstanceField(vm, val->pack.obj, "a", res.w)
+    )
+    {
+        return false;
+    }
+
+    return true;
+}
+
+template <>
+inline bool convert(VM* vm, Colorf& res, Value* val)
+{
+    if (val->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    int32_t r, g, b, a;
+
+    if (
+        !getInstanceField(vm, val->pack.obj, "r", r)
+        || !getInstanceField(vm, val->pack.obj, "g", g)
+        || !getInstanceField(vm, val->pack.obj, "b", b)
+        || !getInstanceField(vm, val->pack.obj, "a", a)
+    )
+    {
+        return false;
+    }
+
+    return true;
+}
+
 } // namespace ffi
 } // namespace melon
 } // namespace kola

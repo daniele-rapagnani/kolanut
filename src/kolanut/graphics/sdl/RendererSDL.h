@@ -15,6 +15,7 @@ public:
 public:
     bool init(const Config& config) override;
     std::shared_ptr<Texture> loadTexture(const std::string& file) override;
+    std::shared_ptr<Font> loadFont(const std::string& file, size_t sizes) override;
     
     void draw(
         std::shared_ptr<Texture> t, 
@@ -30,7 +31,8 @@ public:
         float angle, 
         const Vec2f& scale,
         const Vec2f& origin, 
-        const Vec4i& rect
+        const Vec4i& rect,
+        const Colori& color
     ) override;
 
     void clear() override;

@@ -37,11 +37,11 @@ let Sprite = {
     },
 
     draw = -> {
-        this.texture->draw(
-            this.pos.x, this.pos.y,
-            this.angle,
-            this.scale.x, this.scale.y
-        );
+        // this.texture->draw(
+        //     this.pos.x, this.pos.y,
+        //     this.angle,
+        //     this.scale.x, this.scale.y
+        // );
     }
 };
 

@@ -4,7 +4,9 @@
 #include "kolanut/scripting/melon/modules/VectorModule.h"
 #include "kolanut/scripting/melon/modules/SpriteModule.h"
 #include "kolanut/scripting/melon/modules/RectModule.h"
+#include "kolanut/scripting/melon/modules/ColorModule.h"
 #include "kolanut/scripting/melon/ffi/FFI.h"
+#include "kolanut/scripting/melon/ffi/Modules.h"
 #include "kolanut/scripting/melon/bindings/Bindings.h"
 
 #include <melon/tools/utils.h>
@@ -25,6 +27,7 @@ Module KOLANUT_MODULES[] = {
     { "Vector", vectorModuleInit },
     { "Sprite", spriteModuleInit },
     { "Rect", rectModuleInit },
+    { "Color", colorModuleInit },
     { "Kolanut", kolanutModuleInit },
     { NULL, NULL }
 };
@@ -74,6 +77,11 @@ void ScriptingEngineMelon::onUpdate(float dt)
 void ScriptingEngineMelon::onDraw()
 {
     melon::ffi::callModuleClosure(vm, "Kolanut", "onDraw");
+}
+
+void ScriptingEngineMelon::onDrawUI()
+{
+    melon::ffi::callModuleClosure(vm, "Kolanut", "onDrawUI");
 }
 
 bool ScriptingEngineMelon::onQuit()

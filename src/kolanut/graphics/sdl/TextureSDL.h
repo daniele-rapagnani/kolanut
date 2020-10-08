@@ -20,6 +20,7 @@ public:
 
 public:
     bool load(const std::string& file) override;
+    bool load(unsigned char* data, size_t w, size_t h);
     Sizei getSize() override;
 
     bool loadTexture(const RendererSDL& renderer);
@@ -28,6 +29,7 @@ private:
     SDL_Surface* surface = nullptr;
     SDL_Texture* texture = nullptr;
     unsigned char* data = nullptr;
+    bool ownsData = false;
 };
 
 } // namespace graphics

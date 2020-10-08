@@ -13,6 +13,7 @@ public:
     virtual void onLoad() = 0;
     virtual void onUpdate(float dt) = 0;
     virtual void onDraw() = 0;
+    virtual void onDrawUI() = 0;
     virtual bool onQuit() = 0;
     virtual void onKeyPressed(events::KeyCode key, bool pressed) = 0;
 };

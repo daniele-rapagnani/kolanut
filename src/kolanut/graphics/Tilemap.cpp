@@ -162,7 +162,8 @@ bool Tilemap::draw()
                 0.0f,
                 tile.scale,
                 Vec2f { 0.0f, 0.0f },
-                tile.rect
+                tile.rect,
+                {}
             );   
         }
     }

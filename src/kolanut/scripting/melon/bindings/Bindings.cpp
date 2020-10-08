@@ -1,6 +1,7 @@
 #include "kolanut/scripting/melon/bindings/Bindings.h"
 #include "kolanut/scripting/melon/bindings/Texture.h"
 #include "kolanut/scripting/melon/bindings/Camera.h"
+#include "kolanut/scripting/melon/bindings/Font.h"
 #include "kolanut/scripting/melon/bindings/Tilemap.h"
 
 namespace kola {
@@ -11,6 +12,7 @@ void registerBindings(VM* vm)
 {
     registerCameraBindings(vm);
     registerTextureBindings(vm);
+    registerFontBindings(vm);
     registerTilemapBindings(vm);
 }
 

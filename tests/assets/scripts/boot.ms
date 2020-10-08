@@ -218,7 +218,10 @@ Kolanut.onKeyPressed = |key, pressed| => {
     input[key] = pressed;
 };
 
-Kolanut.onLoad = => {
+let font = null;
+
+Kolanut.onLoad = func kolanutOnLoad => {
+    font = Kolanut.loadFont("assets/Pokemon Classic.ttf", 16);
     initSystems(world);
 
     camera = makeCamera(world);
@@ -237,7 +240,11 @@ Kolanut.onUpdate = |dt| => {
     world->update(dt);
 };
 
-Kolanut.onDraw = func kolanutOnDraw => {
+Kolanut.onDraw = => {
     tilemap->draw();
     world->draw();
+};
+
+Kolanut.onDrawUI = => {
+    font->draw("Hello darkness...\n...my old friend", Vector.create(0, 0), null, Color.green);
 };

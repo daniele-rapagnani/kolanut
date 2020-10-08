@@ -1,6 +1,8 @@
 #include "kolanut/graphics/sdl/TextureSDL.h"
 #include "kolanut/graphics/sdl/RendererSDL.h"
+#include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/core/Logging.h"
+#include "kolanut/core/DIContainer.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
@@ -22,7 +24,7 @@ TextureSDL::~TextureSDL()
         this->surface = nullptr;
     }
 
-    if (this->data)
+    if (this->data && this->ownsData)
     {
         stbi_image_free(this->data);
         this->data = nullptr;
@@ -31,14 +33,46 @@ TextureSDL::~TextureSDL()
 
 bool TextureSDL::load(const std::string& file)
 {
-    int w, h, n;
-    this->data = stbi_load(file.c_str(), &w, &h, &n, STBI_rgb_alpha);
+    std::vector<char> buffer;
     
-    if (!this->data)
+    if (!di::get<filesystem::FilesystemEngine>()->getFileContent(file, buffer))
+    {
+        knM_logError("Can't read '" << file << "'");
+        return false;
+    }
+
+    int w, h, n;
+
+    unsigned char* data = stbi_load_from_memory(
+        reinterpret_cast<const unsigned char*>(&buffer[0]), 
+        buffer.size(), 
+        &w, 
+        &h, 
+        &n, 
+        STBI_rgb_alpha
+    );
+    
+    if (!data)
     {
         knM_logError("Can't load '" << file << "': " << stbi_failure_reason());
         return false;
     }
+
+    if (!load(data, w, h))
+    {
+        knM_logError("Can't create surface from '" << file << "': " << SDL_GetError());
+        return false;
+    }
+    
+    this->ownsData = true;
+    
+    return true;
+}
+
+bool TextureSDL::load(unsigned char* data, size_t w, size_t h)
+{
+    this->data = data;
+    this->ownsData = false;
 
     Uint32 rmask, gmask, bmask, amask;
 
@@ -61,13 +95,7 @@ bool TextureSDL::load(const std::string& file)
         rmask, gmask, bmask, amask
     );
 
-    if (!this->surface)
-    {
-        knM_logError("Can't create surface from '" << file << "': " << SDL_GetError());
-        return false;
-    }
-
-    return true;
+    return this->surface;
 }
 
 bool TextureSDL::loadTexture(const RendererSDL& renderer)

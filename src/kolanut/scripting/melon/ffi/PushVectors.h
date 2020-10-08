@@ -57,6 +57,28 @@ public:
     }
 };
 
+template <>
+class Push<Colori>
+{
+public:
+    static TByte push(VM* vm, const Colori& val)
+    {
+        createInstance(vm, "", "Color", "create", val.x, val.y, val.z, val.w);
+        return 1;
+    }
+};
+
+template <>
+class Push<Colorf>
+{
+public:
+    static TByte push(VM* vm, const Colorf& val)
+    {
+        createInstance(vm, "", "Color", "create", val.x, val.y, val.z, val.w);
+        return 1;
+    }
+};
+
 } // namespace ffi
 } // namespace melon
 } // namespace kola

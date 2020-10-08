@@ -3,6 +3,7 @@
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/scripting/ScriptingEngine.h"
 #include "kolanut/events/EventSystem.h"
+#include "kolanut/filesystem/FilesystemEngine.h"
 
 #include <cassert>
 
@@ -39,6 +40,15 @@ std::shared_ptr<T> initSubsystem(
 bool Kolanut::init(const Config& conf)
 {
     knM_logDebug("Initializing Kolanut");
+    
+    di::registerType<filesystem::FilesystemEngine>(
+        std::bind(
+            initSubsystem<filesystem::FilesystemEngine, filesystem::Config>,
+            "filesystem",
+            filesystem::createFilesystemEngine,
+            conf.filesystem
+        )
+    );
 
     di::registerType<scripting::ScriptingEngine>(
         std::bind(
@@ -93,6 +103,9 @@ void Kolanut::run()
     uint64_t newFrameTime;
     float dt = 1.0f/60.0f; // @todo: 60Hz hardcoded
 
+    Vec2f cameraPosTmp = {};
+    float cameraZoomTmp;
+
     while(!isQuit)
     {
         getEventSystem()->poll();
@@ -100,6 +113,15 @@ void Kolanut::run()
 
         getRenderer()->clear();
         getScriptingEngine()->onDraw();
+
+        cameraPosTmp = getRenderer()->getCameraPosition();
+        cameraZoomTmp = getRenderer()->getCameraZoom();
+        getRenderer()->setCameraPosition({});
+        getRenderer()->setCameraZoom(1.0f);
+        getScriptingEngine()->onDrawUI();
+        getRenderer()->setCameraPosition(cameraPosTmp);
+        getRenderer()->setCameraZoom(cameraZoomTmp);
+        
         getRenderer()->flip();
 
         newFrameTime = getEventSystem()->getTimeMS();

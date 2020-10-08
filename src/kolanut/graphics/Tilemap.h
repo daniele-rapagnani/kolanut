@@ -32,7 +32,7 @@ public:
     {
         const Tmx::MapTile* tile = nullptr;
         
-        Vec4i rect;
+        Recti rect;
         Vec2f position;
         Vec2f scale;
         std::shared_ptr<Texture> texture = nullptr;
@@ -92,7 +92,7 @@ public:
             return true;
         }
 
-        bool remove(Vec4i rect, uint32_t layer)
+        bool remove(Recti rect, uint32_t layer)
         {
             bool found = false;
 

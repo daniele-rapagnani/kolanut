@@ -13,12 +13,13 @@ let SpriteRenderSystem = {
                 let tr = components.Transform;
                 let sr = components.SpriteRenderer;
 
-                sr.sprite->drawRect(
+                sr.sprite->draw(
                     tr.position,
                     tr.angle, 
                     tr.scale,
                     tr.origin,
-                    sr.rect
+                    sr.rect,
+                    sr.color
                 );
             }
         );

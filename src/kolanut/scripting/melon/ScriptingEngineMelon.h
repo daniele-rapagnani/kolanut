@@ -16,6 +16,7 @@ public:
     void onLoad() override;
     void onUpdate(float dt) override;
     void onDraw() override;
+    void onDrawUI() override;
     bool onQuit() override;
     void onKeyPressed(events::KeyCode key, bool pressed) override;
 

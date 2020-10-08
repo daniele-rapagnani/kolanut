@@ -1,5 +1,6 @@
 #include "kolanut/graphics/sdl/RendererSDL.h"
 #include "kolanut/graphics/sdl/TextureSDL.h"
+#include "kolanut/graphics/sdl/FontSDL.h"
 #include "kolanut/core/Logging.h"
 
 #include <cassert>
@@ -90,6 +91,25 @@ std::shared_ptr<Texture> RendererSDL::loadTexture(const std::string& file)
     return std::static_pointer_cast<Texture>(texture);
 }
 
+std::shared_ptr<Font> RendererSDL::loadFont(const std::string& file, size_t size)
+{
+    knM_logDebug("Loading font: " << file);
+
+    std::shared_ptr<FontSDL> font = std::make_shared<FontSDL>();
+    
+    if (!font->load(file, size))
+    {
+        return nullptr;
+    }
+
+    if (!font->loadTexture(*this))
+    {
+        return nullptr;
+    }
+
+    return std::static_pointer_cast<Font>(font);
+}
+
 void RendererSDL::draw(
     std::shared_ptr<Texture> t, 
     const Vec2f& position, 
@@ -106,7 +126,8 @@ void RendererSDL::draw(
         angle,
         scale,
         origin,
-        Vec4i { 0, 0, ts.x, ts.y }
+        Recti { 0, 0, ts.x, ts.y },
+        {}
     );
 }
 
@@ -116,7 +137,8 @@ void RendererSDL::draw(
     float angle, 
     const Vec2f& scale,
     const Vec2f& origin,
-    const Vec4i& rect
+    const Recti& rect,
+    const Colori& color
 )
 {
     assert(t);
@@ -163,6 +185,8 @@ void RendererSDL::draw(
         static_cast<int>(origin.x * normScale.x),
         static_cast<int>(origin.y * normScale.y)
     };
+
+    SDL_SetTextureColorMod(sdlTex->texture, color.x, color.y, color.z);
     
     SDL_RenderCopyEx(
         this->renderer,
@@ -173,11 +197,13 @@ void RendererSDL::draw(
         &rotOrigin,
         static_cast<SDL_RendererFlip>(flipped)
     );
-}
 
+    SDL_SetTextureColorMod(sdlTex->texture, 255, 255, 255);
+}
 void RendererSDL::clear()
 {
     assert(this->renderer);
+    SDL_SetRenderDrawColor(this->renderer, 0, 0, 0, 255);
     SDL_RenderClear(this->renderer);
 }
 
