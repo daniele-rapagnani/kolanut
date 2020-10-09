@@ -6,6 +6,7 @@
 #include "kolanut/filesystem/FilesystemEngine.h"
 
 #include <cassert>
+#include <limits>
 
 namespace kola {
 
@@ -125,7 +126,13 @@ void Kolanut::run()
         getRenderer()->flip();
 
         newFrameTime = getEventSystem()->getTimeMS();
-        dt = static_cast<float>(newFrameTime - lastFrameTime) / 1000.0f;
+        dt = std::min(
+            std::max(
+                static_cast<float>(newFrameTime - lastFrameTime) / 1000.0f,
+                std::numeric_limits<decltype(dt)>::epsilon()
+            ),
+            (1.0f/60.0f) * 5.0f
+        );
         lastFrameTime = newFrameTime;
     }
 }

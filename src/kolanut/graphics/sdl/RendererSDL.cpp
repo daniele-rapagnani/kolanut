@@ -187,8 +187,12 @@ void RendererSDL::draw(
     };
 
     SDL_SetTextureColorMod(sdlTex->texture, color.x, color.y, color.z);
-    
+
+#ifndef NDEBUG
+    int result = SDL_RenderCopyEx(
+#else
     SDL_RenderCopyEx(
+#endif
         this->renderer,
         sdlTex->texture,
         &srcRect,
@@ -197,6 +201,13 @@ void RendererSDL::draw(
         &rotOrigin,
         static_cast<SDL_RendererFlip>(flipped)
     );
+
+#ifndef NDEBUG
+    if (result < 0)
+    {
+        knM_logError("Can't render texture: " << SDL_GetError());
+    }
+#endif
 
     SDL_SetTextureColorMod(sdlTex->texture, 255, 255, 255);
 }
