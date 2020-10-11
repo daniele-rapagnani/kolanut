@@ -1,27 +1,47 @@
+let Utils = import("utils");
+
 let World = {
+    Phase = {
+        Update = "update",
+        Draw = "draw",
+        DrawUI = "drawUI"
+    },
+
     create = => {
         return {
             systems = {
                 update = [],
-                draw = []
+                draw = [],
+                drawUI = []
             },
             entities = [], 
             tagged = {},
-            deletedQueue = []
+            deletedQueue = [],
+
+            oneShotFunctions = [],
+            oneShotFunctionsDeleted = []
         } @ World;
     },
 
-    addSystem = |system, update| -> {
-        let arr = null;
-
-        if (update) {
-            arr = this.systems.update;
-        } else {
-            arr = this.systems.draw;
+    clearEntities = -> {
+        for (let e in this.entities) {
+            this->removeEntity(e);
         }
+    },
 
+    clearSystems = -> {
+        for (let k in this.systems) {
+            for (let s in this.systems[k]) {
+                s.world = null;
+            }
+
+            this.systems[k] = [];
+        }
+    },
+
+    addSystem = |system, type| -> {
         system.world = this;
-        arr[] = system;
+        this.systems[type ?? World.Phase.Update][] = system;
     },
 
     addEntity = |entity| -> {
@@ -41,11 +61,7 @@ let World = {
 
     removeFromArray = |entity, arr| => {
         if (arr != null && entity != null) {
-            for (let i in #arr..0) {
-                if (arr[i] == entity) {
-                    array.delete(arr, i);
-                }
-            }
+            Utils.Array.delete(arr, entity);   
         }
     },
 
@@ -68,15 +84,50 @@ let World = {
         return this.tagged[tag] ?? [];
     },
 
+    updateOneShotFunctions = |dt| -> {
+        for (let f in this.oneShotFunctions) {
+            f.time = f.time + dt;
+
+            if (f.time >= f.triggerTime) {
+                f.function(f.time - f.triggerTime);
+                this.oneShotFunctionsDeleted[] = f;
+            }
+        }
+    },
+
+    updateFunctions = |dt| -> {
+        this->updateOneShotFunctions(dt);
+    },
+
+    scheduleFunction = |function, time, oneShot| -> {
+        let f = {
+            function = function,
+            triggerTime = time * 1.0,
+            time = 0.0
+        };
+
+        if (oneShot ?? true) {
+            this.oneShotFunctions[] = f;
+        }
+    },
+
     update = |dt| -> {
+        this->updateFunctions(dt);
+
         for (let system in this.systems.update) {
-            system->update(dt, this.entities);
+            system->update(dt, this.entities, World.Phase.Update);
         }
     },
 
     draw = -> {
         for (let system in this.systems.draw) {
-            system->update(0.0, this.entities);
+            system->update(0.0, this.entities, World.Phase.Draw);
+        }
+    },
+
+    drawUI = -> {
+        for (let system in this.systems.drawUI) {
+            system->update(0.0, this.entities, World.Phase.DrawUI);
         }
     },
 
@@ -84,10 +135,19 @@ let World = {
         if (#this.deletedQueue > 0) {
             for (let e in this.deletedQueue) {
                 this->setEntityTag(e, null);
+                e.world = null;
                 World.removeFromArray(e, this.entities);
             }
 
             this.deletedQueue = [];
+        }
+
+        if (#this.oneShotFunctionsDeleted > 0) {
+            for (let fd in this.oneShotFunctionsDeleted) {
+                Utils.Array.delete(this.oneShotFunctions, fd);
+            }
+
+            this.oneShotFunctionsDeleted = [];
         }
     }
 };

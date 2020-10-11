@@ -2,6 +2,7 @@
 #include "kolanut/scripting/melon/ffi/OOP.h"
 #include "kolanut/scripting/melon/ffi/PushVectors.h"
 #include "kolanut/graphics/Renderer.h"
+#include "kolanut/events/EventSystem.h"
 #include "kolanut/core/DIContainer.h"
 
 extern "C" {
@@ -109,6 +110,17 @@ static TByte getScreenSize(VM* vm)
     return 1;
 }
 
+static TByte getTime(VM* vm)
+{
+    std::shared_ptr<kola::events::EventSystem> eventSystem = 
+        kola::di::get<kola::events::EventSystem>()
+    ;
+
+    kola::melon::ffi::push(vm, eventSystem->getTimeMS());
+
+    return 1;
+}
+
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
     { "onLoad", 0, 0, &onLoad },
@@ -121,6 +133,8 @@ static const ModuleFunction funcs[] = {
     { "loadSprite", 1, 0, &loadSprite },
     { "loadFont", 2, 0, &loadFont },
     { "getScreenSize", 0, 0, &getScreenSize },
+
+    { "getTime", 0, 0, &getTime },
 
     { NULL, 0, 0, NULL }
 };

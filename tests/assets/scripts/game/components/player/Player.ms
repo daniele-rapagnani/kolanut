@@ -1,8 +1,10 @@
-let Component = import("../../Component");
+let Component = import("ecs/components/Component");
 
 let Player = {
     create = => {
-        return { } @ Player;
+        return {
+            onDeath = null
+        } @ Player;
     },
     
     getType = -> {

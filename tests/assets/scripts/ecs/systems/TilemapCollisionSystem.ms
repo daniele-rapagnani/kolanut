@@ -8,6 +8,14 @@ let TilemapCollisionSystem = {
     update = |dt, entities| -> {
         let self = this;
 
+        if (this.tilemap == null) {
+            let tilemapEntity = this.world->getTaggedEntities("Tilemap");
+
+            if (#tilemapEntity > 0 && tilemapEntity[0].Tilemap != null) {
+                this.tilemap = tilemapEntity[0].Tilemap.tilemap;
+            }
+        }
+
         if (this.tilemap != null) {
             this.updateWithComponents(
                 entities, 

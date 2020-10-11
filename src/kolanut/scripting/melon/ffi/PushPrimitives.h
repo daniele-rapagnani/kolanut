@@ -15,6 +15,7 @@ namespace ffi {
 template <typename T>
 class Push
 {
+public:
     static TByte push(VM* vm, const T& val) = delete;
 };
 
@@ -38,6 +39,21 @@ class Push<unsigned long>
 {
 public:
     static TByte push(VM* vm, const unsigned long& val)
+    {
+        melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+        Value* stackVal = melM_stackAllocRaw(&vm->stack);
+        stackVal->type = MELON_TYPE_INTEGER;
+        stackVal->pack.value.integer = val;
+
+        return 1;
+    }
+};
+
+template <>
+class Push<unsigned long long>
+{
+public:
+    static TByte push(VM* vm, const unsigned long long& val)
     {
         melM_stackEnsure(&vm->stack, vm->stack.top + 1);
         Value* stackVal = melM_stackAllocRaw(&vm->stack);

@@ -9,7 +9,7 @@ let FrameAnimationSystem = {
         this.updateWithComponents(
             entities,
             ["SpriteRenderer", "FrameAnimation"],
-            |components| => {
+            |components, entity| => {
                 let sr = components.SpriteRenderer;
                 let fa = components.FrameAnimation;
 
@@ -21,9 +21,20 @@ let FrameAnimationSystem = {
                     }
 
                     fa.time = fa.time + dt;
-
+                    
                     while (fa.time >= ca.duration) {
                         fa.time = fa.time - ca.duration;
+
+                        if (fa.frame + 1 >= ca.totalFrames && !fa.loop) {
+                            fa->stopAnimation();
+
+                            if (fa.finishCallback != null) {
+                                fa.finishCallback(entity);
+                            }
+                            
+                            break;
+                        }
+
                         fa.frame = (fa.frame + 1) % ca.totalFrames;
                     }
 

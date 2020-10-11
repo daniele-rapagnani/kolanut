@@ -48,9 +48,27 @@ static TByte draw(VM* vm)
     return 0;
 }
 
+static TByte getTextSize(VM* vm)
+{
+    melM_this(vm, thisObj);
+    melM_arg(vm, text, MELON_TYPE_STRING, 0);
+
+    std::shared_ptr<graphics::Font> font = 
+        ffi::getInstance<graphics::Font>(vm, thisObj->pack.obj)
+    ;
+
+    String* textStr = melM_strFromObj(text->pack.obj);
+    Sizei size = font->getTextSize(textStr->string, textStr->len);
+
+    ffi::push(vm, size);
+
+    return 1;
+}
+
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
     { "draw", 5, 0, &draw, 1 },
+    { "getTextSize", 1, 0, &getTextSize, 1 },
     { NULL, 0, 0, NULL }
 };
 

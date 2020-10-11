@@ -1,4 +1,4 @@
-let System = import("./System");
+let System = import("ecs/systems/System");
 
 let PlatformSystem = {
     create = => {

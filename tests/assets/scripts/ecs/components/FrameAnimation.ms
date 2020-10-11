@@ -7,7 +7,8 @@ let FrameAnimation = {
             curAnimation = null,
             frame = 0,
             loop = true,
-            time = 0.0
+            time = 0.0,
+            finishCallback = null
         } @ FrameAnimation;
     },
 
@@ -42,6 +43,10 @@ let FrameAnimation = {
         return true;
     },
 
+    stopAnimation = -> {
+        this.curAnimation = null;
+    },
+
     getCurAnimation = -> {
         if (this.curAnimation == null) {
             return null;
@@ -53,14 +58,16 @@ let FrameAnimation = {
     getBB = |tr| -> {
         let ca = this->getCurAnimation();
 
-        if (ca == null) {
-            return null;
-        }
-
         let res = {
             left = tr.position.x - tr.origin.x,
-            top = tr.position.y - tr.origin.y
+            top = tr.position.y - tr.origin.y,
         };
+
+        if (ca == null) {
+            res.right = res.left;
+            res.bottom = res.top;
+            return res;
+        }
 
         res.right = res.left + ca.frameSize.w;
         res.bottom = res.top + ca.frameSize.h;
