@@ -26,6 +26,6 @@ let CameraSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("CameraSystem");
 
 return CameraSystem;

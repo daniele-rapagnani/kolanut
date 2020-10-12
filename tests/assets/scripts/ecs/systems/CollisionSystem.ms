@@ -1,5 +1,6 @@
 let System = import("./System");
 let Collider = import("../components/Collider");
+let Events = import("../events");
 
 let CollisionSystem = {
     create = => {
@@ -34,16 +35,12 @@ let CollisionSystem = {
                 continue;
             }
             
-            a.collidedWith = null;
-
             for (let j in (i+1)..#entities) {
                 let b = entities[j].Collider;
 
                 if (b == null) {
                     continue;
                 }
-
-                b.collidedWith = null;
 
                 if (a.type == Collider.Types.RendererBB && b.type == a.type) {
                     let aBB = CollisionSystem.getRendererBB(entities[i]);
@@ -53,13 +50,12 @@ let CollisionSystem = {
                     let overlapV = (aBB.bottom > bBB.top && aBB.top < bBB.bottom);
 
                     if (overlapH && overlapV) {
-                        a.collidedWith = entities[j];
-                        b.collidedWith = entities[i];
-                    }   
+                        Events.Collision->trigger(this.world, entities[i], entities[j]);
+                    }
                 }
             }
         }
     }
-} @ System.create();
+} @ System.create("CollisionSystem");
 
 return CollisionSystem;

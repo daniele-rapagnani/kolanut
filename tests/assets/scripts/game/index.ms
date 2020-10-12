@@ -3,5 +3,6 @@ return {
     Systems = import("./systems"),
     Prefabs = import("./prefabs"),
     Scenes = import("./scenes"),
-    Assets = import("./Assets"),
+    Events = import("./events"),
+    Assets = import("./Assets")
 };

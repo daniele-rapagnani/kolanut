@@ -1,6 +1,10 @@
 let System = {
-    create = => {
-        return { world = null } @ System;
+    create = |name| => {
+        return { world = null, name = name } @ System;
+    },
+
+    getName = -> {
+        return this.name;
     },
 
     updateWithComponents = |entities, components, update| => {

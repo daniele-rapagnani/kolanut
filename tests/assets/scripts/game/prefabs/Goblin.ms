@@ -1,5 +1,6 @@
 let ECS = import("ecs");
 let GameComps = import("../components");
+let GameAssets = import("../Assets");
 
 let Goblin = {
     create = => {
@@ -8,7 +9,7 @@ let Goblin = {
         let tr = ECS.Components.Transform.create();
         let rb = ECS.Components.Rigidbody.create();
         let fa = ECS.Components.FrameAnimation.create();
-        let sr = ECS.Components.SpriteRenderer.create("assets/goblin_spritesheet.png");
+        let sr = ECS.Components.SpriteRenderer.create(GameAssets.Sprites.Goblin);
 
         goblin->addComponent(tr);
         goblin->addComponent(sr);

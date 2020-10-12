@@ -8,7 +8,11 @@ let SpriteRenderer = {
     },
 
     load = |image| -> {
-        this.sprite = Kolanut.loadSprite(image);
+        if (types.isString(image)) {
+            this.sprite = Kolanut.loadSprite(image);
+        } else {
+            this.sprite = image;
+        }
 
         if (this.sprite != null) {
             this.size = this.sprite->getSize();

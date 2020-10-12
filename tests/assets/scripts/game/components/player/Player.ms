@@ -3,7 +3,8 @@ let Component = import("ecs/components/Component");
 let Player = {
     create = => {
         return {
-            onDeath = null
+            onDeath = null,
+            dead = false
         } @ Player;
     },
     

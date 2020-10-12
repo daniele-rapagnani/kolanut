@@ -24,6 +24,6 @@ let SpriteRenderSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("SpriteRenderSystem");
 
 return SpriteRenderSystem;

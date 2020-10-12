@@ -31,6 +31,6 @@ let PanControllerSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("PanControllerSystem");
 
 return PanControllerSystem;

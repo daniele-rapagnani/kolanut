@@ -80,6 +80,6 @@ let PlatformSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("PlatformSystem");
 
 return PlatformSystem;

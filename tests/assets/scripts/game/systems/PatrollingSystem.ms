@@ -62,6 +62,6 @@ let PatrollingSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("PatrollingSystem");
 
 return PatrollingSystem;

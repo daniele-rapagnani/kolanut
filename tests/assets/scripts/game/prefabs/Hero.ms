@@ -1,5 +1,6 @@
 let ECS = import("ecs");
 let GameComps = import("../components");
+let GameAssets = import("../Assets");
 
 let Hero = {
     create = |world| => {
@@ -8,7 +9,7 @@ let Hero = {
         let tr = ECS.Components.Transform.create();
         let fa = ECS.Components.FrameAnimation.create();
         let rb = ECS.Components.Rigidbody.create();
-        let sr = ECS.Components.SpriteRenderer.create("assets/herochar_spritesheet.png");
+        let sr = ECS.Components.SpriteRenderer.create(GameAssets.Sprites.Hero);
 
         hero->addComponent(tr);
         hero->addComponent(sr);

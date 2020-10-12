@@ -99,6 +99,6 @@ let TilemapCollisionSystem = {
             );
         }
     }
-} @ System.create();
+} @ System.create("TilemapCollisionSystem");
 
 return TilemapCollisionSystem;

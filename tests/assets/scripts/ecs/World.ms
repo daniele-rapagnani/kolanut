@@ -14,6 +14,7 @@ let World = {
                 draw = [],
                 drawUI = []
             },
+            systemsMap = {},
             entities = [], 
             tagged = {},
             deletedQueue = [],
@@ -37,11 +38,23 @@ let World = {
 
             this.systems[k] = [];
         }
+
+        this.systemsMap = {};
     },
 
     addSystem = |system, type| -> {
+        if (system->getName() == null || #system->getName() == 0) {
+            debug.error("Systems must have a name");
+            return;
+        }
+
         system.world = this;
         this.systems[type ?? World.Phase.Update][] = system;
+        this.systemsMap[system->getName()] = system;
+    },
+
+    getSystem = |systemName| -> {
+        return this.systemsMap[systemName];
     },
 
     addEntity = |entity| -> {

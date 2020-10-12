@@ -14,6 +14,6 @@ let TilemapRenderSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("TilemapRenderSystem");
 
 return TilemapRenderSystem;

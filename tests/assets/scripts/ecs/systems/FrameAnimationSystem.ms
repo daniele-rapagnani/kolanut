@@ -31,7 +31,7 @@ let FrameAnimationSystem = {
                             if (fa.finishCallback != null) {
                                 fa.finishCallback(entity);
                             }
-                            
+
                             break;
                         }
 
@@ -46,6 +46,6 @@ let FrameAnimationSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("FrameAnimationSystem");
 
 return FrameAnimationSystem;

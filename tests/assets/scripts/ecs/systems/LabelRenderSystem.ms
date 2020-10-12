@@ -22,6 +22,6 @@ let LabelRenderSystem = {
             }
         );
     }
-} @ System.create();
+} @ System.create("LabelRenderSystem");
 
 return LabelRenderSystem;

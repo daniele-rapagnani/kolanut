@@ -11,6 +11,8 @@ let Camera = {
         camera.Transform.origin = Kolanut.getScreenSize() * 0.5;
         camera.Camera.followTag = "Player";
 
+        camera->setTag("Camera");
+
         world->addEntity(camera);
 
         return camera;
