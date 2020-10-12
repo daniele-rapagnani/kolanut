@@ -4,7 +4,9 @@ let Player = {
     create = => {
         return {
             onDeath = null,
-            dead = false
+            dead = false,
+            invincible = false,
+            energy = 3
         } @ Player;
     },
     

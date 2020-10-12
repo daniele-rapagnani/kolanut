@@ -187,6 +187,7 @@ void RendererSDL::draw(
     };
 
     SDL_SetTextureColorMod(sdlTex->texture, color.x, color.y, color.z);
+    SDL_SetTextureAlphaMod(sdlTex->texture, color.w);
 
 #ifndef NDEBUG
     int result = SDL_RenderCopyEx(
@@ -210,6 +211,7 @@ void RendererSDL::draw(
 #endif
 
     SDL_SetTextureColorMod(sdlTex->texture, 255, 255, 255);
+    SDL_SetTextureAlphaMod(sdlTex->texture, 255);
 }
 
 void RendererSDL::draw(
@@ -239,7 +241,7 @@ void RendererSDL::draw(
     assert(this->renderer);
 
     SDL_SetRenderDrawColor(this->renderer, color.x, color.y, color.z, color.w);
-    
+
     SDL_RenderDrawLineF(
         this->renderer, 
         a.x - this->cameraPos.x, 

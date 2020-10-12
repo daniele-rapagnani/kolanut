@@ -11,6 +11,7 @@ let PlatformController = {
             dashingRecharge = 0.3,
             curDashingTime = null,
             dashSpeed = null,
+            overrideAnimation = false,
             animations = {
                 run = "run",
                 idle = "idle",

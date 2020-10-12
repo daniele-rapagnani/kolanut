@@ -23,6 +23,24 @@ Kolanut.onDraw = => {
     world->draw();
 };
 
+let uiState = {
+    lives = { total = 3, count = 1 }
+};
+
+let updateUIState = => {
+    let player = world->getTaggedEntities("Player");
+
+    if (#player == 0) {
+        return;
+    }
+
+    player = player[0];
+    uiState.lives.count = player.Player.energy;
+};
+
 Kolanut.onDrawUI = => {
     world->drawUI();
+
+    updateUIState();
+    Game.UI.Lives.draw(Vector.create(10, 10), uiState.lives);
 };

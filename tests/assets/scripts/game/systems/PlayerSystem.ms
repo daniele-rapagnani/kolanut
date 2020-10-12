@@ -6,6 +6,7 @@ let PlayerSystem = {
     create = => {
         Events.OnPlayerDeath->subscribeSystem("PlayerSystem");
         Events.OnPlayerFall->subscribeSystem("PlayerSystem");
+        Events.OnPlayerHit->subscribeSystem("PlayerSystem");
         ECS.Events.Collision->subscribeSystem("PlayerSystem");
         
         return { } @ PlayerSystem;
@@ -29,9 +30,34 @@ let PlayerSystem = {
 
         if (other.Enemy != null) {
             if (other.FrameAnimation.curAnimation == "attack") {
-                Events.OnPlayerDeath->trigger(this.world);
+                Events.OnPlayerHit->trigger(this.world);
             }
         }
+    },
+
+    onPlayerHit = -> {
+        let player = this.world->getTaggedEntities("Player")[0];
+
+        if (player.Player.invincible) {
+            return;
+        }
+
+        player.Player.energy = player.Player.energy - 1;
+
+        if (player.Player.energy <= 0) {
+            Events.OnPlayerDeath->trigger(this.world);
+            return;
+        }
+
+        player.Player.invincible = true;
+        player.PlatformController.overrideAnimation = true;
+        player.FrameAnimation->playAnimation("hit", false);
+
+        player.FrameAnimation.finishCallback = => {
+            player.Player.invincible = false;
+            player.PlatformController.overrideAnimation = false;
+            player.FrameAnimation.finishCallback = null;
+        };
     },
 
     killPlayer = |disableComps, animation| -> {

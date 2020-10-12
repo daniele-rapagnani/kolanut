@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="7">
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="17">
  <editorsettings>
   <export target="map.tmx" format="tmx"/>
  </editorsettings>
  <tileset firstgid="1" source="Forest 16 Colors.tsx"/>
  <layer id="1" name="Tile Layer 1" width="200" height="200">
   <data encoding="base64" compression="zlib">
-   eJzt2ckKwjAYhdE4ghPU6f1f1QYFi3qluFHbc+BftYEu8i2SlgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwL+Z3mb27Q+BH7Rv59DO8dsfAgAA/KV5O4swyzfrJuV+XndmZ6hW7azDbG7vNJ33m7BuU2B4+vTRZ50+GKK6z7flem/bnV3RB9R9/mpv138d7/5z6IMxSH30WacPhk4fkKU+6r1v9363eXiuD8ag7vNTef73cS7O5+B+FzJ9QKYPyPQBmT4g0wdk+oBMH5DpAzJ9QKYPyD7tAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGAsLj6BCfo=
+   eJzt2tlqhDAUBmC7QjewG/T9n7QGKrWSOEndMuP3wbmaxHhxfpc4TQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwLm5/qmbvU8EKvTa1VtX73ufCAAX66r5fR7LrbnPbafW9FxILR66eiysp5XXnHt8jue2q7tE3U/MG1+rx9dm+eASTPVU30/tYHybmDfuvS3y8VW4pnxQKicfOfPGY/u9rmG9TKzl/kGNQk89N/FenpOPnDlL9W9/H5EPlhZ6KtY34fo/9Z2jpnxsdXyOJ5WPnHl758P7B2urOR+xvbWpPTX5YGmpfITeHPZiO/p9jXx8NH+z8Jkx5tR4+WCO0LOxngu9tvX7+dolH5Raa3+3dC35oEY15SO2z7xk+d8xpbbMR+ybof6lZlvmA86NfECafECafECafECafECafECafEDaf/MBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcBTfpF0Xqg==
   </data>
  </layer>
  <layer id="4" name="Tile Layer 2" width="200" height="200">
@@ -30,6 +30,15 @@
    <point/>
   </object>
   <object id="6" name="Goblin" type="Enemy Spawn" x="992" y="832">
+   <point/>
+  </object>
+  <object id="14" name="Goblin" type="Enemy Spawn" x="1168" y="928">
+   <point/>
+  </object>
+  <object id="15" name="Goblin" type="Enemy Spawn" x="1328" y="928">
+   <point/>
+  </object>
+  <object id="16" name="Goblin" type="Enemy Spawn" x="1648" y="928">
    <point/>
   </object>
  </objectgroup>

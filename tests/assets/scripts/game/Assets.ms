@@ -8,10 +8,19 @@ let Assets = {
         Goblin = null
     },
 
+    UI = {
+        Heart = null,
+        NoHeart = null
+    },
+
     load = => {
         Assets.Fonts.Title = Kolanut.loadFont("assets/Pokemon Classic.ttf", 48);
+
         Assets.Sprites.Hero = Kolanut.loadSprite("assets/herochar_spritesheet.png");
         Assets.Sprites.Goblin = Kolanut.loadSprite("assets/goblin_spritesheet.png");
+        
+        Assets.UI.Heart = Kolanut.loadSprite("assets/hearts_hud.png");
+        Assets.UI.NoHeart = Kolanut.loadSprite("assets/no_hearts_hud.png");
     }
 };
 

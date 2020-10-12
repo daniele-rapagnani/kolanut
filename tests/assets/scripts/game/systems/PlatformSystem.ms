@@ -40,13 +40,15 @@ let PlatformSystem = {
 
                 let moving = pc.controls.left || pc.controls.right;
 
-                if (isDashing) {
-                    fa->playAnimation(pc.animations.dash);
-                } else if (moving) {
-                    fa->playAnimation(pc.animations.run);
-                } else {
-                    fa->playAnimation(pc.animations.idle);
-                    rb.velocity.x = 0;
+                if (!pc.overrideAnimation) {
+                    if (isDashing) {
+                        fa->playAnimation(pc.animations.dash);
+                    } else if (moving) {
+                        fa->playAnimation(pc.animations.run);
+                    } else {
+                        fa->playAnimation(pc.animations.idle);
+                        rb.velocity.x = 0;
+                    }
                 }
 
                 if (tc.colliding.bottom) {

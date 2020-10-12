@@ -34,6 +34,13 @@ let Hero = {
             duration = 0.15
         });
 
+        fa->addAnimation({
+            name = "hit",
+            frameSize = Rect.create(0, 16 * 7, 16, 16),
+            totalFrames = 3,
+            duration = 0.15
+        });
+
         fa->playAnimation("idle");
 
         tr.origin.x = 8;
@@ -50,6 +57,9 @@ let Hero = {
                 world.scene->reload();
             }, 2.0);
         };
+
+        hero.PlatformController.animations.run = "idle";
+        hero.PlatformController.animations.dash = "idle";
 
         return hero;
     }
