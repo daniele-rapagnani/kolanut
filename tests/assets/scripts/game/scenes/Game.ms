@@ -15,6 +15,7 @@ let Game = {
 
         return {
             player = null,
+            camera = null,
             input = {
                 left = false,
                 right = false,
@@ -52,15 +53,16 @@ let Game = {
         gameOverText.Label.enabled = false;
 
         this.player = this.world->getTaggedEntities("Player")[0];
+        this.camera = this.world->getTaggedEntities("Camera")[0];
+
+        this.camera.Camera.bounds.bottom = 1150.0;
     },
 
     onKeyPressed = |key, pressed| -> {
         this.input[key] = pressed; 
 
         if (key == "f1" && pressed) {
-            this.world->getSystem("DebugRectSystem").enabled =
-                !this.world->getSystem("DebugRectSystem").enabled
-            ;
+            this.world.debug = !this.world.debug;
         }
     },
 

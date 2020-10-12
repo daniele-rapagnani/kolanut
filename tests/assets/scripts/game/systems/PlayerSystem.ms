@@ -8,9 +8,7 @@ let PlayerSystem = {
         Events.OnPlayerFall->subscribeSystem("PlayerSystem");
         ECS.Events.Collision->subscribeSystem("PlayerSystem");
         
-        return { 
-            fallDoomY = 1121.0
-        } @ PlayerSystem;
+        return { } @ PlayerSystem;
     },
 
     onCollision = |a, b| -> {
@@ -81,12 +79,16 @@ let PlayerSystem = {
 
     update = |dt, entities| -> {
         let self = this;
+        let camera = this.world->getTaggedEntities("Camera")[0].Camera;
 
         this.updateWithComponents(
             entities,
             ["Transform", "Player"],
             |components| => {
-                if (components.Transform.position.y > self.fallDoomY) {
+                if (
+                    camera.bounds.bottom != null 
+                    && components.Transform.position.y > camera.bounds.bottom
+                ) {
                     Events.OnPlayerFall->trigger(self.world);
                 }
             }

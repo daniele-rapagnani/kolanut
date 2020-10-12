@@ -39,13 +39,34 @@ let TilemapCollisionSystem = {
                     let h = bb.bottom - bb.top;
                     let pos = Vector.create(bb.left, bb.top);
 
+                    let topTile = self.tilemap->getTileAt(
+                        tc.layer,
+                        pos + Vector.create(w * 0.5, -1.0)
+                    );
+
+                    if (topTile != null) {
+                        let point = (topTile.position.y + topTile.rect.h);
+
+                        if (bb.top < point * 1.0) {
+                            tr.position.y = point + tr.origin.y;
+                        }
+
+                        if (rb.velocity.y < 0.0) {
+                            rb.velocity.y = 0;
+                        }
+                    }
+
                     let bottomTile = self.tilemap->getTileAt(
                         tc.layer,
                         pos + Vector.create(w * 0.5, h + 1.0)
                     );
 
                     if (bottomTile != null) {
-                        tr.position.y = bottomTile.position.y - (h - tr.origin.y);
+                        let point = bottomTile.position.y;
+
+                        if (bb.bottom > point) {
+                            tr.position.y = point - (h - tr.origin.y);
+                        }
 
                         if (rb.velocity.y > 0.0) {
                             rb.velocity.y = 0;
@@ -68,7 +89,11 @@ let TilemapCollisionSystem = {
                     );
 
                     if (rightTile != null) {
-                        tr.position.x = rightTile.position.x - (w  - tr.origin.x);
+                        let point = rightTile.position.x;
+                        
+                        if (bb.right > point) {
+                            tr.position.x = point - (w - tr.origin.x);
+                        }
                         
                         if (rb.velocity.x > 0.0) {
                             rb.velocity.x = 0.0;
@@ -81,14 +106,19 @@ let TilemapCollisionSystem = {
                     );
 
                     if (leftTile != null) {
-                        tr.position.x = leftTile.position.x + leftTile.rect.w + tr.origin.x;
-                        
+                        let point = leftTile.position.x + leftTile.rect.w;
+
+                        if (bb.left < point) {
+                            tr.position.x = point + tr.origin.x;
+                        }
+
                         if (rb.velocity.x < 0.0) {
                             rb.velocity.x = 0.0;
                         }
                     }
 
                     tc.colliding = {
+                        top = topTile != null,
                         bottom = bottomTile != null,
                         left = leftTile != null,
                         right = rightTile != null,

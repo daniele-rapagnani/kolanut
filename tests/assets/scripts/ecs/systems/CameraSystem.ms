@@ -12,16 +12,23 @@ let CameraSystem = {
             entities,
             ["Transform", "Camera"],
             |components| => {
-                let targets = self.world->getTaggedEntities(components.Camera.followTag);
+                let tr = components.Transform;
+                let ca = components.Camera;
+
+                let targets = self.world->getTaggedEntities(ca.followTag);
 
                 if (#targets > 0) {
-                    components.Transform.position = targets[0].Transform.position;
+                    tr.position = targets[0].Transform.position;
                 }
 
-                Kolanut.Camera.setPosition(
-                    components.Transform.position
-                    - components.Transform.origin * (1.0 / components.Transform.scale.x)
-                );
+                let pos = tr.position - tr.origin * (1.0 / tr.scale.x);
+                let bb = ca->getBB(tr);
+
+                if (ca.bounds.bottom != null && bb.bottom > ca.bounds.bottom) {
+                    pos.y = pos.y - (bb.bottom - ca.bounds.bottom);
+                }
+
+                Kolanut.Camera.setPosition(pos);
                 Kolanut.Camera.setZoom(components.Transform.scale.x);
             }
         );

@@ -6,6 +6,10 @@ let DebugRectSystem = {
     },
 
     update = |dt, entities| -> {
+        if (!this.world.debug) {
+            return;
+        }
+
         let r = Rect.create();
 
         for (let e in entities) {

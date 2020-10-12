@@ -19,6 +19,8 @@ let World = {
             tagged = {},
             deletedQueue = [],
 
+            debug = false,
+
             oneShotFunctions = [],
             oneShotFunctionsDeleted = []
         } @ World;
