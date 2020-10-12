@@ -55,6 +55,17 @@ public:
         draw(str.c_str(), str.size(), f, position, scale, color);
     }
 
+    virtual void draw(
+        const Rectf& rect,
+        const Colori& color
+    ) = 0;
+
+    virtual void draw(
+        const Vec2f& a,
+        const Vec2f& b,
+        const Colori& color
+    ) = 0;
+
     virtual void setCameraPosition(const Vec2f& pos) = 0;
     virtual void setCameraZoom(float zoom) = 0;
     virtual Vec2f getCameraPosition() = 0;

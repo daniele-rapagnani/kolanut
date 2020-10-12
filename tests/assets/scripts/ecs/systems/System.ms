@@ -1,6 +1,6 @@
 let System = {
     create = |name| => {
-        return { world = null, name = name } @ System;
+        return { world = null, name = name, enabled = true } @ System;
     },
 
     getName = -> {

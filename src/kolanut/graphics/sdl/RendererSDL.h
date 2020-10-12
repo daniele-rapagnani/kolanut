@@ -35,6 +35,17 @@ public:
         const Colori& color
     ) override;
 
+    void draw(
+        const Rectf& rect,
+        const Colori& color
+    ) override;
+
+    void draw(
+        const Vec2f& a,
+        const Vec2f& b,
+        const Colori& color
+    ) override;
+
     void clear() override;
     void flip() override;
 

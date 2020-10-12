@@ -1,5 +1,6 @@
 #include "kolanut/scripting/melon/modules/KolanutModule.h"
 #include "kolanut/scripting/melon/ffi/OOP.h"
+#include "kolanut/scripting/melon/ffi/PopVectors.h"
 #include "kolanut/scripting/melon/ffi/PushVectors.h"
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/events/EventSystem.h"
@@ -121,6 +122,49 @@ static TByte getTime(VM* vm)
     return 1;
 }
 
+static TByte drawRect(VM* vm)
+{
+    melM_arg(vm, rectVal, MELON_TYPE_OBJECT, 0);
+    melM_argOptional(vm, colorVal, MELON_TYPE_OBJECT, 1);
+
+    kola::Rectf rect = {};
+    kola::Colori color = { };
+
+    std::shared_ptr<kola::graphics::Renderer> renderer = 
+        kola::di::get<kola::graphics::Renderer>()
+    ;
+
+    kola::melon::ffi::convert(vm, rect, rectVal);
+    kola::melon::ffi::convert(vm, color, colorVal);
+
+    renderer->draw(rect, color);
+
+    return 0;
+}
+
+static TByte drawLine(VM* vm)
+{
+    melM_arg(vm, aVal, MELON_TYPE_OBJECT, 0);
+    melM_arg(vm, bVal, MELON_TYPE_OBJECT, 1);
+    melM_argOptional(vm, colorVal, MELON_TYPE_OBJECT, 2);
+
+    kola::Vec2f a = {};
+    kola::Vec2f b = {};
+    kola::Colori color = { };
+
+    std::shared_ptr<kola::graphics::Renderer> renderer = 
+        kola::di::get<kola::graphics::Renderer>()
+    ;
+
+    kola::melon::ffi::convert(vm, a, aVal);
+    kola::melon::ffi::convert(vm, b, bVal);
+    kola::melon::ffi::convert(vm, color, colorVal);
+
+    renderer->draw(a, b, color);
+
+    return 0;
+}
+
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
     { "onLoad", 0, 0, &onLoad },
@@ -135,6 +179,9 @@ static const ModuleFunction funcs[] = {
     { "getScreenSize", 0, 0, &getScreenSize },
 
     { "getTime", 0, 0, &getTime },
+
+    { "drawRect", 2, 0, &drawRect },
+    { "drawLine", 3, 0, &drawLine },
 
     { NULL, 0, 0, NULL }
 };

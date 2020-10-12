@@ -39,6 +39,7 @@ let Game = {
         this.world->addSystem(ECS.Systems.TilemapRenderSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.SpriteRenderSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.LabelRenderSystem.create(), ECS.World.Phase.Draw);
+        this.world->addSystem(ECS.Systems.DebugRectSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.LabelRenderSystem.create(), ECS.World.Phase.DrawUI);
     },
 
@@ -55,6 +56,12 @@ let Game = {
 
     onKeyPressed = |key, pressed| -> {
         this.input[key] = pressed; 
+
+        if (key == "f1" && pressed) {
+            this.world->getSystem("DebugRectSystem").enabled =
+                !this.world->getSystem("DebugRectSystem").enabled
+            ;
+        }
     },
 
     update = |dt| -> {

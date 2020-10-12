@@ -128,18 +128,30 @@ let World = {
         this->updateFunctions(dt);
 
         for (let system in this.systems.update) {
+            if (!system.enabled) {
+                continue;
+            }
+
             system->update(dt, this.entities, World.Phase.Update);
         }
     },
 
     draw = -> {
         for (let system in this.systems.draw) {
+            if (!system.enabled) {
+                continue;
+            }
+
             system->update(0.0, this.entities, World.Phase.Draw);
         }
     },
 
     drawUI = -> {
         for (let system in this.systems.drawUI) {
+            if (!system.enabled) {
+                continue;
+            }
+            
             system->update(0.0, this.entities, World.Phase.DrawUI);
         }
     },

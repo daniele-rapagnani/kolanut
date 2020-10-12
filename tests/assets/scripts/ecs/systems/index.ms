@@ -7,5 +7,6 @@ return {
     TilemapCollisionSystem = import("./TilemapCollisionSystem"),
     CollisionSystem = import("./CollisionSystem"),
     TilemapRenderSystem = import("./TilemapRenderSystem"),
+    DebugRectSystem = import("./DebugRectSystem"),
     LabelRenderSystem = import("./LabelRenderSystem")
 };

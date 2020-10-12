@@ -211,6 +211,44 @@ void RendererSDL::draw(
 
     SDL_SetTextureColorMod(sdlTex->texture, 255, 255, 255);
 }
+
+void RendererSDL::draw(
+    const Rectf& rect,
+    const Colori& color
+)
+{
+    assert(this->renderer);
+
+    SDL_FRect frect = {
+        rect.x - this->cameraPos.x,
+        rect.y - this->cameraPos.y,
+        rect.z,
+        rect.w
+    };
+
+    SDL_SetRenderDrawColor(this->renderer, color.x, color.y, color.z, color.w);
+    SDL_RenderDrawRectF(this->renderer, &frect);
+}
+
+void RendererSDL::draw(
+    const Vec2f& a,
+    const Vec2f& b,
+    const Colori& color
+)
+{
+    assert(this->renderer);
+
+    SDL_SetRenderDrawColor(this->renderer, color.x, color.y, color.z, color.w);
+    
+    SDL_RenderDrawLineF(
+        this->renderer, 
+        a.x - this->cameraPos.x, 
+        a.y - this->cameraPos.y, 
+        b.x - this->cameraPos.x, 
+        b.y - this->cameraPos.y
+    );
+}
+
 void RendererSDL::clear()
 {
     assert(this->renderer);
