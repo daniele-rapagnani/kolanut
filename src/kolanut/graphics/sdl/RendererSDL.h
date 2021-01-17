@@ -13,7 +13,7 @@ public:
     ~RendererSDL();
 
 public:
-    bool init(const Config& config) override;
+    bool doInit(const Config& config) override;
     std::shared_ptr<Texture> loadTexture(const std::string& file) override;
     std::shared_ptr<Font> loadFont(const std::string& file, size_t sizes) override;
     

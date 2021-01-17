@@ -88,6 +88,11 @@ bool EventSystemGLFW::poll()
 
 void EventSystemGLFW::processKey(int key, int action)
 {
+    if (key == GLFW_KEY_UNKNOWN)
+    {
+        return;
+    }
+    
     assert(GLFW_KOLA_KEYMAP.find(key) != GLFW_KOLA_KEYMAP.end());
     KeyCode keyCode = GLFW_KOLA_KEYMAP[key];
 

@@ -23,7 +23,7 @@ RendererSDL::~RendererSDL()
     }
 }
 
-bool RendererSDL::init(const Config& config)
+bool RendererSDL::doInit(const Config& config)
 {
     knM_logDebug("Initilizing SDL renderer");
 

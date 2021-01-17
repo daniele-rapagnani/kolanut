@@ -13,7 +13,9 @@ namespace graphics {
 class Renderer
 {
 public:
-    virtual bool init(const Config& config) = 0;
+    virtual bool init(const Config& config);
+    
+    virtual bool doInit(const Config& config) = 0;
     virtual std::shared_ptr<Texture> loadTexture(const std::string& file) = 0;
     virtual std::shared_ptr<Font> loadFont(const std::string& file, size_t size) = 0;
     
@@ -75,6 +77,12 @@ public:
     virtual void flip() = 0;
 
     virtual Vec2i getResolution() = 0;
+
+    virtual Vec2i getDesignResolution()
+    { return this->designResolution; }
+
+private:
+    Vec2i designResolution = {};
 };
 
 } // namespace graphics

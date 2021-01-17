@@ -6,6 +6,13 @@
 namespace kola {
 namespace graphics {
 
+bool Renderer::init(const Config& config)
+{
+    this->designResolution = config.resolution.designResolution;
+
+    return doInit(config);
+}
+
 void Renderer::draw(
     const char* str,
     size_t len,

@@ -27,7 +27,17 @@ RendererOGL::~RendererOGL()
     }
 }
 
-bool RendererOGL::init(const Config& config)
+namespace {
+
+void onWindowResize(GLFWwindow* window, int width, int height)
+{
+    auto r = std::static_pointer_cast<RendererOGL>(di::get<Renderer>());
+    r->updateWindowSize();
+}
+
+} // namespace 
+
+bool RendererOGL::doInit(const Config& config)
 {
     knM_logDebug("Initilizing OpenGL renderer");
 
@@ -83,8 +93,7 @@ bool RendererOGL::init(const Config& config)
         return false;
     }
 
-    Sizei resolution = getPixelResolution();
-    knM_oglCall(glViewport(0, 0, resolution.x, resolution.y));
+    updateWindowSize();
 
     knM_oglCall(glDisable(GL_DEPTH_TEST));
     knM_oglCall(glEnable(GL_BLEND));
@@ -123,7 +132,15 @@ bool RendererOGL::init(const Config& config)
         return false;
     }
 
+    glfwSetWindowSizeCallback(getWindow(), onWindowResize);
+
     return true;
+}
+
+void RendererOGL::updateWindowSize()
+{
+    Sizei resolution = getPixelResolution();
+    knM_oglCall(glViewport(0, 0, resolution.x, resolution.y));
 }
 
 namespace {
@@ -301,7 +318,7 @@ void RendererOGL::draw(
     );
 
     Vec2i resolution = getResolution();
-    this->drawProgram->setUnifrom("screenSize", Vec2f { resolution.x, resolution.y });
+    this->drawProgram->setUnifrom("screenSize", Vec2f { getDesignResolution().x, getDesignResolution().y });
     this->drawProgram->setUnifrom("camera", cameraTransform);
 
     dr.texture = std::static_pointer_cast<TextureOGL>(t);

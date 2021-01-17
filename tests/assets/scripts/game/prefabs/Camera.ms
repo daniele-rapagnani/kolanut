@@ -7,8 +7,7 @@ let Camera = {
         camera->addComponent(ECS.Components.Camera.create());
         camera->addComponent(ECS.Components.PanController.create());
 
-        camera.Transform.scale.x = 2.0;
-        camera.Transform.origin = Kolanut.getScreenSize() * 0.5;
+        camera.Transform.origin = Kolanut.getDesignResolution() * 0.5;
         camera.Camera.followTag = "Player";
 
         camera->setTag("Camera");

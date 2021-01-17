@@ -48,8 +48,8 @@ let Game = {
         let gameOverText = this.world->getTaggedEntities("Game Over Label")[0];
         
         let size = gameOverText.Label.font->getTextSize(gameOverText.Label.text);
-        gameOverText.Transform.position.x = (Kolanut.getScreenSize().x * 0.5) - (size.x * 0.5);
-        gameOverText.Transform.position.y = (Kolanut.getScreenSize().y * 0.5) - (size.y * 0.5);
+        gameOverText.Transform.position.x = (Kolanut.getDesignResolution().x * 0.5) - (size.x * 0.5);
+        gameOverText.Transform.position.y = (Kolanut.getDesignResolution().y * 0.5) - (size.y * 0.5);
         gameOverText.Label.enabled = false;
 
         this.player = this.world->getTaggedEntities("Player")[0];

@@ -111,6 +111,17 @@ static TByte getScreenSize(VM* vm)
     return 1;
 }
 
+static TByte getDesignResolution(VM* vm)
+{
+    std::shared_ptr<kola::graphics::Renderer> renderer = 
+        kola::di::get<kola::graphics::Renderer>()
+    ;
+
+    kola::melon::ffi::push(vm, renderer->getDesignResolution());
+
+    return 1;
+}
+
 static TByte getTime(VM* vm)
 {
     std::shared_ptr<kola::events::EventSystem> eventSystem = 
@@ -177,6 +188,7 @@ static const ModuleFunction funcs[] = {
     { "loadSprite", 1, 0, &loadSprite },
     { "loadFont", 2, 0, &loadFont },
     { "getScreenSize", 0, 0, &getScreenSize },
+    { "getDesignResolution", 0, 0, &getDesignResolution },
 
     { "getTime", 0, 0, &getTime },
 

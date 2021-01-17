@@ -14,7 +14,7 @@ let Camera = {
     },
 
     getBB = |tr| -> {
-        let ss = Kolanut.getScreenSize();
+        let ss = Kolanut.getDesignResolution();
         let zoom = 1.0 / tr.scale.x;
 
         let bb = {

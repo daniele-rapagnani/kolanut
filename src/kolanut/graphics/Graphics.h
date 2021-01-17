@@ -20,6 +20,7 @@ enum class Engine
 struct Resolution
 {
     Sizei screenSize = { 800, 600 };
+    Sizei designResolution = { 800, 600 };
     bool fullScreen = false;
     bool vSynced = true;
 };
