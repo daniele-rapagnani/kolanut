@@ -9,6 +9,7 @@ Kolanut.onKeyPressed = |key, pressed| => {
 
 Kolanut.onLoad = func kolanutOnLoad => {
     Game.Assets.load();
+
     world.scene = Game.Scenes.Game.create(world);
     world.scene->load();
 };
@@ -40,7 +41,6 @@ let updateUIState = => {
 
 Kolanut.onDrawUI = => {
     world->drawUI();
-
     updateUIState();
     Game.UI.Lives.draw(Vector.create(10, 10), uiState.lives);
 };

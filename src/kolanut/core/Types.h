@@ -2,6 +2,9 @@
 
 #include <linalg.h>
 
+#include <glm/mat3x3.hpp>
+#include <glm/mat4x4.hpp>
+
 namespace kola {
 
 template <typename T, int M>
@@ -37,5 +40,11 @@ struct Colori : public Vec4i {
 struct Colorf : public Vec4f {
     Colorf(float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f) : Vec4f(r, g, b, a) {}
 };
+
+using Mat3f = glm::mat3x3;
+using Mat4f = glm::mat4x4;
+
+using Transform2D = Mat3f;
+using Transform3D = Mat4f;
 
 } // namespace kola

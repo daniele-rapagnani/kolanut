@@ -3,6 +3,7 @@
 #include "kolanut/graphics/Graphics.h"
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/graphics/sdl/RendererSDL.h"
+#include "kolanut/graphics/ogl/RendererOGL.h"
 
 #include <cassert>
 
@@ -15,6 +16,9 @@ std::shared_ptr<Renderer> createRenderer(const Config& conf)
     {
         case Engine::SDL2:
             return std::make_shared<RendererSDL>();
+
+        case Engine::OGL:
+            return std::make_shared<RendererOGL>();
         
         default:
             assert(false);

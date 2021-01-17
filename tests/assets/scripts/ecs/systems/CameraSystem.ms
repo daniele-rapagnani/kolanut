@@ -21,7 +21,8 @@ let CameraSystem = {
                     tr.position = targets[0].Transform.position;
                 }
 
-                let pos = tr.position - tr.origin * (1.0 / tr.scale.x);
+                let zoom = components.Transform.scale.x;
+                let pos = tr.position - tr.origin * (1.0 / zoom);
                 let bb = ca->getBB(tr);
 
                 if (ca.bounds.bottom != null && bb.bottom > ca.bounds.bottom) {
@@ -29,7 +30,7 @@ let CameraSystem = {
                 }
 
                 Kolanut.Camera.setPosition(pos);
-                Kolanut.Camera.setZoom(components.Transform.scale.x);
+                Kolanut.Camera.setZoom(zoom);
             }
         );
     }

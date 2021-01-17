@@ -2,6 +2,7 @@
 #include "kolanut/core/Logging.h"
 #include "kolanut/events/EventSystem.h"
 #include "kolanut/events/sdl/EventSystemSDL.h"
+#include "kolanut/events/glfw/EventSystemGLFW.h"
 
 #include <cassert>
 
@@ -14,6 +15,9 @@ std::shared_ptr<EventSystem> createEventSystem(const Config& conf)
     {
         case Engine::SDL2:
             return std::make_shared<EventSystemSDL>();
+            
+        case Engine::GLFW:
+            return std::make_shared<EventSystemGLFW>();
         
         default:
             assert(false);

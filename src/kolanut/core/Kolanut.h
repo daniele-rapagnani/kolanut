@@ -24,11 +24,16 @@ public:
 public:
     bool init(const Config& conf);
     void run();
-
+    
+    const Config& getConfig() const
+    { return this->config; }
+    
 protected:
     std::shared_ptr<events::EventSystem> getEventSystem() const;
     std::shared_ptr<scripting::ScriptingEngine> getScriptingEngine() const;
     std::shared_ptr<graphics::Renderer> getRenderer() const;
+
+    Config config;
 };
 
 } // namespace kola

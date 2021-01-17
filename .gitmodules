@@ -13,3 +13,9 @@
 [submodule "src/kolanut/libs/tinyxml2"]
 	path = src/kolanut/libs/tinyxml2
 	url = git@github.com:leethomason/tinyxml2.git
+[submodule "src/kolanut/libs/glfw"]
+	path = src/kolanut/libs/glfw
+	url = https://github.com/glfw/glfw.git
+[submodule "src/kolanut/libs/glm"]
+	path = src/kolanut/libs/glm
+	url = https://github.com/g-truc/glm

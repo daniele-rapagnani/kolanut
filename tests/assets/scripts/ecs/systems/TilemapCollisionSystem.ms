@@ -18,7 +18,7 @@ let TilemapCollisionSystem = {
 
         if (this.tilemap != null) {
             this.updateWithComponents(
-                entities, 
+                entities,
                 ["Transform", "Rigidbody", "TileCollider"],
                 |components, entity| => {
                     let tr = components.Transform;

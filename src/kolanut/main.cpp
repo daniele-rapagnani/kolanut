@@ -1,21 +1,27 @@
 #include <iostream>
 
 #include "kolanut/core/Logging.h"
+#include "kolanut/core/DIContainer.h"
 #include "kolanut/core/Kolanut.h"
 
 int main(int argc, char** argv)
 {
-	kola::Kolanut kn;
+	kola::di::registerType<kola::Kolanut>([] () -> std::shared_ptr<kola::Kolanut> {
+		return std::make_shared<kola::Kolanut>();
+	});
+
 	kola::Kolanut::Config conf;
 	conf.graphics.windowTitle = "Kolanut";
+	conf.graphics.renderer = kola::graphics::Engine::OGL;
+	conf.events.eventSystem = kola::events::Engine::GLFW;
 
-	if (!kn.init(conf))
+	if (!kola::di::get<kola::Kolanut>()->init(conf))
 	{
 		knM_logFatal("Can't initialize engine");
 		return 1;
 	}
 
-	kn.run();
+	kola::di::get<kola::Kolanut>()->run();
 
 	return 0;
 }

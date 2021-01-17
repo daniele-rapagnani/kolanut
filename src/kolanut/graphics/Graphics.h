@@ -13,7 +13,8 @@ class Renderer;
 enum class Engine
 {
     NONE = 0,
-    SDL2
+    SDL2,
+    OGL
 };
 
 struct Resolution

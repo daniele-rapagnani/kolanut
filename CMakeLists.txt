@@ -27,6 +27,9 @@ option(BUILD_TINYXML2 "" ON)
 set(BUILD_TINYXML2 ON)
 add_subdirectory(src/kolanut/libs/tmxparser)
 
+add_subdirectory(src/kolanut/libs/glfw)
+add_subdirectory(src/kolanut/libs/glm)
+
 add_definitions(-Werror=incompatible-pointer-types)
 add_definitions(-Werror=implicit-function-declaration)
 add_definitions(-Werror=return-type)
@@ -43,12 +46,23 @@ set(
     src/kolanut/graphics/Graphics.cpp
     src/kolanut/graphics/Tilemap.cpp
     src/kolanut/graphics/Renderer.cpp
+
     src/kolanut/graphics/sdl/RendererSDL.cpp
     src/kolanut/graphics/sdl/TextureSDL.cpp
-    src/kolanut/graphics/Font.cpp
     src/kolanut/graphics/sdl/FontSDL.cpp
-    src/kolanut/events/Events.cpp
+    
+    src/kolanut/graphics/ogl/glad/src/glad.c
+    src/kolanut/graphics/ogl/RendererOGL.cpp
+    src/kolanut/graphics/ogl/TextureOGL.cpp
+    src/kolanut/graphics/ogl/FontOGL.cpp
+    src/kolanut/graphics/ogl/utils/shaders/Shader.cpp
+    src/kolanut/graphics/ogl/utils/shaders/Program.cpp
+    src/kolanut/graphics/ogl/utils/GenericUtils.cpp
+
+    src/kolanut/graphics/Font.cpp
     src/kolanut/events/sdl/EventSystemSDL.cpp
+    src/kolanut/events/glfw/EventSystemGLFW.cpp
+    src/kolanut/events/Events.cpp
     src/kolanut/core/Kolanut.cpp
 
     src/kolanut/filesystem/Filesystem.cpp
@@ -84,8 +98,9 @@ target_include_directories(
     src/
     src/kolanut/libs/linalg/
     src/kolanut/libs/stb/
+    src/kolanut/graphics/ogl/glad/include/
 )
 
-set(LINKLIBS melonscript-vm external cjson SDL2-static tmxparser)
+set(LINKLIBS melonscript-vm external cjson SDL2-static glfw glm tmxparser)
 
 target_link_libraries(kolanut ${LINKLIBS})

@@ -40,6 +40,8 @@ std::shared_ptr<T> initSubsystem(
 
 bool Kolanut::init(const Config& conf)
 {
+    this->config = conf;
+
     knM_logDebug("Initializing Kolanut");
     
     di::registerType<filesystem::FilesystemEngine>(
@@ -48,6 +50,15 @@ bool Kolanut::init(const Config& conf)
             "filesystem",
             filesystem::createFilesystemEngine,
             conf.filesystem
+        )
+    );
+
+    di::registerType<graphics::Renderer>(
+        std::bind(
+            initSubsystem<graphics::Renderer, graphics::Config>,
+            "graphics",
+            graphics::createRenderer,
+            conf.graphics
         )
     );
 
@@ -66,15 +77,6 @@ bool Kolanut::init(const Config& conf)
             "event system",
             events::createEventSystem,
             conf.events
-        )
-    );
-
-    di::registerType<graphics::Renderer>(
-        std::bind(
-            initSubsystem<graphics::Renderer, graphics::Config>,
-            "graphics",
-            graphics::createRenderer,
-            conf.graphics
         )
     );
 

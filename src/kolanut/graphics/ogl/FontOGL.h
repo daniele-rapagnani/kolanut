@@ -1,22 +1,22 @@
 #pragma once
 
 #include "kolanut/graphics/Font.h"
-#include "kolanut/graphics/sdl/TextureSDL.h"
+#include "kolanut/graphics/ogl/TextureOGL.h"
 
 #define STBTT_STATIC
 #include <stb_truetype.h>
-#include <SDL.h>
 
 #include <string>
 #include <memory>
 #include <vector>
+#include <cstdint>
 
 namespace kola {
 namespace graphics {
 
-class RendererSDL;
+class RendererOGL;
 
-class FontSDL : public Font
+class FontOGL : public Font
 {
 public:
     static const size_t DEF_ATLAS_WIDTH = 512;
@@ -25,14 +25,13 @@ public:
     static const size_t DEF_LAST_CODEPOINT = 255;
 
 public:
-    friend class RendererSDL;
+    friend class RendererOGL;
 
-    FontSDL() = default;
-    ~FontSDL();
+    FontOGL() = default;
+    ~FontOGL();
 
 public:
     bool load(const std::string& file, size_t size = DEF_SIZE) override;
-    bool loadTexture(const RendererSDL& renderer);
 
     const Glyph* getGlyphInfo(int codepoint) const override;
 
@@ -63,9 +62,9 @@ private:
     size_t size = DEF_SIZE;
     size_t firstCodepoint = DEF_FIRST_CODEPOINT;
     size_t lastCodepoint = DEF_LAST_CODEPOINT;
-    Uint32* textureData = nullptr;
+    uint32_t* textureData = nullptr;
     Sizei atlasSize = { DEF_ATLAS_WIDTH, DEF_ATLAS_HEIGHT };
-    std::shared_ptr<TextureSDL> texture = nullptr;
+    std::shared_ptr<TextureOGL> texture = nullptr;
     std::vector<stbtt_packedchar> charsMap;
     std::vector<Glyph> glyphs;
 };
