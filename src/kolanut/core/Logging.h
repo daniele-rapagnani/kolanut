@@ -23,26 +23,32 @@
 #define knM_logDebug(x) do {} while(false)
 #endif
 
-#if VERBOSITY >= 4
+#if VERBOSITY >= 5
 #define knM_logTrace(x) knM_log("Trace", x)
 #else
-#define knM_logDebug(x) do {} while(false)
+#define knM_logTrace(x) do {} while(false)
+#endif
+
+#if VERBOSITY >= 4
+#define knM_logInfo(x) knM_log("Info", x)
+#else
+#define knM_logInfo(x) do {} while(false)
 #endif
 
 #if VERBOSITY >= 3
-#define knM_logInfo(x) knM_log("Info", x)
+#define knM_logWarning(x) knM_log("Warning", x)
 #else
-#define knM_logDebug(x) do {} while(false)
+#define knM_logWarning(x) do {} while(false)
 #endif
 
 #if VERBOSITY >= 2
 #define knM_logError(x) knM_log("Error", x)
 #else
-#define knM_logDebug(x) do {} while(false)
+#define knM_logError(x) do {} while(false)
 #endif
 
 #if VERBOSITY >= 1
 #define knM_logFatal(x) knM_log("Fatal", x)
 #else
-#define knM_logDebug(x) do {} while(false)
+#define knM_logFatal(x) do {} while(false)
 #endif

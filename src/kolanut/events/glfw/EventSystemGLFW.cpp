@@ -17,10 +17,9 @@ namespace {
 
 GLFWwindow* getWindow()
 {
-    if (
-        di::get<Kolanut>()->getConfig().graphics.renderer
-        != graphics::Engine::OGL
-    )
+    auto rendererType = di::get<Kolanut>()->getConfig().graphics.renderer;
+
+    if (!(rendererType == graphics::Engine::OGL || rendererType == graphics::Engine::VULKAN))
     {
         knM_logFatal("GLFW event system can be used only with the OGL renderer");
         return nullptr;
@@ -92,7 +91,7 @@ void EventSystemGLFW::processKey(int key, int action)
     {
         return;
     }
-    
+
     assert(GLFW_KOLA_KEYMAP.find(key) != GLFW_KOLA_KEYMAP.end());
     KeyCode keyCode = GLFW_KOLA_KEYMAP[key];
 

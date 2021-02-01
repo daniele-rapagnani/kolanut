@@ -13,7 +13,7 @@ int main(int argc, char** argv)
 	kola::Kolanut::Config conf;
 	conf.graphics.windowTitle = "Kolanut";
 	conf.graphics.resolution.designResolution = conf.graphics.resolution.screenSize / 2;
-	conf.graphics.renderer = kola::graphics::Engine::OGL;
+	conf.graphics.renderer = kola::graphics::Engine::VULKAN;
 	conf.events.eventSystem = kola::events::Engine::GLFW;
 
 	if (!kola::di::get<kola::Kolanut>()->init(conf))

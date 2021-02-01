@@ -8,6 +8,8 @@ endif (APPLE)
 
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
+find_package(Vulkan REQUIRED FATAL_ERROR)
+
 option(DEBUG_GC "" OFF)
 set(DEBUG_GC OFF)
 option(STRESS_GC "" OFF)
@@ -59,6 +61,10 @@ set(
     src/kolanut/graphics/ogl/utils/shaders/Program.cpp
     src/kolanut/graphics/ogl/utils/GenericUtils.cpp
 
+    src/kolanut/graphics/vulkan/RendererVK.cpp
+    src/kolanut/graphics/vulkan/TextureVK.cpp
+    src/kolanut/graphics/vulkan/FontVK.cpp
+
     src/kolanut/graphics/Font.cpp
     src/kolanut/events/sdl/EventSystemSDL.cpp
     src/kolanut/events/glfw/EventSystemGLFW.cpp
@@ -99,8 +105,9 @@ target_include_directories(
     src/kolanut/libs/linalg/
     src/kolanut/libs/stb/
     src/kolanut/graphics/ogl/glad/include/
+    ${Vulkan_INCLUDE_DIR}
 )
 
-set(LINKLIBS melonscript-vm external cjson SDL2-static glfw glm tmxparser)
+set(LINKLIBS melonscript-vm external cjson SDL2-static glfw glm tmxparser ${Vulkan_LIBRARIES})
 
 target_link_libraries(kolanut ${LINKLIBS})

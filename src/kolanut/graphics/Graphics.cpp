@@ -4,6 +4,7 @@
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/graphics/sdl/RendererSDL.h"
 #include "kolanut/graphics/ogl/RendererOGL.h"
+#include "kolanut/graphics/vulkan/RendererVK.h"
 
 #include <cassert>
 
@@ -19,6 +20,9 @@ std::shared_ptr<Renderer> createRenderer(const Config& conf)
 
         case Engine::OGL:
             return std::make_shared<RendererOGL>();
+
+        case Engine::VULKAN:
+            return std::make_shared<RendererVK>();
         
         default:
             assert(false);

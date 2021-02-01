@@ -14,7 +14,8 @@ enum class Engine
 {
     NONE = 0,
     SDL2,
-    OGL
+    OGL,
+    VULKAN
 };
 
 struct Resolution
