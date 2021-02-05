@@ -3,6 +3,7 @@
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/Kolanut.h"
 #include "kolanut/graphics/ogl/RendererOGL.h"
+#include "kolanut/graphics/vulkan/RendererVK.h"
 #include "kolanut/core/DIContainer.h"
 
 #include <cassert>
@@ -26,9 +27,15 @@ GLFWwindow* getWindow()
     }
 
     std::shared_ptr<graphics::Renderer> renderer = di::get<graphics::Renderer>();
-    auto rendererOgl = std::static_pointer_cast<graphics::RendererOGL>(renderer);
 
-    return rendererOgl->getWindow();
+    if (rendererType == graphics::Engine::OGL)
+    {
+        auto rendererOgl = std::static_pointer_cast<graphics::RendererOGL>(renderer);
+        return rendererOgl->getWindow();
+    }
+
+    auto rendererVk = std::static_pointer_cast<graphics::RendererVK>(renderer);
+    return rendererVk->getWindow();
 }
 
 class EventSystemGLFWEX : public EventSystemGLFW

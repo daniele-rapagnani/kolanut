@@ -64,6 +64,18 @@ set(
     src/kolanut/graphics/vulkan/RendererVK.cpp
     src/kolanut/graphics/vulkan/TextureVK.cpp
     src/kolanut/graphics/vulkan/FontVK.cpp
+    src/kolanut/graphics/vulkan/utils/Instance.cpp
+    src/kolanut/graphics/vulkan/utils/Helpers.cpp
+    src/kolanut/graphics/vulkan/utils/PhysicalDevice.cpp
+    src/kolanut/graphics/vulkan/utils/Device.cpp
+    src/kolanut/graphics/vulkan/utils/Swapchain.cpp
+    src/kolanut/graphics/vulkan/utils/ShaderModule.cpp
+    src/kolanut/graphics/vulkan/utils/RenderPass.cpp
+    src/kolanut/graphics/vulkan/utils/Pipeline.cpp
+    src/kolanut/graphics/vulkan/utils/Pipeline2D.cpp
+    src/kolanut/graphics/vulkan/utils/Queue.cpp
+    src/kolanut/graphics/vulkan/utils/Semaphore.cpp
+    src/kolanut/graphics/vulkan/utils/Fence.cpp
 
     src/kolanut/graphics/Font.cpp
     src/kolanut/events/sdl/EventSystemSDL.cpp

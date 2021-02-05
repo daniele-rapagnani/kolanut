@@ -1,6 +1,7 @@
 #include "kolanut/graphics/vulkan/RendererVK.h"
 #include "kolanut/graphics/vulkan/TextureVK.h"
 #include "kolanut/graphics/vulkan/FontVK.h"
+#include "kolanut/graphics/vulkan/utils/Helpers.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/DIContainer.h"
@@ -36,91 +37,26 @@ void onWindowResize(GLFWwindow* window, int width, int height)
     //r->updateWindowSize();
 }
 
-VkBool32 onVulkanValidationLayerMessage(
+void onVulkanValidationLayerMessage(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
     VkDebugUtilsMessageTypeFlagsEXT messageTypes,
-    const VkDebugUtilsMessengerCallbackDataEXT* pCallbackData,
-    void* pUserData
+    const std::string& message
 )
 {
     switch(messageSeverity)
     {
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT:
-            knM_logInfo("[Vulkan] " << pCallbackData->pMessage);
+            knM_logInfo("[Vulkan] " << message);
             break;
 
         case VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT:
-            knM_logWarning("[Vulkan] " << pCallbackData->pMessage);
+            knM_logWarning("[Vulkan] " << message);
             break;
 
         default:
-            knM_logError("[Vulkan] " << pCallbackData->pMessage);
+            knM_logError("[Vulkan] " << message);
             break;
     }
-
-    return VK_FALSE;
-}
-
-template <typename T>
-VkResult getVulkanList(
-    std::vector<T>& out,
-    std::function<VkResult(uint32_t* count, T* list)> listFunc
-)
-{
-    uint32_t count = 0;
-    VkResult r = VK_SUCCESS;
-
-    if ((r = listFunc(&count, nullptr)) != VK_SUCCESS)
-    {
-        return r;
-    }
-
-    out.clear();
-    out.resize(count);
-
-    if (count == 0)
-    {
-        return VK_SUCCESS;
-    }
-
-    if ((r = listFunc(&count, &out[0])) != VK_SUCCESS)
-    {
-        return r;
-    }
-
-    return VK_SUCCESS;
-}
-
-template <typename T>
-std::vector<T> getVulkanList(
-    std::function<void(uint32_t* count, T* list)> listFunc
-)
-{
-    std::vector<T> out;
-    
-    getVulkanList<T>(out, [listFunc] (uint32_t* count, T* list) {
-        listFunc(count, list);
-        return VK_SUCCESS;
-    });
-
-    return out;
-}
-
-template <typename T>
-std::vector<T> getVulkanListFatal(
-    std::function<VkResult(uint32_t* count, T* list)> listFunc,
-    const std::string& error
-)
-{
-    std::vector<T> out;
-    VkResult errorCode = getVulkanList<T>(out, listFunc);
-
-    if (errorCode != VK_SUCCESS)
-    {
-        knM_logFatal(error << ". Code: " << errorCode);
-    }
-
-    return out;
 }
 
 } // namespace 
@@ -175,81 +111,31 @@ bool RendererVK::doInit(const Config& config)
         config.resolution.screenSize.y
     );
 
-    VkApplicationInfo ai = {};
-    ai.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
-    ai.pApplicationName = config.windowTitle.c_str();
-    ai.applicationVersion = 1;
-    ai.apiVersion = VK_API_VERSION_1_0;
-
-    static const char* layers[] = {
-        "VK_LAYER_KHRONOS_validation"
-    };
-
-    std::vector<const char*> extensions = {
-        "VK_EXT_debug_utils",
-        "VK_KHR_get_physical_device_properties2"
-    };
-
     uint32_t glfwExtensionsCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
+
+    vulkan::Instance::Config instConf = {};
+    instConf.appName = config.windowTitle;
+    instConf.layers.push_back("VK_LAYER_KHRONOS_validation");
+    instConf.extensions.push_back("VK_EXT_debug_utils");
+    instConf.extensions.push_back("VK_KHR_get_physical_device_properties2");
+    instConf.messengerCb = onVulkanValidationLayerMessage;
 
     std::copy(
         glfwExtensions, 
         glfwExtensions + glfwExtensionsCount, 
-        std::back_inserter(extensions)
+        std::back_inserter(instConf.extensions)
     );
 
-    VkDebugUtilsMessengerCreateInfoEXT mci = {};
-    mci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
-    mci.messageSeverity = (
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
-    );
+    this->instance = std::make_shared<vulkan::Instance>();
 
-    mci.messageType = (
-        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
-    );
-
-    mci.pfnUserCallback = onVulkanValidationLayerMessage;
-
-    VkInstanceCreateInfo ici = {};
-    ici.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
-    ici.pApplicationInfo = &ai;
-    ici.enabledExtensionCount = extensions.size();
-    ici.ppEnabledExtensionNames = &extensions[0];
-    ici.enabledLayerCount = sizeof(layers) / sizeof(const char*);
-    ici.ppEnabledLayerNames = layers;
-    ici.pNext = &mci;
-
-    if (vkCreateInstance(&ici, nullptr, &this->instance) != VK_SUCCESS)
+    if (!this->instance->init(instConf))
     {
-        knM_logFatal("Can't create Vulkan instance");
-        return false;
-    }
-
-    auto createDebug = 
-        reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
-            glfwGetInstanceProcAddress(this->instance, "vkCreateDebugUtilsMessengerEXT")
-        )
-    ;
-
-    if (!createDebug)
-    {
-        knM_logFatal("vkCreateDebugUtilsMessengerEXT not supported");
-        return false;
-    }
-
-    if (createDebug(this->instance, &mci, nullptr, &this->messenger) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create debug messenger");
         return false;
     }
 
     if (
-        glfwCreateWindowSurface(this->instance, this->window, nullptr, &this->surface)
+        glfwCreateWindowSurface(this->instance->getVkHandle(), this->window, nullptr, &this->surface)
         != VK_SUCCESS
     )
     {
@@ -257,501 +143,153 @@ bool RendererVK::doInit(const Config& config)
         return false;
     }
 
-    uint32_t physicalDevicesCount = 0;
+    if (vulkan::PhysicalDevice::getDevices(this->instance).empty())
+    {
+        knM_logFatal("No GPUs found on this system");
+        return false;
+    }
+
+    this->physicalDevice = vulkan::PhysicalDevice::getDevices(this->instance)[0];
+
+    if (!this->physicalDevice->hasSwapchainSupport())
+    {
+        knM_logFatal(this->physicalDevice->getName() << " doesn't support swapchains.");
+        return false;
+    }
+
+    vulkan::QueueFamily presentationQueueFamilyIdx =
+        this->physicalDevice->getPresentationQueueFamily(this->surface)
+    ;
+
+    if (!presentationQueueFamilyIdx)
+    {
+        knM_logFatal("Can't find a suitable presentation queue");
+        return false;
+    }
+
+    vulkan::QueueFamily graphicsQueueFamilyIdx = 
+        this->physicalDevice->getQueueFamily(vulkan::QueueFamilyType::GRAPHICS)
+    ;
+
+    if (!graphicsQueueFamilyIdx)
+    {
+        knM_logFatal("Can't find a suitable graphics queue");
+        return false;
+    }
+
+    vulkan::Device::Config devConfig = {};
+    devConfig.extensions.push_back("VK_KHR_swapchain");
     
-    if (vkEnumeratePhysicalDevices(this->instance, &physicalDevicesCount, nullptr) != VK_SUCCESS)
+    if (this->physicalDevice->isExtensionSupported("VK_KHR_portability_subset"))
     {
-        knM_logFatal("Can't get number of Vulkan physical devices");
-        return false;
+        devConfig.extensions.push_back("VK_KHR_portability_subset");
     }
 
-    if (physicalDevicesCount == 0)
-    {
-        knM_logFatal("Can't find any Vulkan physical device");
-        return false;
-    }
+    vulkan::Queue::Config queueConfig = {};
 
-    std::vector<VkPhysicalDevice> devices(physicalDevicesCount);
-
-    if (vkEnumeratePhysicalDevices(this->instance, &physicalDevicesCount, &devices[0]) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't enumerate Vulkan physical devices");
-        return false;
-    }
-
-    this->physicalDevice = devices[0];
-
-    VkPhysicalDeviceFeatures feature = {};
-    vkGetPhysicalDeviceFeatures(this->physicalDevice, &feature);
-
-    std::vector<VkQueueFamilyProperties> queuesProps = getVulkanList<VkQueueFamilyProperties>(
-        std::bind(
-            vkGetPhysicalDeviceQueueFamilyProperties,
-            this->physicalDevice,
-            std::placeholders::_1,
-            std::placeholders::_2
-        )
-    );
-
-    int32_t presentationQueueFamilyIdx = -1;
-    int32_t graphicsQueueFamilyIdx = -1;
-
-    for (auto it = queuesProps.begin(); it != queuesProps.end(); ++it)
-    {
-        if (presentationQueueFamilyIdx >= 0 && graphicsQueueFamilyIdx >= 0)
-        {
-            break;
-        }
-
-        size_t idx = std::distance(queuesProps.begin(), it);
-
-        if (graphicsQueueFamilyIdx < 0 && it->queueFlags & VK_QUEUE_GRAPHICS_BIT)
-        {
-            graphicsQueueFamilyIdx = idx;
-        }
-
-        if (presentationQueueFamilyIdx < 0)
-        {
-            VkBool32 isSurfaceSupported = VK_FALSE;
-
-            if (
-                vkGetPhysicalDeviceSurfaceSupportKHR(
-                    this->physicalDevice, 
-                    idx, 
-                    this->surface, 
-                    &isSurfaceSupported
-                ) != VK_SUCCESS
-            )
-            {
-                knM_logError("Can't check for physical device surface support.");
-            }
-            else if (isSurfaceSupported == VK_TRUE)
-            {
-                presentationQueueFamilyIdx = idx;
-            }
-        }
-    }
-
-    std::vector<VkDeviceQueueCreateInfo> dqcis;
-
-    float priority = 0.0f;
-    
-    VkDeviceQueueCreateInfo presentDqci = {};
-    presentDqci.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-    presentDqci.queueCount = 1;
-    presentDqci.queueFamilyIndex = presentationQueueFamilyIdx;
-    presentDqci.pQueuePriorities = &priority;
-
-    dqcis.push_back(presentDqci);
+    queueConfig.family = presentationQueueFamilyIdx;
+    devConfig.queues.push_back(queueConfig);
 
     if (presentationQueueFamilyIdx != graphicsQueueFamilyIdx)
     {
-        VkDeviceQueueCreateInfo graphDqci = {};
-        graphDqci.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
-        graphDqci.queueCount = 1;
-        graphDqci.queueFamilyIndex = graphicsQueueFamilyIdx;
-        presentDqci.pQueuePriorities = &priority;
-
-        dqcis.push_back(graphDqci);
+        queueConfig.family = graphicsQueueFamilyIdx;
+        devConfig.queues.push_back(queueConfig);
     }
 
-    std::vector<VkExtensionProperties> extProps = getVulkanListFatal<VkExtensionProperties>(
-        std::bind(
-            vkEnumerateDeviceExtensionProperties,
-            this->physicalDevice,
-            nullptr,
-            std::placeholders::_1,
-            std::placeholders::_2
-        ),
-        "Can't get device extensions"
-    );
+    this->device = std::make_shared<vulkan::Device>();
 
-    std::vector<const char*> deviceExts = {};
-    deviceExts.push_back("VK_KHR_swapchain");
-
-    if (!extProps.empty())
+    if (!this->device->init(this->physicalDevice,this->surface, devConfig))
     {
-        auto ext = std::find_if(extProps.begin(), extProps.end(), [] (const VkExtensionProperties& p) {
-            return strcmp(p.extensionName, "VK_KHR_portability_subset") == 0;
-        });
-
-        if (ext != extProps.end())
-        {
-            deviceExts.push_back("VK_KHR_portability_subset");
-        }
-    }
-
-    VkDeviceCreateInfo dci = {};
-    dci.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
-    dci.pQueueCreateInfos = &dqcis[0];
-    dci.queueCreateInfoCount = dqcis.size();
-    dci.enabledExtensionCount = deviceExts.size();
-    dci.ppEnabledExtensionNames = &deviceExts[0];
-
-    if (vkCreateDevice(this->physicalDevice, &dci, nullptr, &this->logicalDevice) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create Vulkan logical device");
         return false;
     }
 
-    vkGetDeviceQueue(this->logicalDevice, presentationQueueFamilyIdx, 0, &this->presQueue);
+    this->presQueue = this->device->getQueue(presentationQueueFamilyIdx);
+    this->graphQueue = (presentationQueueFamilyIdx != graphicsQueueFamilyIdx)
+        ? this->device->getQueue(graphicsQueueFamilyIdx)
+        : this->presQueue
+    ;
 
-    if (presentationQueueFamilyIdx != graphicsQueueFamilyIdx)
-    {
-        vkGetDeviceQueue(this->logicalDevice, graphicsQueueFamilyIdx, 0, &this->graphQueue);
-    }
-    else
-    {
-        this->graphQueue = this->presQueue;
-    }
+    this->vertexShader = std::make_shared<vulkan::ShaderModule>();
 
-    VkFormatProperties fp = {};
-    vkGetPhysicalDeviceFormatProperties(this->physicalDevice, VK_FORMAT_R8G8B8A8_SRGB, &fp);
-
-    if (!fp.bufferFeatures)
-    {
-        knM_logFatal("RGBA SRGB is not supported");
-        return false;
-    }
-    
-    VkSurfaceCapabilitiesKHR sc = {};
-    vkGetPhysicalDeviceSurfaceCapabilitiesKHR(this->physicalDevice, this->surface, &sc);
-
-    if (sc.minImageCount > 2 || sc.maxImageCount < 2)
-    {
-        knM_logFatal("Unsupported surface format: min or max image count is not enough");
-        return false;
-    }
-
-    std::vector<uint32_t> queueFamilies;
-    queueFamilies.push_back(presentationQueueFamilyIdx);
-    
-    if (presentationQueueFamilyIdx != graphicsQueueFamilyIdx)
-    {
-        queueFamilies.push_back(graphicsQueueFamilyIdx);
-    }
-
-    std::vector<VkSurfaceFormatKHR> surfaceForms = getVulkanList<VkSurfaceFormatKHR>(
-        std::bind(
-            vkGetPhysicalDeviceSurfaceFormatsKHR,
-            this->physicalDevice,
-            this->surface,
-            std::placeholders::_1,
-            std::placeholders::_2
+    if (
+        !this->vertexShader->init(
+            this->device,
+            di::get<filesystem::FilesystemEngine>(),
+            "assets/mainv.svert"
         )
-    );
-
-    bool found = false;
-
-    for (const auto& f : surfaceForms)
+    )
     {
-        if (f.format == VK_FORMAT_B8G8R8A8_SRGB)
-        {
-            found = f.colorSpace == VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-            break;
-        }
-    }
-
-    if (!found)
-    {
-        knM_logFatal("Can't find a suitable surface format");
+        knM_logFatal("Can't create main vertex shader");
         return false;
     }
 
-    VkSwapchainCreateInfoKHR sci = {};
-    sci.sType = VK_STRUCTURE_TYPE_SWAPCHAIN_CREATE_INFO_KHR;
-    sci.surface = this->surface;
-    sci.minImageCount = 2;
-    sci.imageFormat = VK_FORMAT_B8G8R8A8_SRGB;
-    sci.imageColorSpace = VK_COLOR_SPACE_SRGB_NONLINEAR_KHR;
-    sci.imageExtent = sc.currentExtent;
-    sci.imageArrayLayers = 1;
-    sci.imageUsage = VK_IMAGE_USAGE_COLOR_ATTACHMENT_BIT;
-    sci.imageSharingMode = queueFamilies.size() > 1 ? VK_SHARING_MODE_CONCURRENT : VK_SHARING_MODE_EXCLUSIVE; // TODO: Family transfer
-    sci.queueFamilyIndexCount = queueFamilies.size();
-    sci.pQueueFamilyIndices = &queueFamilies[0];
-    sci.preTransform = sc.currentTransform;
-    sci.compositeAlpha = VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
-    sci.presentMode = VK_PRESENT_MODE_FIFO_KHR;
-    sci.clipped = VK_TRUE;
+    this->fragmentShader = std::make_shared<vulkan::ShaderModule>();
 
-    if (vkCreateSwapchainKHR(this->logicalDevice, &sci, nullptr, &this->swapchain) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create swapchain");
-        return false;
-    }
-
-    this->swapchainImages = getVulkanListFatal<VkImage>(
-        std::bind(
-            vkGetSwapchainImagesKHR,
-            this->logicalDevice,
-            this->swapchain,
-            std::placeholders::_1,
-            std::placeholders::_2
-        ),
-        "Can't get swapchain's image list"
-    );
-
-    this->swapchainImageViews.clear();
-
-    for (VkImage i : this->swapchainImages)
-    {
-        VkImageViewCreateInfo ivci = {};
-        ivci.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-        ivci.image = i;
-        ivci.format = sci.imageFormat;
-        ivci.viewType = VK_IMAGE_VIEW_TYPE_2D;
-        ivci.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-        ivci.subresourceRange.levelCount = VK_REMAINING_MIP_LEVELS;
-        ivci.subresourceRange.layerCount = VK_REMAINING_ARRAY_LAYERS;
-
-        this->swapchainImageViews.emplace_back();
-
-        if (
-            vkCreateImageView(
-                this->logicalDevice, 
-                &ivci, 
-                nullptr, 
-                &this->swapchainImageViews.back()
-            ) != VK_SUCCESS
+    if (
+        !this->fragmentShader->init(
+            this->device,
+            di::get<filesystem::FilesystemEngine>(),
+            "assets/mainv.sfrag"
         )
-        {
-            knM_logFatal("Can't create image view for swapchain's image");
-            return false;
-        }
-    }
-
-    std::vector<char> buffer;
-
-    if (!di::get<filesystem::FilesystemEngine>()->getFileContent("assets/mainv.svert", buffer))
+    )
     {
-        knM_logFatal("Can't open main vertex shader");
+        knM_logFatal("Can't create main fragment shader");
         return false;
     }
 
-    VkShaderModuleCreateInfo smci = {};
-    smci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    smci.codeSize = buffer.size();
-    smci.pCode = reinterpret_cast<uint32_t*>(&buffer[0]);
-
-    if (vkCreateShaderModule(this->logicalDevice, &smci, nullptr, &this->vertexShader) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create vertex shader");
-        return false;
-    }
-
-    buffer.clear();
-
-    if (!di::get<filesystem::FilesystemEngine>()->getFileContent("assets/mainv.sfrag", buffer))
-    {
-        knM_logFatal("Can't open main fragment shader");
-        return false;
-    }
-
-    smci = {};
-    smci.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
-    smci.codeSize = buffer.size();
-    smci.pCode = reinterpret_cast<uint32_t*>(&buffer[0]);
-
-    if (vkCreateShaderModule(this->logicalDevice, &smci, nullptr, &this->fragmentShader) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create fragment shader");
-        return false;
-    }
+    vulkan::RenderPass::Config renderPassConfig;
 
     VkAttachmentDescription atd = {};
-    atd.format = sci.imageFormat;
+    atd.format = this->device->getSwapchain()->getConfig().format;
     atd.samples = VK_SAMPLE_COUNT_1_BIT;
     atd.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
     atd.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
     atd.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
     atd.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+    renderPassConfig.attachments.push_back(atd);
+
+    vulkan::RenderPass::Subpass subpass;
+
     VkAttachmentReference atr = {};
     atr.attachment = 0;
     atr.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
-    VkSubpassDescription sbd = {};
-    sbd.colorAttachmentCount = 1;
-    sbd.pColorAttachments = &atr;
-    
-    VkRenderPassCreateInfo rpci = {};
-    rpci.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-    rpci.attachmentCount = 1;
-    rpci.pAttachments = &atd;
-    rpci.subpassCount = 1;
-    rpci.pSubpasses = &sbd;
+    subpass.attachmentRefs.push_back(atr);
+    renderPassConfig.subpasses.push_back(subpass);
 
-    if (vkCreateRenderPass(this->logicalDevice, &rpci, nullptr, &this->renderPass) != VK_SUCCESS)
+    if (!this->device->addRenderPass(renderPassConfig))
     {
-        knM_logFatal("Can't create render pass");
         return false;
     }
 
-    VkPipelineShaderStageCreateInfo pssci[2] = {};
-    pssci[0].sType = pssci[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-    pssci[0].module = this->vertexShader;
-    pssci[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-    pssci[0].pName = "main";
+    this->device->getSwapchain()->initFramebuffers(this->device->getRenderPasses().back());
 
-    pssci[1].module = this->fragmentShader;
-    pssci[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-    pssci[1].pName = "main";
+    VkSurfaceCapabilitiesKHR sc = this->physicalDevice->getSurfaceCapabilities(this->surface);
 
-    VkPipelineRasterizationStateCreateInfo prsci = {};
-    prsci.sType = VK_STRUCTURE_TYPE_PIPELINE_RASTERIZATION_STATE_CREATE_INFO;
-    prsci.rasterizerDiscardEnable = VK_FALSE;
-    prsci.polygonMode = VK_POLYGON_MODE_FILL;
-    prsci.cullMode = VK_CULL_MODE_NONE;
-    prsci.frontFace = VK_FRONT_FACE_CLOCKWISE;
-    prsci.lineWidth = 1.0f;
+    vulkan::Pipeline2D::Config p2dConf = {};
+    p2dConf.fragmentShader = this->fragmentShader;
+    p2dConf.vertexShader = this->vertexShader;
+    p2dConf.renderPass = this->device->getRenderPasses().back();
+    p2dConf.viewportWidth = sc.currentExtent.width;
+    p2dConf.viewportHeight = sc.currentExtent.height;
 
-    VkPipelineInputAssemblyStateCreateInfo paci = {};
-    paci.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    paci.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
-    paci.primitiveRestartEnable = VK_FALSE;
+    this->pipeline = std::make_shared<vulkan::Pipeline2D>();
 
-    VkPipelineVertexInputStateCreateInfo pvisci = {};
-    pvisci.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-
-    VkPipelineColorBlendAttachmentState pcbas = {};
-    pcbas.blendEnable = VK_FALSE;
-    pcbas.colorWriteMask = 
-        VK_COLOR_COMPONENT_R_BIT 
-        | VK_COLOR_COMPONENT_G_BIT
-        | VK_COLOR_COMPONENT_B_BIT
-    ;
-
-    VkPipelineColorBlendStateCreateInfo pcbsci = {};
-    pcbsci.sType = VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO;
-    pcbsci.logicOp = VK_LOGIC_OP_COPY;
-    pcbsci.logicOpEnable = VK_FALSE;
-    pcbsci.attachmentCount = 1;
-    pcbsci.pAttachments = &pcbas;
-
-    VkPipelineMultisampleStateCreateInfo pmsci = {};
-    pmsci.sType = VK_STRUCTURE_TYPE_PIPELINE_MULTISAMPLE_STATE_CREATE_INFO;
-    pmsci.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
-
-    VkViewport viewport = {};
-    viewport.width = sc.currentExtent.width;
-    viewport.height = sc.currentExtent.height;
-    viewport.minDepth = 0.0f;
-    viewport.maxDepth = 1.0f;
-    
-    VkRect2D scissoring = {};
-    scissoring.extent = sc.currentExtent;
-
-    VkPipelineViewportStateCreateInfo pvsci = {};
-    pvsci.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;
-    pvsci.viewportCount = 1;
-    pvsci.pViewports = &viewport;
-    pvsci.scissorCount = 1;
-    pvsci.pScissors = &scissoring;
-
-    VkPipelineLayoutCreateInfo plci = {};
-    plci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-    
-    if (vkCreatePipelineLayout(this->logicalDevice, &plci, nullptr, &this->pipelineLayout) != VK_SUCCESS)
+    if (!this->pipeline->init(this->device, p2dConf))
     {
-        knM_logFatal("Can' create pipeline layout");
         return false;
     }
 
-    VkGraphicsPipelineCreateInfo gpci = {};
-    gpci.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
-    gpci.pStages = pssci;
-    gpci.stageCount = 2;
-    gpci.renderPass = this->renderPass;
-    gpci.pRasterizationState = &prsci;
-    gpci.layout = this->pipelineLayout;
-    gpci.pInputAssemblyState = &paci;
-    gpci.pVertexInputState = &pvisci;
-    gpci.pColorBlendState = &pcbsci;
-    gpci.pMultisampleState = &pmsci;
-    gpci.pViewportState = &pvsci;
-
-    if (
-        vkCreateGraphicsPipelines(this->logicalDevice, VK_NULL_HANDLE, 1, &gpci, nullptr, &this->pipeline)
-        != VK_SUCCESS
-    )
+    for (auto it = this->device->getSwapchain()->getImageViews().cbegin(); it != this->device->getSwapchain()->getImageViews().cend(); ++it)
     {
-        knM_logFatal("Can't create pipeline");
-        return false;
-    }
-
-    VkCommandPoolCreateInfo cpci = {};
-    cpci.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-    cpci.queueFamilyIndex = graphicsQueueFamilyIdx;
-
-    if (vkCreateCommandPool(this->logicalDevice, &cpci, nullptr, &this->graphicsCmdPool) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create graphics command pool");
-        return false;
-    }
-
-    cpci.queueFamilyIndex = presentationQueueFamilyIdx;
-
-    if (vkCreateCommandPool(this->logicalDevice, &cpci, nullptr, &this->presentCmdPool) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create graphics command pool");
-        return false;
-    }
-
-    VkCommandBufferAllocateInfo cbai = {};
-    cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cbai.commandBufferCount = this->swapchainImageViews.size() * this->framesInFlight;
-    cbai.commandPool = this->graphicsCmdPool;
-    cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-    this->graphicsCommandBuffers.resize(cbai.commandBufferCount);
-    this->presentCommandBuffers.resize(cbai.commandBufferCount);
-
-    if (vkAllocateCommandBuffers(this->logicalDevice, &cbai, &this->graphicsCommandBuffers[0]) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create graphics command buffer");
-        return false;
-    }
-
-    cbai.commandPool = this->presentCmdPool;
-    
-    if (vkAllocateCommandBuffers(this->logicalDevice, &cbai, &this->presentCommandBuffers[0]) != VK_SUCCESS)
-    {
-        knM_logFatal("Can't create present command buffer");
-        return false;
-    }
-
-    for (auto it = this->swapchainImageViews.cbegin(); it != this->swapchainImageViews.cend(); ++it)
-    {
-        for (uint8_t i = 0; i < this->framesInFlight; i++)
+        for (uint8_t frame = 0; frame < this->device->getConfig().framesInFlight; frame++)
         {
-            VkFramebufferCreateInfo fbci = {};
-            fbci.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
-            fbci.attachmentCount = 1;
-            fbci.pAttachments = &(*it);
-            fbci.renderPass = this->renderPass;
-            fbci.layers = 1;
-            fbci.width = sc.currentExtent.width;
-            fbci.height = sc.currentExtent.height;
+            size_t idx = std::distance(this->device->getSwapchain()->getImageViews().cbegin(), it);
+            size_t offset = this->device->getSwapchain()->getResourceOffset(idx, frame);
 
-            this->framebuffers.emplace_back();
-
-            if (
-                vkCreateFramebuffer(this->logicalDevice, &fbci, nullptr, &this->framebuffers.back())
-                != VK_SUCCESS
-            )
-            {
-                knM_logFatal("Can't create framebuffer object");
-                return false;
-            }
-
-            decltype(this->swapchainImageViews)::size_type idx = 
-                std::distance(this->swapchainImageViews.cbegin(), it)
-                + this->swapchainImageViews.size() * i
-            ;
-
-            VkCommandBuffer gcb = this->graphicsCommandBuffers[idx];
-            VkCommandBuffer pcb = this->presentCommandBuffers[idx];
+            VkCommandBuffer gcb = this->graphQueue->getCommandBuffers()[offset];
+            VkCommandBuffer pcb = this->presQueue->getCommandBuffers()[offset];
     
             VkCommandBufferBeginInfo cbbi = {};
             cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
@@ -770,15 +308,16 @@ bool RendererVK::doInit(const Config& config)
 
             VkRenderPassBeginInfo rpbi = {};
             rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            rpbi.renderPass = this->renderPass;
-            rpbi.framebuffer = this->framebuffers.back();
+            rpbi.renderPass = this->device->getRenderPasses().back()->getVkHandle();
+            rpbi.framebuffer = this->device->getSwapchain()->getFramebuffer(idx, frame);
             rpbi.renderArea.extent = sc.currentExtent;
             rpbi.clearValueCount = 1;
             rpbi.pClearValues = &cv;
 
+            assert(rpbi.framebuffer);
             vkCmdBeginRenderPass(gcb, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
 
-            vkCmdBindPipeline(gcb, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline);
+            vkCmdBindPipeline(gcb, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
             vkCmdDraw(gcb, 3, 1, 0, 0);
 
             vkCmdEndRenderPass(gcb);
@@ -797,31 +336,6 @@ bool RendererVK::doInit(const Config& config)
     VkFenceCreateInfo fci = {};
     fci.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
     fci.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-
-    for (uint8_t i = 0; i < this->framesInFlight; i++)
-    {
-        this->swapchainImageReadySems.emplace_back();
-        this->renderCompleteSems.emplace_back();
-        this->frameCompleteFens.emplace_back();
-
-        if (vkCreateSemaphore(this->logicalDevice, &sci2, nullptr, &this->swapchainImageReadySems.back()) != VK_SUCCESS)
-        {
-            knM_logFatal("Can't create swapchian semaphore");
-            return false;
-        }
-
-        if (vkCreateSemaphore(this->logicalDevice, &sci2, nullptr, &this->renderCompleteSems.back()) != VK_SUCCESS)
-        {
-            knM_logFatal("Can't create render semaphore");
-            return false;
-        }
-
-        if (vkCreateFence(this->logicalDevice, &fci, nullptr, &this->frameCompleteFens.back()) != VK_SUCCESS)
-        {
-            knM_logFatal("Can't create frame fence");
-            return false;
-        }
-    }
 
     return true;
 }
@@ -891,24 +405,17 @@ void RendererVK::draw(
 
 void RendererVK::clear()
 {
-    if (
-        vkWaitForFences(
-            this->logicalDevice, 
-            1, 
-            &this->frameCompleteFens[this->currentInFlightFrame], 
-            VK_TRUE,
-            std::numeric_limits<uint64_t>::max()
-        ) != VK_SUCCESS
-    )
+    std::shared_ptr<vulkan::Fence> frameFence =
+        this->device->getSwapchain()->getFrameCompletedFence(this->currentInFlightFrame)
+    ;
+
+    if (!frameFence->wait())
     {
         knM_logFatal("Can't wait for frame fence");
         return;
     }
 
-    if (
-        vkResetFences(this->logicalDevice, 1, &this->frameCompleteFens[this->currentInFlightFrame])
-        != VK_SUCCESS
-    )
+    if (!frameFence->reset())
     {
         knM_logFatal("Can't reset fences");
         return;
@@ -916,56 +423,35 @@ void RendererVK::clear()
 
     uint32_t nextIdx = 0;
 
-    if (
-        vkAcquireNextImageKHR(
-            this->logicalDevice, 
-            this->swapchain, 
-            std::numeric_limits<uint64_t>::max(),
-            this->swapchainImageReadySems[this->currentInFlightFrame],
-            VK_NULL_HANDLE,
-            &nextIdx
-        ) != VK_SUCCESS
-    )
+    if (!this->device->getSwapchain()->acquireNext(&nextIdx, this->currentInFlightFrame))
     {
         knM_logFatal("Can't acquire next swapchain image");
         return;
     }
 
-    uint32_t nextCommandOffset = nextIdx + this->swapchainImageViews.size() * this->currentInFlightFrame;
+    uint32_t nextCommandOffset = this->device->getSwapchain()->getResourceOffset(nextIdx, this->currentInFlightFrame);
 
-    VkPipelineStageFlags waitMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-
-    VkSubmitInfo si = {};
-    si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-    si.commandBufferCount = 1;
-    si.pCommandBuffers = &this->graphicsCommandBuffers[nextCommandOffset];
-    si.pWaitSemaphores = &this->swapchainImageReadySems[this->currentInFlightFrame];
-    si.waitSemaphoreCount = 1;
-    si.pWaitDstStageMask = &waitMask;
-    si.signalSemaphoreCount = 1;
-    si.pSignalSemaphores = &this->renderCompleteSems[this->currentInFlightFrame];
+    vulkan::Queue::Sync sync = {};
+    sync.submitFence = frameFence;
+    sync.waitFor = this->device->getSwapchain()->getImageReadySemaphore(this->currentInFlightFrame);
+    sync.completeSignal = this->device->getSwapchain()->getRenderCompleteSemaphore(nextIdx, this->currentInFlightFrame);
     
-    if (vkQueueSubmit(this->graphQueue, 1, &si, this->frameCompleteFens[this->currentInFlightFrame]) != VK_SUCCESS)
+    if (!this->graphQueue->submit(nextCommandOffset, sync))
     {
         knM_logFatal("Can't submit graphic queue");
         return;
     }
 
-    VkPresentInfoKHR pi = {};
-    pi.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
-    pi.swapchainCount = 1;
-    pi.pSwapchains = &this->swapchain;
-    pi.pImageIndices = &nextIdx;
-    pi.waitSemaphoreCount = 1;
-    pi.pWaitSemaphores = &this->renderCompleteSems[this->currentInFlightFrame];
-
-    if (vkQueuePresentKHR(this->presQueue, &pi) != VK_SUCCESS)
+    if (!this->device->getSwapchain()->present(this->presQueue, nextIdx, sync.completeSignal))
     {
         knM_logFatal("Can't present swapchain image");
         return;
     }
 
-    this->currentInFlightFrame = (this->currentInFlightFrame + 1) % this->framesInFlight;
+    this->currentInFlightFrame = 
+        (this->currentInFlightFrame + 1) % 
+        this->device->getConfig().framesInFlight
+    ;
 }
 
 void RendererVK::flip()

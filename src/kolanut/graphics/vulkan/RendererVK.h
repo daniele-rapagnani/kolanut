@@ -1,6 +1,13 @@
 #pragma once
 
 #include "kolanut/graphics/Renderer.h"
+#include "kolanut/graphics/vulkan/utils/Instance.h"
+#include "kolanut/graphics/vulkan/utils/PhysicalDevice.h"
+#include "kolanut/graphics/vulkan/utils/Device.h"
+#include "kolanut/graphics/vulkan/utils/Queue.h"
+#include "kolanut/graphics/vulkan/utils/RenderPass.h"
+#include "kolanut/graphics/vulkan/utils/Pipeline2D.h"
+#include "kolanut/graphics/vulkan/utils/ShaderModule.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -74,38 +81,18 @@ private:
 
     GLFWwindow* window = nullptr;
 
-    VkInstance instance = {};
+    std::shared_ptr<vulkan::Instance> instance = {};
+    std::shared_ptr<vulkan::PhysicalDevice> physicalDevice = {};
+    std::shared_ptr<vulkan::Device> device = {};
+    std::shared_ptr<vulkan::Queue> presQueue = {};
+    std::shared_ptr<vulkan::Queue> graphQueue = {};
+    std::shared_ptr<vulkan::ShaderModule> vertexShader = {};
+    std::shared_ptr<vulkan::ShaderModule> fragmentShader = {};
+    std::shared_ptr<vulkan::Pipeline2D> pipeline = {};
+
     VkSurfaceKHR surface = {};
-    VkDebugUtilsMessengerEXT messenger = {};
-    VkPhysicalDevice physicalDevice = {};
-    VkDevice logicalDevice = {};
-    VkQueue presQueue = {};
-    VkQueue graphQueue = {};
-    VkSwapchainKHR swapchain = {};
 
-    std::vector<VkImage> swapchainImages = {};
-    std::vector<VkImageView> swapchainImageViews = {};
-
-    VkShaderModule vertexShader = {};
-    VkShaderModule fragmentShader = {};
-
-    VkRenderPass renderPass = {};
-    VkPipelineLayout pipelineLayout = {};
-    VkPipeline pipeline = {};
-    VkCommandPool graphicsCmdPool = {};
-    VkCommandPool presentCmdPool = {};
-
-    uint8_t framesInFlight = 2;
     uint8_t currentInFlightFrame = 0;
-
-    std::vector<VkSemaphore> swapchainImageReadySems = {};
-    std::vector<VkSemaphore> renderCompleteSems = {};
-    std::vector<VkFence> frameCompleteFens = {};
-
-    std::vector<VkCommandBuffer> graphicsCommandBuffers = {};
-    std::vector<VkCommandBuffer> presentCommandBuffers = {};
-
-    std::vector<VkFramebuffer> framebuffers = {};
 };
 
 } // namespace graphics
