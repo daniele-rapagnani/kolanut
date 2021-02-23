@@ -3,11 +3,16 @@
 #include "kolanut/graphics/Texture.h"
 
 #include <string>
+#include <memory>
 
 namespace kola {
 namespace graphics {
 
 class RendererVK;
+
+namespace vulkan {
+class Texture;
+}
 
 class TextureVK : public Texture
 {
@@ -22,10 +27,12 @@ public:
     bool load(unsigned char* data, size_t w, size_t h);
     Sizei getSize() override;
 
+    std::shared_ptr<vulkan::Texture> getTexture() const
+    { return this->texture; }
+
 private:
     Sizei size = {};
-    unsigned char* data = nullptr;
-    bool ownsData = false;
+    std::shared_ptr<vulkan::Texture> texture = nullptr;
 };
 
 } // namespace graphics

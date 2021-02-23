@@ -84,7 +84,40 @@ std::vector<T> getVulkanListFatal(
     return out;
 }
 
+template <typename T, typename K>
+bool testFlag(T flag, K bit)
+{
+    return (flag & bit) == bit;
+}
+
 std::vector<const char*> toConstCharVec(const std::vector<std::string>& sv);
+
+template <typename T, typename ...Args>
+std::shared_ptr<T> make_init(Args... args)
+{
+    std::shared_ptr<T> inst = std::make_shared<T>();
+
+    if (!inst)
+    {
+        return nullptr;
+    }
+
+    if (!inst->init(std::forward<Args>(args)...))
+    {
+        return nullptr;
+    }
+
+    return inst;
+}
+
+template <typename T, typename ...Args>
+std::shared_ptr<T> make_init_fatal(Args... args)
+{
+    std::shared_ptr<T> i = make_init<T>(std::forward<Args>(args)...);
+    assert(i);
+    
+    return i;
+}
 
 } // namespace vulkan
 } // namespace graphics

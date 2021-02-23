@@ -103,21 +103,29 @@ bool Instance::init(const Instance::Config& config)
     }
 
     VkDebugUtilsMessengerCreateInfoEXT mci = {};
-    mci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
+    
+    VkInstanceCreateInfo ici = {};
+    ici.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
 
-    mci.messageSeverity = (
-        VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
-    );
+    if (this->config.messengerCb)
+    {
+        mci.sType = VK_STRUCTURE_TYPE_DEBUG_UTILS_MESSENGER_CREATE_INFO_EXT;
 
-    mci.messageType = (
-        VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
-        | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
-    );
+        mci.messageSeverity = (
+            VK_DEBUG_UTILS_MESSAGE_SEVERITY_INFO_BIT_EXT
+            | VK_DEBUG_UTILS_MESSAGE_SEVERITY_WARNING_BIT_EXT
+            | VK_DEBUG_UTILS_MESSAGE_SEVERITY_ERROR_BIT_EXT
+        );
 
-    mci.pfnUserCallback = onVulkanValidationLayerMessage;
+        mci.messageType = (
+            VK_DEBUG_UTILS_MESSAGE_TYPE_GENERAL_BIT_EXT
+            | VK_DEBUG_UTILS_MESSAGE_TYPE_VALIDATION_BIT_EXT
+            | VK_DEBUG_UTILS_MESSAGE_TYPE_PERFORMANCE_BIT_EXT
+        );
+
+        mci.pfnUserCallback = onVulkanValidationLayerMessage;
+        ici.pNext = &mci;
+    }
 
     VkApplicationInfo ai = {};
     ai.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -128,14 +136,11 @@ bool Instance::init(const Instance::Config& config)
     std::vector<const char*> ccExtensions = toConstCharVec(config.extensions);
     std::vector<const char*> ccLayers = toConstCharVec(config.layers);
 
-    VkInstanceCreateInfo ici = {};
-    ici.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
     ici.pApplicationInfo = &ai;
     ici.enabledExtensionCount = ccExtensions.size();
     ici.ppEnabledExtensionNames = &ccExtensions[0];
     ici.enabledLayerCount = ccLayers.size();
     ici.ppEnabledLayerNames = &ccLayers[0];
-    ici.pNext = &mci;
 
     if (vkCreateInstance(&ici, nullptr, &this->handle) != VK_SUCCESS)
     {
@@ -143,22 +148,25 @@ bool Instance::init(const Instance::Config& config)
         return false;
     }
 
-    auto createDebug = 
-        reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
-            glfwGetInstanceProcAddress(getVkHandle(), "vkCreateDebugUtilsMessengerEXT")
-        )
-    ;
-
-    if (!createDebug)
+    if (this->config.messengerCb)
     {
-        knM_logError("vkCreateDebugUtilsMessengerEXT not supported");
-        return false;
-    }
+        auto createDebug = 
+            reinterpret_cast<PFN_vkCreateDebugUtilsMessengerEXT>(
+                glfwGetInstanceProcAddress(getVkHandle(), "vkCreateDebugUtilsMessengerEXT")
+            )
+        ;
 
-    if (createDebug(getVkHandle(), &mci, nullptr, &this->messenger) != VK_SUCCESS)
-    {
-        knM_logError("Can't create debug messenger");
-        return false;
+        if (!createDebug)
+        {
+            knM_logError("vkCreateDebugUtilsMessengerEXT not supported");
+            return false;
+        }
+
+        if (createDebug(getVkHandle(), &mci, nullptr, &this->messenger) != VK_SUCCESS)
+        {
+            knM_logError("Can't create debug messenger");
+            return false;
+        }
     }
 
     return true;

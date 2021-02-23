@@ -8,6 +8,17 @@
 #include "kolanut/graphics/vulkan/utils/RenderPass.h"
 #include "kolanut/graphics/vulkan/utils/Pipeline2D.h"
 #include "kolanut/graphics/vulkan/utils/ShaderModule.h"
+#include "kolanut/graphics/vulkan/utils/Buffer.h"
+#include "kolanut/graphics/vulkan/utils/StagedBuffer.h"
+#include "kolanut/graphics/vulkan/utils/Texture.h"
+#include "kolanut/graphics/vulkan/utils/DescriptorPool.h"
+#include "kolanut/graphics/vulkan/utils/DescriptorSet.h"
+#include "kolanut/graphics/vulkan/utils/MemoryManager.h"
+#include "kolanut/graphics/vulkan/utils/CommandBuffer.h"
+#include "kolanut/graphics/vulkan/utils/GeometryBuffer.h"
+#include "kolanut/graphics/vulkan/utils/UniformsBuffer.h"
+#include "kolanut/graphics/vulkan/utils/Semaphore.h"
+#include "kolanut/graphics/vulkan/utils/Fence.h"
 
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
@@ -24,6 +35,10 @@ class RendererVK : public Renderer
 public:
     static constexpr const char* SHADER_FRAG_EXT = ".frag";
     static constexpr const char* SHADER_VERT_EXT = ".vert";
+
+    static constexpr const size_t MAX_DESC_SETS = 16384;
+    static constexpr const size_t MAX_DESC_UNIFORM_BUFFERS = 8192;
+    static constexpr const size_t MAX_DESC_IMAGE_SAMPLERS = 12384;
 
 public:
     ~RendererVK();
@@ -75,6 +90,15 @@ public:
     GLFWwindow* getWindow() const
     { return this->window; }
 
+    Vec2i getPixelResolution();
+    float getPixelsPerPoint();
+
+    std::shared_ptr<vulkan::Device> getDevice() const
+    { return this->device; }
+
+    std::shared_ptr<vulkan::Queue> getGraphicQueue() const
+    { return this->graphQueue; }
+
 private:
     Vec2f cameraPos = {};
     float cameraZoom = 1.0f;
@@ -89,10 +113,25 @@ private:
     std::shared_ptr<vulkan::ShaderModule> vertexShader = {};
     std::shared_ptr<vulkan::ShaderModule> fragmentShader = {};
     std::shared_ptr<vulkan::Pipeline2D> pipeline = {};
+    std::shared_ptr<vulkan::GeometryBuffer> geomBuffer = {};
+    std::shared_ptr<vulkan::UniformsBuffer> uniformsBuffer = {};
+    std::shared_ptr<vulkan::Texture> kitten = {};
+    std::shared_ptr<vulkan::DescriptorPool> descriptorPool = {};
+
+    std::vector<std::shared_ptr<vulkan::Semaphore>> imageReadySemaphores = {};
+    std::vector<std::shared_ptr<vulkan::Semaphore>> renderCompleteSemaphores = {};
+    std::vector<std::shared_ptr<vulkan::Fence>> frameCompletedFence = {};
+    std::vector<std::shared_ptr<vulkan::CommandBuffer>> graphCommandBuffers = {};
+    std::vector<std::shared_ptr<vulkan::DescriptorSet>> descriptorSets = {};
 
     VkSurfaceKHR surface = {};
 
     uint8_t currentInFlightFrame = 0;
+    uint32_t nextImageIdx = 0;
+
+    VkSampler sampler = {};
+
+    Config config = {};
 };
 
 } // namespace graphics

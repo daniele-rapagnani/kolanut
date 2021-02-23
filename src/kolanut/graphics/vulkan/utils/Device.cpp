@@ -81,29 +81,13 @@ bool Device::init(
         return false;
     }
 
-    this->swapchain = std::make_shared<Swapchain>();
-
-    if (!getSwapchain()->init(surface, shared_from_this(), getConfig().swapchain))
-    {
-        return false;
-    }
-
+    this->memMgr = make_init_fatal<MemoryManager>(shared_from_this());
+    this->swapchain = make_init_fatal<Swapchain>(surface, shared_from_this(), getConfig().swapchain);
+    
     for (auto& gr : this->queueGroups)
     {
         for (size_t i = 0; i < gr.second.count; i++)
         {
-            if (gr.second.configs[i].commandBuffersCount == 0)
-            {
-                // If an exact number of command buffers was not request,
-                // we allocate one for each image in the swapchain times
-                // the number of frames in fight to render.
-
-                gr.second.configs[i].commandBuffersCount = 
-                    std::max(static_cast<uint8_t>(1), this->config.framesInFlight) 
-                    * this->getSwapchain()->getImageViews().size()
-                ;
-            }
-
             QueueFamily family = gr.second.configs[i].family;
             std::vector<std::shared_ptr<Queue>>& familyQueues = this->queues[family];
 
@@ -146,15 +130,7 @@ std::shared_ptr<Queue> Device::getQueue(QueueFamily family, uint32_t index /* = 
 
 bool Device::addRenderPass(const RenderPass::Config& config)
 {
-    std::shared_ptr<RenderPass> rp = std::make_shared<RenderPass>();
-
-    if (!rp->init(shared_from_this(), config))
-    {
-        return false;
-    }
-
-    this->renderPasses.push_back(rp);
-
+    this->renderPasses.push_back(make_init_fatal<RenderPass>(shared_from_this(), config));
     return true;
 }
 

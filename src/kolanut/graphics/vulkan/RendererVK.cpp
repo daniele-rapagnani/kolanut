@@ -2,12 +2,21 @@
 #include "kolanut/graphics/vulkan/TextureVK.h"
 #include "kolanut/graphics/vulkan/FontVK.h"
 #include "kolanut/graphics/vulkan/utils/Helpers.h"
+#include "kolanut/graphics/vulkan/utils/MappedMemory.h"
+#include "kolanut/graphics/vulkan/utils/Vertex.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/DIContainer.h"
 
+#define GLM_FORCE_DEGREES
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_transform_2d.hpp>
+
+#define STB_IMAGE_IMPLEMENTATION
+#define STB_IMAGE_STATIC
+#include <stb_image.h>
 
 #include <cstring>
 #include <sstream>
@@ -59,10 +68,19 @@ void onVulkanValidationLayerMessage(
     }
 }
 
+struct ViewUniform
+{
+    Vec2f screenSize = {};
+    alignas(16) glm::mat4 transform { 1.0f };
+    alignas(16) glm::mat4 camera { 1.0f };
+};
+
 } // namespace 
 
 bool RendererVK::doInit(const Config& config)
 {
+    this->config = config;
+
     knM_logDebug("Initilizing Vulkan renderer");
 
     if (!glfwInit())
@@ -116,10 +134,10 @@ bool RendererVK::doInit(const Config& config)
 
     vulkan::Instance::Config instConf = {};
     instConf.appName = config.windowTitle;
-    instConf.layers.push_back("VK_LAYER_KHRONOS_validation");
-    instConf.extensions.push_back("VK_EXT_debug_utils");
+    //instConf.layers.push_back("VK_LAYER_KHRONOS_validation");
+    //instConf.extensions.push_back("VK_EXT_debug_utils");
     instConf.extensions.push_back("VK_KHR_get_physical_device_properties2");
-    instConf.messengerCb = onVulkanValidationLayerMessage;
+    // instConf.messengerCb = onVulkanValidationLayerMessage;
 
     std::copy(
         glfwExtensions, 
@@ -127,12 +145,8 @@ bool RendererVK::doInit(const Config& config)
         std::back_inserter(instConf.extensions)
     );
 
-    this->instance = std::make_shared<vulkan::Instance>();
-
-    if (!this->instance->init(instConf))
-    {
-        return false;
-    }
+    this->instance = vulkan::make_init_fatal<vulkan::Instance>(instConf);
+    assert(this->instance);
 
     if (
         glfwCreateWindowSurface(this->instance->getVkHandle(), this->window, nullptr, &this->surface)
@@ -178,6 +192,8 @@ bool RendererVK::doInit(const Config& config)
     }
 
     vulkan::Device::Config devConfig = {};
+
+    devConfig.framesInFlight = 1;
     devConfig.extensions.push_back("VK_KHR_swapchain");
     
     if (this->physicalDevice->isExtensionSupported("VK_KHR_portability_subset"))
@@ -196,12 +212,8 @@ bool RendererVK::doInit(const Config& config)
         devConfig.queues.push_back(queueConfig);
     }
 
-    this->device = std::make_shared<vulkan::Device>();
-
-    if (!this->device->init(this->physicalDevice,this->surface, devConfig))
-    {
-        return false;
-    }
+    this->device = vulkan::make_init_fatal<vulkan::Device>(this->physicalDevice,this->surface, devConfig);
+    assert(this->device);
 
     this->presQueue = this->device->getQueue(presentationQueueFamilyIdx);
     this->graphQueue = (presentationQueueFamilyIdx != graphicsQueueFamilyIdx)
@@ -209,31 +221,51 @@ bool RendererVK::doInit(const Config& config)
         : this->presQueue
     ;
 
-    this->vertexShader = std::make_shared<vulkan::ShaderModule>();
-
-    if (
-        !this->vertexShader->init(
-            this->device,
-            di::get<filesystem::FilesystemEngine>(),
-            "assets/mainv.svert"
+    if (!
+        this->graphQueue->createCommandBuffers(
+            this->graphCommandBuffers, 
+            this->device->getConfig().framesInFlight
         )
     )
     {
-        knM_logFatal("Can't create main vertex shader");
+        knM_logFatal("Can't create graphic command buffers");
         return false;
     }
 
-    this->fragmentShader = std::make_shared<vulkan::ShaderModule>();
+    this->vertexShader = vulkan::make_init_fatal<vulkan::ShaderModule>(
+        this->device,
+        di::get<filesystem::FilesystemEngine>(),
+        "assets/mainv.svert"
+    );
 
-    if (
-        !this->fragmentShader->init(
-            this->device,
-            di::get<filesystem::FilesystemEngine>(),
-            "assets/mainv.sfrag"
-        )
-    )
+    assert(this->vertexShader);
+
+    this->fragmentShader = vulkan::make_init_fatal<vulkan::ShaderModule>(
+        this->device,
+        di::get<filesystem::FilesystemEngine>(),
+        "assets/mainv.sfrag"
+    );
+
+    assert(this->fragmentShader);
+
+    VkSamplerCreateInfo sci = {};
+    sci.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
+    sci.minFilter = VK_FILTER_NEAREST;
+    sci.magFilter = VK_FILTER_NEAREST;
+    sci.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+    sci.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sci.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sci.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
+    sci.mipLodBias = 0.0f;
+    sci.anisotropyEnable = VK_FALSE;
+    sci.compareEnable = VK_FALSE;
+    sci.compareOp = VK_COMPARE_OP_ALWAYS;
+    sci.borderColor = VK_BORDER_COLOR_FLOAT_TRANSPARENT_BLACK;
+    sci.unnormalizedCoordinates = VK_FALSE;
+
+    if (vkCreateSampler(this->device->getVkHandle(), &sci, nullptr, &this->sampler) != VK_SUCCESS)
     {
-        knM_logFatal("Can't create main fragment shader");
+        knM_logFatal("Can't create texture sampler");
         return false;
     }
 
@@ -263,6 +295,19 @@ bool RendererVK::doInit(const Config& config)
         return false;
     }
 
+    {
+        vulkan::GeometryBuffer::Config c = {};
+        c.maxFrames = this->device->getConfig().framesInFlight;
+        this->geomBuffer = vulkan::make_init_fatal<vulkan::GeometryBuffer>(this->device, c);
+    }
+
+    {
+        vulkan::UniformsBuffer::Config c = {};
+        c.maxSets = MAX_DESC_SETS;
+
+        this->uniformsBuffer = vulkan::make_init_fatal<vulkan::UniformsBuffer>(this->device, c);
+    }
+
     this->device->getSwapchain()->initFramebuffers(this->device->getRenderPasses().back());
 
     VkSurfaceCapabilitiesKHR sc = this->physicalDevice->getSurfaceCapabilities(this->surface);
@@ -274,82 +319,54 @@ bool RendererVK::doInit(const Config& config)
     p2dConf.viewportWidth = sc.currentExtent.width;
     p2dConf.viewportHeight = sc.currentExtent.height;
 
-    this->pipeline = std::make_shared<vulkan::Pipeline2D>();
+    this->pipeline = vulkan::make_init_fatal<vulkan::Pipeline2D>(this->device, p2dConf);
 
-    if (!this->pipeline->init(this->device, p2dConf))
     {
-        return false;
+        vulkan::DescriptorPool::Config poolConfig = {};
+        poolConfig.maxSets = MAX_DESC_SETS * this->device->getConfig().framesInFlight;
+
+        poolConfig.sizes.push_back({ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, MAX_DESC_UNIFORM_BUFFERS });
+        poolConfig.sizes.push_back({ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, MAX_DESC_IMAGE_SAMPLERS });
+
+        this->descriptorPool = vulkan::make_init_fatal<vulkan::DescriptorPool>(this->device, poolConfig);
     }
 
-    for (auto it = this->device->getSwapchain()->getImageViews().cbegin(); it != this->device->getSwapchain()->getImageViews().cend(); ++it)
+    for (size_t frame = 0; frame < device->getConfig().framesInFlight; frame++)
     {
-        for (uint8_t frame = 0; frame < this->device->getConfig().framesInFlight; frame++)
-        {
-            size_t idx = std::distance(this->device->getSwapchain()->getImageViews().cbegin(), it);
-            size_t offset = this->device->getSwapchain()->getResourceOffset(idx, frame);
-
-            VkCommandBuffer gcb = this->graphQueue->getCommandBuffers()[offset];
-            VkCommandBuffer pcb = this->presQueue->getCommandBuffers()[offset];
-    
-            VkCommandBufferBeginInfo cbbi = {};
-            cbbi.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-
-            if (vkBeginCommandBuffer(gcb, &cbbi) != VK_SUCCESS)
-            {
-                knM_logFatal("Can't begin graphics command buffer");
-                return false;
-            }
-
-            VkClearValue cv = {};
-            cv.color.float32[0] = 0.0f;
-            cv.color.float32[1] = 0.0f;
-            cv.color.float32[2] = 0.0f;
-            cv.color.float32[3] = 1.0f;
-
-            VkRenderPassBeginInfo rpbi = {};
-            rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
-            rpbi.renderPass = this->device->getRenderPasses().back()->getVkHandle();
-            rpbi.framebuffer = this->device->getSwapchain()->getFramebuffer(idx, frame);
-            rpbi.renderArea.extent = sc.currentExtent;
-            rpbi.clearValueCount = 1;
-            rpbi.pClearValues = &cv;
-
-            assert(rpbi.framebuffer);
-            vkCmdBeginRenderPass(gcb, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
-
-            vkCmdBindPipeline(gcb, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
-            vkCmdDraw(gcb, 3, 1, 0, 0);
-
-            vkCmdEndRenderPass(gcb);
-            
-            if (vkEndCommandBuffer(gcb) != VK_SUCCESS)
-            {
-                knM_logFatal("Can't end graphics command buffer");
-                return false;
-            }
-        }
+        this->imageReadySemaphores.push_back(vulkan::make_init_fatal<vulkan::Semaphore>(device));
+        this->frameCompletedFence.push_back(vulkan::make_init_fatal<vulkan::Fence>(device, true));
+        this->renderCompleteSemaphores.push_back(vulkan::make_init_fatal<vulkan::Semaphore>(device));
     }
-
-    VkSemaphoreCreateInfo sci2 = {};
-    sci2.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-
-    VkFenceCreateInfo fci = {};
-    fci.sType = VK_STRUCTURE_TYPE_FENCE_CREATE_INFO;
-    fci.flags = VK_FENCE_CREATE_SIGNALED_BIT;
 
     return true;
 }
 
 std::shared_ptr<Texture> RendererVK::loadTexture(const std::string& file)
 {
-    return nullptr;
+    knM_logDebug("Loading texture: " << file);
+    
+    std::shared_ptr<TextureVK> texture = std::make_shared<TextureVK>();
+    
+    if (!texture->load(file))
+    {
+        return nullptr;
+    }
+
+    return std::static_pointer_cast<Texture>(texture);
 }
 
 std::shared_ptr<Font> RendererVK::loadFont(const std::string& file, size_t size)
 {
     knM_logDebug("Loading font: " << file);
 
-    return nullptr;
+    std::shared_ptr<FontVK> font = std::make_shared<FontVK>();
+    
+    if (!font->load(file, size))
+    {
+        return nullptr;
+    }
+
+    return std::static_pointer_cast<Font>(font);
 }
 
 void RendererVK::draw(
@@ -384,6 +401,86 @@ void RendererVK::draw(
 )
 {
     assert(t);
+
+    auto ds = this->descriptorPool->allocateSet(this->pipeline->descriptorSetLayout);
+    assert(ds);
+
+    this->descriptorSets.push_back(ds);
+
+    std::shared_ptr<TextureVK> vkt = std::static_pointer_cast<TextureVK>(t);
+
+    Sizei s = vkt->getSize();
+
+    Rectf tcRect = { 
+        rect.x / static_cast<float>(s.x), 
+        rect.y / static_cast<float>(s.y),
+        0.0f,
+        0.0f
+    };
+    
+    tcRect.z = tcRect.x + (rect.z / static_cast<float>(s.x));
+    tcRect.w = tcRect.y + (rect.w / static_cast<float>(s.y));
+
+    std::vector<vulkan::Vertex> vertices = {
+        { Vec2f { 0.0f, 0.0f }, { tcRect.x, tcRect.y }, color },
+        { Vec2f { 0.0f, rect.w }, { tcRect.x, tcRect.w }, color },
+        { Vec2f { rect.z, 0.0f }, { tcRect.z, tcRect.y }, color },
+        { Vec2f { rect.z, 0.0f }, { tcRect.z, tcRect.y }, color },
+        { Vec2f { 0.0f, rect.w }, { tcRect.x, tcRect.w }, color },
+        { Vec2f { rect.z, rect.w }, { tcRect.z, tcRect.w }, color },
+    };
+
+    vulkan::GeometryBuffer::Handle h = this->geomBuffer->addVertices(vertices, this->currentInFlightFrame);
+
+    ViewUniform vu = {};
+    vu.screenSize.x = getDesignResolution().x;
+    vu.screenSize.y = getDesignResolution().y;
+
+    // T * S * R * O, outer comes first
+    vu.transform = glm::translate(
+        glm::rotate(
+            glm::scale(
+                glm::translate(
+                    vu.transform,
+                    glm::vec3 { position.x, position.y, 0.0f }
+                ),
+                glm::vec3 { scale.x, scale.y, 0.0f }
+            ),
+            static_cast<float>(angle * (M_PI / 180.0)),
+            glm::vec3 { 0.0f, 0.0f, 1.0f }
+        ),
+        glm::vec3 { -origin.x, -origin.y, 0.0f }
+    );
+
+    vu.camera = glm::translate(
+        glm::scale(
+            vu.camera,
+            glm::vec3 {
+                getPixelsPerPoint() * this->cameraZoom,
+                getPixelsPerPoint() * this->cameraZoom,
+                1.0f
+            }
+        ),
+        glm::vec3 {
+            -this->cameraPos.x, 
+            -this->cameraPos.y,
+            0.0f
+        }
+    );
+
+    vulkan::UniformsBuffer::Handle uh = 
+        this->uniformsBuffer->addUniform(&vu, sizeof(vu), this->currentInFlightFrame)
+    ;
+
+    vkt->getTexture()->use(this->sampler, ds, 1);
+    this->uniformsBuffer->bind(uh, ds, 2);
+
+    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
+    VkCommandBuffer b = gcb->getVkHandle();
+    vkCmdBindPipeline(b, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
+    ds->bind(b, this->pipeline->layout, VK_PIPELINE_BIND_POINT_GRAPHICS);
+    this->geomBuffer->bind(h, gcb);
+    vkCmdDraw(b, vertices.size(), 1, 0, 0);
 }
 
 void RendererVK::draw(
@@ -405,9 +502,12 @@ void RendererVK::draw(
 
 void RendererVK::clear()
 {
-    std::shared_ptr<vulkan::Fence> frameFence =
-        this->device->getSwapchain()->getFrameCompletedFence(this->currentInFlightFrame)
-    ;
+    this->descriptorPool->reset();
+    this->descriptorSets.clear();
+    this->geomBuffer->reset(this->currentInFlightFrame);
+    this->uniformsBuffer->reset(this->currentInFlightFrame);
+
+    std::shared_ptr<vulkan::Fence> frameFence = this->frameCompletedFence[this->currentInFlightFrame];
 
     if (!frameFence->wait())
     {
@@ -421,28 +521,66 @@ void RendererVK::clear()
         return;
     }
 
-    uint32_t nextIdx = 0;
-
-    if (!this->device->getSwapchain()->acquireNext(&nextIdx, this->currentInFlightFrame))
+    if (
+        !this->device->getSwapchain()->acquireNext(
+            &this->nextImageIdx, 
+            this->imageReadySemaphores[this->currentInFlightFrame]
+        )
+    )
     {
         knM_logFatal("Can't acquire next swapchain image");
         return;
     }
 
-    uint32_t nextCommandOffset = this->device->getSwapchain()->getResourceOffset(nextIdx, this->currentInFlightFrame);
+    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
+    gcb->begin();
+
+    VkCommandBuffer b = gcb->getVkHandle();
+
+    VkClearValue cv = {};
+    cv.color.float32[0] = 0.0f;
+    cv.color.float32[1] = 0.0f;
+    cv.color.float32[2] = 0.0f;
+    cv.color.float32[3] = 1.0f;
+
+    VkSurfaceCapabilitiesKHR sc = this->physicalDevice->getSurfaceCapabilities(this->surface);
+
+    VkRenderPassBeginInfo rpbi = {};
+    rpbi.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
+    rpbi.renderPass = this->device->getRenderPasses().back()->getVkHandle();
+    rpbi.framebuffer = this->device->getSwapchain()->getFramebuffer(
+        this->nextImageIdx, 
+        this->currentInFlightFrame
+    );
+
+    rpbi.renderArea.extent = sc.currentExtent;
+    rpbi.clearValueCount = 1;
+    rpbi.pClearValues = &cv;
+
+    assert(rpbi.framebuffer);
+
+    vkCmdBeginRenderPass(b, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
+}
+
+void RendererVK::flip()
+{
+    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
+    vkCmdEndRenderPass(gcb->getVkHandle());
+
+    gcb->end();
 
     vulkan::Queue::Sync sync = {};
-    sync.submitFence = frameFence;
-    sync.waitFor = this->device->getSwapchain()->getImageReadySemaphore(this->currentInFlightFrame);
-    sync.completeSignal = this->device->getSwapchain()->getRenderCompleteSemaphore(nextIdx, this->currentInFlightFrame);
+    sync.submitFence = this->frameCompletedFence[this->currentInFlightFrame];
+    sync.waitFor = this->imageReadySemaphores[this->currentInFlightFrame];
+    sync.completeSignal = this->renderCompleteSemaphores[this->currentInFlightFrame];
     
-    if (!this->graphQueue->submit(nextCommandOffset, sync))
+    if (!this->graphQueue->submit(this->graphCommandBuffers[this->currentInFlightFrame], sync))
     {
         knM_logFatal("Can't submit graphic queue");
         return;
     }
 
-    if (!this->device->getSwapchain()->present(this->presQueue, nextIdx, sync.completeSignal))
+    if (!this->device->getSwapchain()->present(this->presQueue, this->nextImageIdx, sync.completeSignal))
     {
         knM_logFatal("Can't present swapchain image");
         return;
@@ -452,11 +590,6 @@ void RendererVK::clear()
         (this->currentInFlightFrame + 1) % 
         this->device->getConfig().framesInFlight
     ;
-}
-
-void RendererVK::flip()
-{
-    assert(this->window);
 }
 
 void RendererVK::setCameraPosition(const Vec2f& pos)
@@ -487,6 +620,26 @@ Vec2i RendererVK::getResolution()
     glfwGetWindowSize(this->window, &w, &h);
 
     return { w, h };
+}
+
+Vec2i RendererVK::getPixelResolution()
+{
+    assert(this->physicalDevice);
+    assert(this->device);
+
+    auto sc =
+        this->physicalDevice->getSurfaceCapabilities(this->device->getSwapchain()->getSurface())
+    ;
+
+    return { sc.currentExtent.width, sc.currentExtent.height };
+}
+
+float RendererVK::getPixelsPerPoint()
+{
+    Vec2i r = getResolution();
+    Vec2i pr = getPixelResolution();
+
+    return pr.x / r.x;
 }
 
 } // namespace graphics

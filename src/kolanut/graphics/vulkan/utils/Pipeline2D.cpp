@@ -1,5 +1,6 @@
 #include "kolanut/graphics/vulkan/utils/Pipeline2D.h"
 #include "kolanut/graphics/vulkan/utils/Device.h"
+#include "kolanut/graphics/vulkan/utils/Vertex.h"
 #include "kolanut/graphics/vulkan/utils/Helpers.h"
 
 #include <cassert>
@@ -41,11 +42,41 @@ bool Pipeline2D::init(
     paci.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     paci.primitiveRestartEnable = VK_FALSE;
 
+    VkVertexInputAttributeDescription viad[3] = {};
+    viad[0].offset = offsetof(Vertex, pos);
+    viad[0].location = 0;
+    viad[0].binding = 0;
+    viad[0].format = VK_FORMAT_R32G32_SFLOAT;
+
+    viad[1].offset = offsetof(Vertex, uv);
+    viad[1].location = 1;
+    viad[1].binding = 0;
+    viad[1].format = VK_FORMAT_R32G32_SFLOAT;
+    
+    viad[2].offset = offsetof(Vertex, color);
+    viad[2].location = 2;
+    viad[2].binding = 0;
+    viad[2].format = VK_FORMAT_R32G32B32A32_SFLOAT;
+
+    VkVertexInputBindingDescription vibd = {};
+    vibd.binding = 0;
+    vibd.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+    vibd.stride = sizeof(Vertex);
+
     VkPipelineVertexInputStateCreateInfo pvisci = {};
     pvisci.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
+    pvisci.pVertexAttributeDescriptions = viad;
+    pvisci.pVertexBindingDescriptions = &vibd;
+    pvisci.vertexAttributeDescriptionCount = 3;
+    pvisci.vertexBindingDescriptionCount = 1;
 
     VkPipelineColorBlendAttachmentState pcbas = {};
-    pcbas.blendEnable = VK_FALSE;
+    pcbas.blendEnable = VK_TRUE;
+    pcbas.srcAlphaBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    pcbas.dstAlphaBlendFactor = VK_BLEND_FACTOR_DST_ALPHA;
+    pcbas.srcColorBlendFactor = VK_BLEND_FACTOR_SRC_ALPHA;
+    pcbas.dstColorBlendFactor = VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA;
+
     pcbas.colorWriteMask = 
         VK_COLOR_COMPONENT_R_BIT 
         | VK_COLOR_COMPONENT_G_BIT
@@ -80,8 +111,44 @@ bool Pipeline2D::init(
     pvsci.scissorCount = 1;
     pvsci.pScissors = &scissoring;
 
+    VkDescriptorSetLayoutBinding dslb[3] = {};
+    
+    dslb[0].binding = 0;
+    dslb[0].descriptorCount = 1;
+    dslb[0].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    dslb[0].stageFlags = VK_SHADER_STAGE_VERTEX_BIT;
+
+    dslb[1].binding = 1;
+    dslb[1].descriptorCount = 1;
+    dslb[1].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+    dslb[1].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+
+    dslb[2].binding = 2;
+    dslb[2].descriptorCount = 1;
+    dslb[2].descriptorType = VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER;
+    dslb[2].stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT | VK_SHADER_STAGE_VERTEX_BIT;
+
+    VkDescriptorSetLayoutCreateInfo dslci = {};
+    dslci.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+    dslci.pBindings = dslb;
+    dslci.bindingCount = sizeof(dslb) / sizeof(VkDescriptorSetLayoutBinding);
+
+    if (
+        vkCreateDescriptorSetLayout(
+            device->getVkHandle(), 
+            &dslci, 
+            nullptr, 
+            &this->descriptorSetLayout
+        ) != VK_SUCCESS)
+    {
+        knM_logFatal("Can't create descriptor set layout");
+        return false;
+    }
+
     VkPipelineLayoutCreateInfo plci = {};
     plci.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
+    plci.setLayoutCount = 1;
+    plci.pSetLayouts = &this->descriptorSetLayout;
     
     if (vkCreatePipelineLayout(device->getVkHandle(), &plci, nullptr, &this->layout) != VK_SUCCESS)
     {

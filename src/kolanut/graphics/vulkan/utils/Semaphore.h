@@ -12,7 +12,9 @@ namespace kola {
 namespace graphics {
 namespace vulkan {
 
-class Semaphore : public VkHandle<VkSemaphore>, DeviceDependent
+class Semaphore : 
+    public VkHandle<VkSemaphore>, 
+    public DeviceDependent
 {
 public:
     bool init(std::shared_ptr<Device> device);

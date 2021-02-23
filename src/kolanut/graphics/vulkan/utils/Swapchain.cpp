@@ -136,42 +136,6 @@ bool Swapchain::init(
         }
     }
 
-    for (size_t frame = 0; frame < device->getConfig().framesInFlight; frame++)
-    {   
-        std::shared_ptr<Semaphore> s = std::make_shared<Semaphore>();
-
-        if (!s->init(device))
-        {
-            knM_logFatal("Can't create image ready seamphore for swapchain image frame #" << frame);
-            return false;
-        }
-
-        this->imageReadySemaphores.push_back(s);
-
-        std::shared_ptr<Fence> f = std::make_shared<Fence>();
-
-        if (!f->init(device, true))
-        {
-            knM_logFatal("Can't create frame ready fence for frame #" << frame);
-            return false;
-        }
-
-        this->frameCompletedFence.push_back(f);
-
-        for (auto it = getImageViews().cbegin(); it != getImageViews().cend(); ++it)
-        {
-            std::shared_ptr<Semaphore> renderComplete = std::make_shared<Semaphore>();
-
-            if (!renderComplete->init(device))
-            {
-                knM_logFatal("Can't create render complete semaphore #" << frame);
-                return false;
-            }
-
-            this->renderCompleteSemaphores.push_back(renderComplete);
-        }
-    }
-
     this->device = device;
     this->config = config;
     this->surface = surface;
@@ -216,110 +180,27 @@ bool Swapchain::initFramebuffers(std::shared_ptr<RenderPass> renderPass)
     return true;
 }
 
-namespace {
-
-template <typename T, typename K>
-struct ItemGetter
-{
-    static K returnItem(const std::vector<T>& vec, typename std::vector<T>::size_type i)
-        = delete
-    ;
-};
-
-template <typename T>
-struct ItemGetter<T, T>
-{
-    static T returnItem(const std::vector<T>& vec, typename std::vector<T>::size_type i)
-    {
-        return vec[i];
-    }
-};
-
-template <typename T>
-struct ItemGetter<T, const T*>
-{
-    static const T* returnItem(const std::vector<T>& vec, typename std::vector<T>::size_type i)
-    {
-        return &vec[i];
-    }
-};
-
-template <typename T, typename K = T>
-K getOffsetedResource(
-    const Swapchain* sc, 
-    const std::vector<T>& vec, 
-    uint32_t index, 
-    uint8_t frame
-)
-{
-    if (frame >= sc->getDevice()->getConfig().framesInFlight)
-    {
-        return VK_NULL_HANDLE;
-    }
-
-    if (index >= vec.size())
-    {
-        return VK_NULL_HANDLE;
-    }
-
-    return ItemGetter<T,K>::returnItem(vec, sc->getResourceOffset(index, frame));
-}
-
-} // namespace
-
 VkFramebuffer Swapchain::getFramebuffer(uint32_t index, uint8_t frame /* = 0 */) const
 {
-    return getOffsetedResource<VkFramebuffer>(
-        this, 
+    return getImageDependentResource<VkFramebuffer>(
         this->imageFramebuffers, 
         index, 
         frame
     );
 }
 
-std::shared_ptr<Semaphore> Swapchain::getRenderCompleteSemaphore(
-    uint32_t index, 
-    uint8_t frame /* = 0 */
+bool Swapchain::acquireNext(
+    uint32_t* next, 
+    std::shared_ptr<Semaphore> imageReady
 ) const
 {
-    return getOffsetedResource<std::shared_ptr<Semaphore>>(
-        this, 
-        this->renderCompleteSemaphores, 
-        index, 
-        frame
-    );
-}
-
-std::shared_ptr<Semaphore> Swapchain::getImageReadySemaphore(uint8_t frame) const
-{
-    if (frame >= this->imageReadySemaphores.size())
-    {
-        return nullptr;
-    }
-
-    return this->imageReadySemaphores[frame];
-}
-
-std::shared_ptr<Fence> Swapchain::getFrameCompletedFence(uint8_t frame) const
-{
-    if (frame >= this->frameCompletedFence.size())
-    {
-        return nullptr;
-    }
-
-    return this->frameCompletedFence[frame];
-}
-
-bool Swapchain::acquireNext(uint32_t* next, uint8_t frame) const
-{
     assert(next);
-    assert(frame < getDevice()->getConfig().framesInFlight);
 
     return vkAcquireNextImageKHR(
         getDevice()->getVkHandle(),
         getVkHandle(), 
         std::numeric_limits<uint64_t>::max(),
-        getImageReadySemaphore(frame)->getVkHandle(),
+        imageReady->getVkHandle(),
         VK_NULL_HANDLE,
         next
     ) == VK_SUCCESS;

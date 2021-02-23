@@ -13,7 +13,9 @@ namespace kola {
 namespace graphics {
 namespace vulkan {
 
-class Fence : public VkHandle<VkFence>, DeviceDependent
+class Fence : 
+    public VkHandle<VkFence>
+    , public DeviceDependent
 {
 public:
     bool init(std::shared_ptr<Device> device, bool signaled = false);

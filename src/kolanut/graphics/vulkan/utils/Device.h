@@ -9,6 +9,7 @@
 #include "kolanut/graphics/vulkan/utils/Queue.h"
 #include "kolanut/graphics/vulkan/utils/Swapchain.h"
 #include "kolanut/graphics/vulkan/utils/RenderPass.h"
+#include "kolanut/graphics/vulkan/utils/MemoryManager.h"
 
 #include <vulkan/vulkan.h>
 
@@ -64,6 +65,9 @@ public:
     std::shared_ptr<Swapchain> getSwapchain() const
     { return this->swapchain; }
 
+    std::shared_ptr<MemoryManager> getMemoryManager() const
+    { return this->memMgr; }
+
     const Config& getConfig() const
     { return this->config; }
 
@@ -73,6 +77,7 @@ private:
     std::unordered_map<uint32_t, std::vector<std::shared_ptr<Queue>>> queues = {};
 
     std::shared_ptr<PhysicalDevice> physicalDevice = {};
+    std::shared_ptr<MemoryManager> memMgr = {};
     std::vector<std::shared_ptr<RenderPass>> renderPasses = {};
     std::shared_ptr<Swapchain> swapchain = {};
 };

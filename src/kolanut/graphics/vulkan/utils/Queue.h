@@ -5,6 +5,7 @@
 #include "kolanut/graphics/vulkan/utils/DeviceDependent.h"
 #include "kolanut/graphics/vulkan/utils/Semaphore.h"
 #include "kolanut/graphics/vulkan/utils/Fence.h"
+#include "kolanut/graphics/vulkan/utils/CommandBuffer.h"
 
 #include <cstdint>
 #include <vector>
@@ -24,7 +25,6 @@ public:
     {
         QueueFamily family = {};
         float priority = 0.0f;
-        size_t commandBuffersCount = 0;
     };
 
     struct Sync
@@ -47,18 +47,19 @@ public:
     ~Queue();
 
     bool submit(
-        uint32_t commandBufferIdx,
+        std::shared_ptr<CommandBuffer> commandBuffer,
         const Sync& sync = {}
     );
+
+    bool createCommandBuffers(std::vector<std::shared_ptr<CommandBuffer>>& buffers, size_t count);
+
+    bool submitOneShot(CommandBuffer::Runner r);
 
     QueueFamily getFamily() const
     { return this->config.family; }
 
     VkCommandPool getCommandPool() const
     { return this->commandPool; }
-
-    const std::vector<VkCommandBuffer>& getCommandBuffers() const
-    { return this->commandBuffers; }
 
     const Config& getConfig() const
     { return this->config; }
@@ -73,7 +74,6 @@ private:
     Config config = {};
     
     VkCommandPool commandPool;
-    std::vector<VkCommandBuffer> commandBuffers;
 };
 
 } // namespace vulkan

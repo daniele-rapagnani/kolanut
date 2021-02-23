@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <cstdint>
+#include <cassert>
 
 namespace kola {
 namespace graphics {
@@ -20,6 +21,33 @@ class Swapchain
     : public VkHandle<VkSwapchainKHR>
     , public DeviceDependent
 {
+private:
+    template <typename T, typename K>
+    struct ItemGetter
+    {
+        static K returnItem(const std::vector<T>& vec, typename std::vector<T>::size_type i)
+            = delete
+        ;
+    };
+
+    template <typename T>
+    struct ItemGetter<T, T>
+    {
+        static T returnItem(const std::vector<T>& vec, typename std::vector<T>::size_type i)
+        {
+            return vec[i];
+        }
+    };
+
+    template <typename T>
+    struct ItemGetter<T, const T*>
+    {
+        static const T* returnItem(const std::vector<T>& vec, typename std::vector<T>::size_type i)
+        {
+            return &vec[i];
+        }
+    };
+
 public:
     struct Config
     {
@@ -53,16 +81,26 @@ public:
     { return this->imageViews; }
 
     VkFramebuffer getFramebuffer(uint32_t index, uint8_t frame = 0) const;
-    std::shared_ptr<Semaphore> getImageReadySemaphore(uint8_t frame) const;
-    std::shared_ptr<Semaphore> getRenderCompleteSemaphore(uint32_t index, uint8_t frame = 0) const;
-    std::shared_ptr<Fence> getFrameCompletedFence(uint8_t frame) const;
 
-    inline size_t getResourceOffset(uint32_t index, uint8_t frame) const
+    inline size_t getImageDependentOffset(uint32_t index, uint8_t frame) const
     { 
         return frame * getImageViews().size() + index;
     }
 
-    bool acquireNext(uint32_t* next, uint8_t frame) const;
+    template <typename T, typename K = T>
+    K getImageDependentResource(
+        const std::vector<T>& vec, 
+        uint32_t index, 
+        uint8_t frame
+    ) const
+    {
+        return ItemGetter<T,K>::returnItem(vec, getImageDependentOffset(index, frame));
+    }
+
+    bool acquireNext(
+        uint32_t* next, 
+        std::shared_ptr<Semaphore> imageReady
+    ) const;
 
     bool present(
         std::shared_ptr<Queue> queue, 
@@ -74,9 +112,6 @@ protected:
     const std::vector<VkFramebuffer>& getFramebuffers() const
     { return this->imageFramebuffers; }
 
-    const std::vector<std::shared_ptr<Semaphore>>& getImageReadySemaphores() const
-    { return this->imageReadySemaphores; }
-
 private:
     Config config = {};
     VkSurfaceKHR surface = VK_NULL_HANDLE;
@@ -84,10 +119,6 @@ private:
     std::vector<VkImage> images = {};
     std::vector<VkImageView> imageViews = {};
     std::vector<VkFramebuffer> imageFramebuffers = {};
-
-    std::vector<std::shared_ptr<Semaphore>> imageReadySemaphores = {};
-    std::vector<std::shared_ptr<Semaphore>> renderCompleteSemaphores = {};
-    std::vector<std::shared_ptr<Fence>> frameCompletedFence = {};
 };
 
 } // namespace vulkan

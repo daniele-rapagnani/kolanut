@@ -76,6 +76,15 @@ set(
     src/kolanut/graphics/vulkan/utils/Queue.cpp
     src/kolanut/graphics/vulkan/utils/Semaphore.cpp
     src/kolanut/graphics/vulkan/utils/Fence.cpp
+    src/kolanut/graphics/vulkan/utils/MemoryManager.cpp
+    src/kolanut/graphics/vulkan/utils/CommandBuffer.cpp
+    src/kolanut/graphics/vulkan/utils/Buffer.cpp
+    src/kolanut/graphics/vulkan/utils/Texture.cpp
+    src/kolanut/graphics/vulkan/utils/DescriptorPool.cpp
+    src/kolanut/graphics/vulkan/utils/DescriptorSet.cpp
+    src/kolanut/graphics/vulkan/utils/StagedBuffer.cpp
+    src/kolanut/graphics/vulkan/utils/GeometryBuffer.cpp
+    src/kolanut/graphics/vulkan/utils/UniformsBuffer.cpp
 
     src/kolanut/graphics/Font.cpp
     src/kolanut/events/sdl/EventSystemSDL.cpp

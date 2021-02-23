@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kolanut/core/Types.h"
 #include "kolanut/graphics/vulkan/utils/ShaderModule.h"
 #include "kolanut/graphics/vulkan/utils/Pipeline.h"
 #include "kolanut/graphics/vulkan/utils/RenderPass.h"
@@ -35,9 +36,11 @@ public:
     const Config& getConfig() const
     { return this->config; }
 
+    VkDescriptorSetLayout descriptorSetLayout = VK_NULL_HANDLE;
+    VkPipelineLayout layout = VK_NULL_HANDLE;
+
 private:
     Config config = {};
-    VkPipelineLayout layout = VK_NULL_HANDLE;
 };
 
 } // namespace vulkan

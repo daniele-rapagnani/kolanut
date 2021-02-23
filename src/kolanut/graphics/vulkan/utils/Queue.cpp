@@ -8,18 +8,6 @@ namespace vulkan {
 
 Queue::~Queue()
 {
-    if (!this->commandBuffers.empty())
-    {
-        vkFreeCommandBuffers(
-            this->device->getVkHandle(), 
-            this->commandPool,
-            this->commandBuffers.size(),
-            &this->commandBuffers[0]
-        );
-
-        this->commandBuffers.clear();
-    }
-
     if (this->commandPool != VK_NULL_HANDLE)
     {
         vkDestroyCommandPool(this->device->getVkHandle(), this->commandPool, nullptr);
@@ -44,43 +32,36 @@ bool Queue::init(
         return false;
     }
 
-    VkCommandBufferAllocateInfo cbai = {};
-    cbai.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-    cbai.commandBufferCount = config.commandBuffersCount;
-    cbai.commandPool = this->commandPool;
-    cbai.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+    return true;
+}
 
-    this->commandBuffers.resize(cbai.commandBufferCount);
-
-    if (vkAllocateCommandBuffers(this->device->getVkHandle(), &cbai, &this->commandBuffers[0]) != VK_SUCCESS)
+bool Queue::createCommandBuffers(std::vector<std::shared_ptr<CommandBuffer>>& buffers, size_t count)
+{
+    for (uint32_t i = 0; i < count; i++)
     {
-        knM_logFatal(
-            "Can't create " 
-            << cbai.commandBufferCount 
-            << " command buffers for family: " 
-            << config.family.index
-        );
-
-        return false;
+        buffers.push_back(make_init_fatal<CommandBuffer>(
+            getDevice(), 
+            getCommandPool(), 
+            VK_COMMAND_BUFFER_LEVEL_PRIMARY
+        ));
     }
 
     return true;
 }
 
 bool Queue::submit(
-    uint32_t commandBufferIdx,
+    std::shared_ptr<CommandBuffer> commandBuffer,
     const Sync& sync /* = {} */
 )
 {
-    assert(commandBufferIdx < this->commandBuffers.size());
-
     VkSemaphore waitFor = sync.waitFor ? sync.waitFor->getVkHandle() : VK_NULL_HANDLE;
     VkSemaphore signal = sync.completeSignal ? sync.completeSignal->getVkHandle() : VK_NULL_HANDLE;
+    VkCommandBuffer cb = commandBuffer->getVkHandle();
 
     VkSubmitInfo si = {};
     si.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
     si.commandBufferCount = 1;
-    si.pCommandBuffers = &getCommandBuffers()[commandBufferIdx];
+    si.pCommandBuffers = &cb;
     si.pWaitSemaphores = &waitFor;
     si.waitSemaphoreCount = waitFor != VK_NULL_HANDLE ? 1 : 0;
     si.pWaitDstStageMask = &sync.waitFlags;
@@ -93,6 +74,29 @@ bool Queue::submit(
         &si, 
         sync.submitFence ? sync.submitFence->getVkHandle() : VK_NULL_HANDLE
     ) == VK_SUCCESS;
+}
+
+bool Queue::submitOneShot(CommandBuffer::Runner r)
+{
+    auto cb = make_init_fatal<CommandBuffer>(
+        getDevice(), 
+        this->commandPool, 
+        VK_COMMAND_BUFFER_LEVEL_PRIMARY
+    );
+
+    if (!cb->run(r, VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT))
+    {
+        return false;
+    }
+
+    Queue::Sync sync = {};
+    sync.submitFence = make_init_fatal<Fence>(getDevice());
+
+    submit(cb, sync);
+
+    sync.submitFence->wait();
+
+    return true;
 }
 
 } // namespace vulkan
