@@ -17,12 +17,6 @@ set(STRESS_GC OFF)
 
 add_subdirectory(src/kolanut/libs/melonscript-vm)
 
-option(SDL_STATIC "" ON)
-option(SDL_SHARED "" ON)
-set(SDL_STATIC ON)
-set(SDL_SHARED OFF)
-add_subdirectory(src/kolanut/libs/SDL)
-
 option(BUILD_SHARED_LIBS "" OFF)
 set(BUILD_SHARED_LIBS OFF)
 option(BUILD_TINYXML2 "" ON)
@@ -48,10 +42,6 @@ set(
     src/kolanut/graphics/Graphics.cpp
     src/kolanut/graphics/Tilemap.cpp
     src/kolanut/graphics/Renderer.cpp
-
-    src/kolanut/graphics/sdl/RendererSDL.cpp
-    src/kolanut/graphics/sdl/TextureSDL.cpp
-    src/kolanut/graphics/sdl/FontSDL.cpp
     
     src/kolanut/graphics/ogl/glad/src/glad.c
     src/kolanut/graphics/ogl/RendererOGL.cpp
@@ -87,7 +77,6 @@ set(
     src/kolanut/graphics/vulkan/utils/UniformsBuffer.cpp
 
     src/kolanut/graphics/Font.cpp
-    src/kolanut/events/sdl/EventSystemSDL.cpp
     src/kolanut/events/glfw/EventSystemGLFW.cpp
     src/kolanut/events/Events.cpp
     src/kolanut/core/Kolanut.cpp
@@ -129,6 +118,6 @@ target_include_directories(
     ${Vulkan_INCLUDE_DIR}
 )
 
-set(LINKLIBS melonscript-vm external cjson SDL2-static glfw glm tmxparser ${Vulkan_LIBRARIES})
+set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser ${Vulkan_LIBRARIES})
 
 target_link_libraries(kolanut ${LINKLIBS})

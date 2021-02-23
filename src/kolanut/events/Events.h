@@ -11,13 +11,12 @@ class EventSystem;
 enum class Engine
 {
     NONE = 0,
-    SDL2,
     GLFW
 };
 
 struct Config
 {
-    Engine eventSystem = Engine::SDL2;
+    Engine eventSystem = Engine::GLFW;
 };
 
 std::shared_ptr<EventSystem> createEventSystem(const Config& conf);

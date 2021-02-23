@@ -13,7 +13,6 @@ class Renderer;
 enum class Engine
 {
     NONE = 0,
-    SDL2,
     OGL,
     VULKAN
 };
@@ -28,7 +27,7 @@ struct Resolution
 
 struct Config
 {
-    Engine renderer = Engine::SDL2;
+    Engine renderer = Engine::VULKAN;
     std::string windowTitle;
     Resolution resolution;
 };
