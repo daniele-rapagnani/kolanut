@@ -30,8 +30,12 @@ struct Config
     Engine renderer = Engine::VULKAN;
     std::string windowTitle;
     Resolution resolution;
+    bool enableAPIDebug = false;
+    uint8_t framesInFlight = 2;
+    size_t maxGeometryBufferVertices = 20000 * 6;
 };
 
+Engine engineFromString(const std::string& s);
 std::shared_ptr<Renderer> createRenderer(const Config& conf);
 
 } // namespace graphics

@@ -3,10 +3,29 @@
 #include "kolanut/events/EventSystem.h"
 #include "kolanut/events/glfw/EventSystemGLFW.h"
 
+#include <unordered_map>
 #include <cassert>
 
 namespace kola {
 namespace events {
+
+namespace {
+
+std::unordered_map<std::string, Engine> ENGINE_NAMES = {
+    { "glfw", Engine::GLFW },
+};
+
+} // namespace
+
+Engine engineFromString(const std::string& s)
+{
+    if (ENGINE_NAMES.find(s) == ENGINE_NAMES.end())
+    {
+        return Engine::NONE;
+    }
+
+    return ENGINE_NAMES.at(s);
+}
 
 std::shared_ptr<EventSystem> createEventSystem(const Config& conf)
 {

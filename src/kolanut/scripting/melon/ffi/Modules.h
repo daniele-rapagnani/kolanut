@@ -40,7 +40,6 @@ inline Value* getValueFromModule(
     {
         melM_vstackPushNull(&vm.stack);
     }
-    
 
     GCItem* keyStrs = melNewString(&vm, key.c_str(), key.size());
     melM_vstackPushGCItem(&vm.stack, keyStrs);
@@ -53,6 +52,35 @@ inline Value* getValueFromModule(
     );
 
     melM_stackPopCount(&vm.stack, 2);
+
+    return val;
+}
+
+inline Value* getValueFromModule(
+    VM& vm, 
+    TType type,
+    const std::string& module, 
+    Value* key
+)
+{
+    if (!module.empty())
+    {
+        GCItem* moduleStr = melNewString(&vm, module.c_str(), module.size());
+        melM_vstackPushGCItem(&vm.stack, moduleStr);
+    }
+    else
+    {
+        melM_vstackPushNull(&vm.stack);
+    }
+
+    Value* val = melGetTypeFromModule(
+        &vm, 
+        melM_stackTop(&vm.stack), 
+        key,
+        type
+    );
+
+    melM_stackPop(&vm.stack);
 
     return val;
 }

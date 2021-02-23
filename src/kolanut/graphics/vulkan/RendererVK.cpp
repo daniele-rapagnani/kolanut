@@ -134,10 +134,15 @@ bool RendererVK::doInit(const Config& config)
 
     vulkan::Instance::Config instConf = {};
     instConf.appName = config.windowTitle;
-    //instConf.layers.push_back("VK_LAYER_KHRONOS_validation");
-    //instConf.extensions.push_back("VK_EXT_debug_utils");
+
     instConf.extensions.push_back("VK_KHR_get_physical_device_properties2");
-    // instConf.messengerCb = onVulkanValidationLayerMessage;
+
+    if (this->config.enableAPIDebug)
+    {
+        instConf.layers.push_back("VK_LAYER_KHRONOS_validation");
+        instConf.extensions.push_back("VK_EXT_debug_utils");
+        instConf.messengerCb = onVulkanValidationLayerMessage;
+    }
 
     std::copy(
         glfwExtensions, 
@@ -193,7 +198,7 @@ bool RendererVK::doInit(const Config& config)
 
     vulkan::Device::Config devConfig = {};
 
-    devConfig.framesInFlight = 1;
+    devConfig.framesInFlight = this->config.framesInFlight;
     devConfig.extensions.push_back("VK_KHR_swapchain");
     
     if (this->physicalDevice->isExtensionSupported("VK_KHR_portability_subset"))
@@ -298,6 +303,7 @@ bool RendererVK::doInit(const Config& config)
     {
         vulkan::GeometryBuffer::Config c = {};
         c.maxFrames = this->device->getConfig().framesInFlight;
+        c.maxVerts = this->config.maxGeometryBufferVertices;
         this->geomBuffer = vulkan::make_init_fatal<vulkan::GeometryBuffer>(this->device, c);
     }
 

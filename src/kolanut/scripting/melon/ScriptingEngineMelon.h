@@ -13,6 +13,7 @@ class ScriptingEngineMelon : public ScriptingEngine
 {
 public:
     bool init(const Config& config) override;
+    bool loadConfig(Kolanut::Config& config) override;
     void onLoad() override;
     void onUpdate(float dt) override;
     void onDraw() override;
@@ -21,8 +22,15 @@ public:
     void onKeyPressed(events::KeyCode key, bool pressed) override;
 
 private:
-    VMConfig vmConfig;
-    VM vm;
+    std::string getScriptPath(const std::string& name) const
+    {
+        return this->config.scriptsDir + "/" + name + ".ms";
+    }
+
+private:
+    Config config = {};
+    VMConfig vmConfig = {};
+    VM vm = {};
 };
 
 } // namespace scripting

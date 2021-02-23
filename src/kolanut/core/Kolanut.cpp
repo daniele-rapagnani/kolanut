@@ -38,27 +38,17 @@ std::shared_ptr<T> initSubsystem(
 
 } // namespace
 
-bool Kolanut::init(const Config& conf)
+bool Kolanut::bootstrap(const BoostrapConfig& conf)
 {
-    this->config = conf;
+    knM_logDebug("Bootstrapping Kolanut");
+    this->bootstrapConfig = conf;
 
-    knM_logDebug("Initializing Kolanut");
-    
     di::registerType<filesystem::FilesystemEngine>(
         std::bind(
             initSubsystem<filesystem::FilesystemEngine, filesystem::Config>,
             "filesystem",
             filesystem::createFilesystemEngine,
-            conf.filesystem
-        )
-    );
-
-    di::registerType<graphics::Renderer>(
-        std::bind(
-            initSubsystem<graphics::Renderer, graphics::Config>,
-            "graphics",
-            graphics::createRenderer,
-            conf.graphics
+            this->bootstrapConfig.filesystem
         )
     );
 
@@ -67,7 +57,29 @@ bool Kolanut::init(const Config& conf)
             initSubsystem<scripting::ScriptingEngine, scripting::Config>,
             "scripting",
             scripting::createScriptingEngine,
-            conf.scripting
+            this->bootstrapConfig.scripting
+        )
+    );
+
+    return true;
+}
+
+bool Kolanut::loadConfig(Config& conf)
+{
+    return di::get<scripting::ScriptingEngine>()->loadConfig(conf);
+}
+
+bool Kolanut::init(const Config& conf)
+{
+    knM_logDebug("Initializing Kolanut");
+    this->config = conf;
+
+    di::registerType<graphics::Renderer>(
+        std::bind(
+            initSubsystem<graphics::Renderer, graphics::Config>,
+            "graphics",
+            graphics::createRenderer,
+            this->config.graphics
         )
     );
 
@@ -76,7 +88,7 @@ bool Kolanut::init(const Config& conf)
             initSubsystem<events::EventSystem, events::Config>,
             "event system",
             events::createEventSystem,
-            conf.events
+            this->config.events
         )
     );
 

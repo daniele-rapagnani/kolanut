@@ -1,5 +1,7 @@
 #pragma once
 
+#include <string>
+
 extern "C" {
 #include <melon/core/vm.h>
 #include <melon/core/tstring.h>
@@ -70,6 +72,20 @@ inline bool convert(VM* vm, float& res, Value* val)
         val->pack.value.number 
         : val->pack.value.integer
     ;
+    return true;
+}
+
+template <>
+inline bool convert(VM* vm, std::string& res, Value* val)
+{
+    if (val->type != MELON_TYPE_STRING)
+    {
+        return false;
+    }
+
+    String* str = melM_strFromObj(val->pack.obj);
+    res.assign(str->string, str->len);
+    
     return true;
 }
 

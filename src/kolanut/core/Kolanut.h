@@ -13,18 +13,27 @@ namespace kola {
 class Kolanut
 {
 public:
+    struct BoostrapConfig
+    {
+        filesystem::Config filesystem;
+        scripting::Config scripting;
+    };
+
     struct Config
     {
         graphics::Config graphics;
-        scripting::Config scripting;
         events::Config events;
-        filesystem::Config filesystem;
     };
 
 public:
+    bool bootstrap(const BoostrapConfig& conf);
+    bool loadConfig(Config& conf);
     bool init(const Config& conf);
     void run();
     
+    const BoostrapConfig& getBootstrapConfig() const
+    { return this->bootstrapConfig; }
+
     const Config& getConfig() const
     { return this->config; }
     
@@ -33,7 +42,8 @@ protected:
     std::shared_ptr<scripting::ScriptingEngine> getScriptingEngine() const;
     std::shared_ptr<graphics::Renderer> getRenderer() const;
 
-    Config config;
+    Config config = {};
+    BoostrapConfig bootstrapConfig = {};
 };
 
 } // namespace kola

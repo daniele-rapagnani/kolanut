@@ -44,8 +44,34 @@ void callModuleClosure(VM& vm, const std::string& module, const std::string& key
     callClosure(vm, cl, ExpRet, args...);
 }
 
+template <int ExpRet = 0, typename ...Types>
+void callModuleClosure(VM& vm, const std::string& module, Value* key, Types ...args)
+{
+    Value* cl = getValueFromModule(
+        vm, 
+        MELON_TYPE_CLOSURE,
+        module,
+        key
+    );
+
+    if (!cl)
+    {
+        knM_logError("Can't find function '" << key << "' in module '" << module << "'");
+        return;
+    }
+
+    callClosure(vm, cl, ExpRet, args...);
+}
+
 template <typename TRet, typename ...Types>
 bool callModuleClosureRet(VM& vm, const std::string& module, const std::string& key, TRet& res, Types ...args)
+{
+    callModuleClosure<1>(vm, module, key, args...);
+    return pop<TRet>(&vm, res);
+}
+
+template <typename TRet, typename ...Types>
+bool callModuleClosureRet(VM& vm, const std::string& module, Value* key, TRet& res, Types ...args)
 {
     callModuleClosure<1>(vm, module, key, args...);
     return pop<TRet>(&vm, res);

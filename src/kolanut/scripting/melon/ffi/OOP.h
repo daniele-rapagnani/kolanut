@@ -13,6 +13,7 @@ extern "C" {
 
 #include <string>
 #include <unordered_map>
+#include <functional>
 #include <memory>
 
 namespace kola {
@@ -152,6 +153,28 @@ bool getInstanceField(VM* vm, GCItem* obj, const std::string& name, T& res)
     }
 
     return convert(vm, res, val);
+}
+
+template <typename T>
+bool getInstanceEnumField(VM* vm, GCItem* val, const std::string& name, T& res, std::function<T(const std::string&)> conv)
+{
+    std::string value = "";
+    if (getInstanceField(vm, val, name, value))
+    {
+        T e = conv(value);
+
+        if (e != T {})
+        {
+            res = e;
+        }
+        else
+        {
+            knM_logError("Unknown value for '" << name << "': " << value);
+            return false;
+        }
+    }
+
+    return true;
 }
 
 template <typename T>

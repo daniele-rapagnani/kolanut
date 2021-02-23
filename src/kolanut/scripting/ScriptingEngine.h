@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kolanut/core/Kolanut.h"
 #include "kolanut/scripting/Scripting.h"
 #include "kolanut/events/KeyCodes.h"
 
@@ -10,6 +11,7 @@ class ScriptingEngine
 {
 public:
     virtual bool init(const Config& config) = 0;
+    virtual bool loadConfig(Kolanut::Config& config) = 0;
     virtual void onLoad() = 0;
     virtual void onUpdate(float dt) = 0;
     virtual void onDraw() = 0;

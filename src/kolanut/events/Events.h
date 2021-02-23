@@ -19,6 +19,7 @@ struct Config
     Engine eventSystem = Engine::GLFW;
 };
 
+Engine engineFromString(const std::string& s);
 std::shared_ptr<EventSystem> createEventSystem(const Config& conf);
 
 } // namespace events
