@@ -20,6 +20,8 @@ namespace graphics {
 
 RendererOGL::~RendererOGL()
 {
+    knM_oglCall(glDeleteQueries(1, &this->perfQuery));
+
     if (this->window)
     {
         glfwDestroyWindow(this->window);
@@ -133,6 +135,8 @@ bool RendererOGL::doInit(const Config& config)
     }
 
     glfwSetWindowSizeCallback(getWindow(), onWindowResize);
+
+    knM_oglCall(glGenQueries(1, &this->perfQuery));
 
     return true;
 }
@@ -348,12 +352,36 @@ void RendererOGL::draw(
 void RendererOGL::clear()
 {
     knM_oglCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+    knM_oglCall(glBeginQuery(GL_TIME_ELAPSED_EXT, this->perfQuery));
 }
 
 void RendererOGL::flip()
 {
+    knM_oglCall(glEndQuery(GL_TIME_ELAPSED_EXT));
+
     assert(this->window);
     glfwSwapBuffers(this->window);
+
+    if (glGetQueryObjectui64vEXT)
+    {
+        GLuint64 elapsed = 0;
+        knM_oglCall(glGetQueryObjectui64vEXT(this->perfQuery, GL_QUERY_RESULT, &elapsed));
+
+        this->gpuElapsed += static_cast<double>(elapsed) / 1000000.0;
+        this->gpuSamples++;
+    }
+
+    if (this->gpuSamples == 60)
+    {
+        knM_logDebug(
+            "[OpenGL] rendering took an avg of " 
+            << (this->gpuElapsed / this->gpuSamples) 
+            << " ms for 60 frames"
+        );
+
+        this->gpuSamples = 0;
+        this->gpuElapsed = 0.0f;
+    }
 }
 
 void RendererOGL::setCameraPosition(const Vec2f& pos)

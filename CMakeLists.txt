@@ -75,6 +75,7 @@ set(
     src/kolanut/graphics/vulkan/utils/StagedBuffer.cpp
     src/kolanut/graphics/vulkan/utils/GeometryBuffer.cpp
     src/kolanut/graphics/vulkan/utils/UniformsBuffer.cpp
+    src/kolanut/graphics/vulkan/utils/QueryPool.cpp
 
     src/kolanut/graphics/Font.cpp
     src/kolanut/events/glfw/EventSystemGLFW.cpp

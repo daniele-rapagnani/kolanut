@@ -17,6 +17,7 @@
 #include "kolanut/graphics/vulkan/utils/CommandBuffer.h"
 #include "kolanut/graphics/vulkan/utils/GeometryBuffer.h"
 #include "kolanut/graphics/vulkan/utils/UniformsBuffer.h"
+#include "kolanut/graphics/vulkan/utils/QueryPool.h"
 #include "kolanut/graphics/vulkan/utils/Semaphore.h"
 #include "kolanut/graphics/vulkan/utils/Fence.h"
 
@@ -117,6 +118,7 @@ private:
     std::shared_ptr<vulkan::UniformsBuffer> uniformsBuffer = {};
     std::shared_ptr<vulkan::Texture> kitten = {};
     std::shared_ptr<vulkan::DescriptorPool> descriptorPool = {};
+    std::shared_ptr<vulkan::QueryPool> queryPool = {};
 
     std::vector<std::shared_ptr<vulkan::Semaphore>> imageReadySemaphores = {};
     std::vector<std::shared_ptr<vulkan::Semaphore>> renderCompleteSemaphores = {};
@@ -128,9 +130,9 @@ private:
 
     uint8_t currentInFlightFrame = 0;
     uint32_t nextImageIdx = 0;
+    std::vector<uint64_t> gpuElapsedTimes = {};
 
     VkSampler sampler = {};
-
     Config config = {};
 };
 

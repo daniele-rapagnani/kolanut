@@ -142,9 +142,22 @@ bool Instance::init(const Instance::Config& config)
     ici.enabledLayerCount = ccLayers.size();
     ici.ppEnabledLayerNames = &ccLayers[0];
 
-    if (vkCreateInstance(&ici, nullptr, &this->handle) != VK_SUCCESS)
+    VkResult r = VK_SUCCESS;
+
+    if ((r = vkCreateInstance(&ici, nullptr, &this->handle)) != VK_SUCCESS)
     {
-        knM_logError("Can't create vulkan instance");
+        if (r == VK_ERROR_INCOMPATIBLE_DRIVER)
+        {
+            knM_logError(
+                "Can't create vulkan instance." 
+                << " Make sure vulkan drivers are installed correctly."
+            );
+        }
+        else 
+        {
+            knM_logError("Can't create vulkan instance: " << r);
+        }
+
         return false;
     }
 

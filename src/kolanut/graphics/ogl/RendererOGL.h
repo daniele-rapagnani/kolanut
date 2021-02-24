@@ -82,9 +82,13 @@ private:
     Vec2f cameraPos = {};
     float cameraZoom = 1.0f;
 
-    GLFWwindow* window = nullptr;
+    GLFWwindow* window = {};
 
-    std::shared_ptr<utils::ogl::Program> drawProgram = nullptr;
+    std::shared_ptr<utils::ogl::Program> drawProgram = {};
+
+    GLuint perfQuery = {};
+    double gpuElapsed = {};
+    GLuint gpuSamples = {};
 };
 
 } // namespace graphics

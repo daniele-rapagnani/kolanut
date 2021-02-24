@@ -135,7 +135,10 @@ bool RendererVK::doInit(const Config& config)
     vulkan::Instance::Config instConf = {};
     instConf.appName = config.windowTitle;
 
-    instConf.extensions.push_back("VK_KHR_get_physical_device_properties2");
+    if (vulkan::Instance::isExtensionSupported("VK_KHR_get_physical_device_properties2"))
+    {
+        instConf.extensions.push_back("VK_KHR_get_physical_device_properties2");
+    }
 
     if (this->config.enableAPIDebug)
     {
@@ -344,6 +347,15 @@ bool RendererVK::doInit(const Config& config)
         this->renderCompleteSemaphores.push_back(vulkan::make_init_fatal<vulkan::Semaphore>(device));
     }
 
+    {
+        vulkan::QueryPool::Config config = {};
+        config.count = this->device->getConfig().framesInFlight * 2;
+        config.type = VK_QUERY_TYPE_TIMESTAMP;
+        
+        this->queryPool = vulkan::make_init_fatal<vulkan::QueryPool>(this->device, config);
+        this->gpuElapsedTimes.resize(config.count);
+    }
+
     return true;
 }
 
@@ -481,12 +493,14 @@ void RendererVK::draw(
     vkt->getTexture()->use(this->sampler, ds, 1);
     this->uniformsBuffer->bind(uh, ds, 2);
 
+    for (size_t i = 0; i < 100; i++) {
     std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
     VkCommandBuffer b = gcb->getVkHandle();
     vkCmdBindPipeline(b, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
     ds->bind(b, this->pipeline->layout, VK_PIPELINE_BIND_POINT_GRAPHICS);
     this->geomBuffer->bind(h, gcb);
     vkCmdDraw(b, vertices.size(), 1, 0, 0);
+    }
 }
 
 void RendererVK::draw(
@@ -540,8 +554,21 @@ void RendererVK::clear()
 
     std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
     gcb->begin();
-
     VkCommandBuffer b = gcb->getVkHandle();
+
+    vkCmdResetQueryPool(
+        b, 
+        this->queryPool->getVkHandle(), 
+        0, 
+        this->queryPool->getConfig().count 
+    );
+
+    vkCmdWriteTimestamp(
+        b, 
+        VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
+        this->queryPool->getVkHandle(), 
+        0
+    );
 
     VkClearValue cv = {};
     cv.color.float32[0] = 0.0f;
@@ -571,7 +598,15 @@ void RendererVK::clear()
 void RendererVK::flip()
 {
     std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
+
     vkCmdEndRenderPass(gcb->getVkHandle());
+
+    vkCmdWriteTimestamp(
+        gcb->getVkHandle(), 
+        VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 
+        this->queryPool->getVkHandle(), 
+        1
+    );
 
     gcb->end();
 
@@ -591,6 +626,31 @@ void RendererVK::flip()
         knM_logFatal("Can't present swapchain image");
         return;
     }
+
+    if (vkGetQueryPoolResults(
+        this->device->getVkHandle(), 
+        this->queryPool->getVkHandle(), 
+        0,
+        2, 
+        this->gpuElapsedTimes.size() * sizeof(uint64_t),
+        &this->gpuElapsedTimes[0], 
+        sizeof(uint64_t), 
+        VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT
+    ) != VK_SUCCESS)
+    {
+        knM_logError("Can't retrieve timestamp");
+    }
+
+    uint64_t start = this->gpuElapsedTimes[0];
+    uint64_t end = this->gpuElapsedTimes[1];
+    uint64_t diff = (end - start);
+
+    knM_logDebug(diff);
+
+    double interval = 1000000.0 / this->physicalDevice->getProperties().limits.timestampPeriod;
+    double elapsedMs = static_cast<double>(diff) / interval;
+
+    knM_logDebug("[Vulkan] " << elapsedMs << " ms");
 
     this->currentInFlightFrame = 
         (this->currentInFlightFrame + 1) % 

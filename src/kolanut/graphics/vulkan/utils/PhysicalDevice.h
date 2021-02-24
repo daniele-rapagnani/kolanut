@@ -35,7 +35,7 @@ public:
     VkPhysicalDeviceFeatures getFeatures() const
     { return this->features; }
 
-    VkPhysicalDeviceProperties getProprties() const
+    VkPhysicalDeviceProperties getProperties() const
     { return this->properties; }
 
     VkFormatProperties getFormatProperties(VkFormat format) const;

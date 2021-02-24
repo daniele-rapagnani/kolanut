@@ -7,6 +7,6 @@ return {
     fullscreen = false,
     graphicBackend = "vulkan",
     enableGraphicAPIDebug = false,
-    framesInFlight = 2,
+    framesInFlight = 1,
     maxGeometryBufferVertices = null
 };
