@@ -12,6 +12,7 @@ class ScriptingEngine
 public:
     virtual bool init(const Config& config) = 0;
     virtual bool loadConfig(Kolanut::Config& config) = 0;
+    virtual bool start() = 0;
     virtual void onLoad() = 0;
     virtual void onUpdate(float dt) = 0;
     virtual void onDraw() = 0;

@@ -14,6 +14,7 @@ class ScriptingEngineMelon : public ScriptingEngine
 public:
     bool init(const Config& config) override;
     bool loadConfig(Kolanut::Config& config) override;
+    bool start() override;
     void onLoad() override;
     void onUpdate(float dt) override;
     void onDraw() override;

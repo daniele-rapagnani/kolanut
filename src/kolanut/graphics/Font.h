@@ -3,6 +3,8 @@
 #include "kolanut/core/Types.h"
 #include "kolanut/graphics/Texture.h"
 
+#include <memory>
+
 namespace kola {
 namespace graphics {
 

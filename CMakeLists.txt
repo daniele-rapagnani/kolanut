@@ -19,18 +19,27 @@ add_subdirectory(src/kolanut/libs/melonscript-vm)
 
 option(BUILD_SHARED_LIBS "" OFF)
 set(BUILD_SHARED_LIBS OFF)
+option(BUILD_STATIC_LIBS ON)
+set(BUILD_STATIC_LIBS ON)
 option(BUILD_TINYXML2 "" ON)
 set(BUILD_TINYXML2 ON)
 add_subdirectory(src/kolanut/libs/tmxparser)
 
 add_subdirectory(src/kolanut/libs/glfw)
 add_subdirectory(src/kolanut/libs/glm)
+add_subdirectory(src/kolanut/libs/cppfs)
 
 add_definitions(-Werror=incompatible-pointer-types)
 add_definitions(-Werror=implicit-function-declaration)
 add_definitions(-Werror=return-type)
 add_definitions(-Werror=int-conversion)
+
+add_definitions(-D_USE_MATH_DEFINES)
+
+if (NOT WIN32)
 add_definitions(-Werror=macro-redefined)
+endif (NOT WIN32)
+
 add_definitions(-Wdouble-promotion)
 add_definitions(-Wno-format)
 
@@ -116,9 +125,29 @@ target_include_directories(
     src/kolanut/libs/linalg/
     src/kolanut/libs/stb/
     src/kolanut/graphics/ogl/glad/include/
+    src/kolanut/libs/cppfs/source/cppfs/include/
+    ${cppfs_BINARY_DIR}/source/cppfs/include/
     ${Vulkan_INCLUDE_DIR}
 )
 
-set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser ${Vulkan_LIBRARIES})
+if (MINGW)
+    # On MinGW add static linking of system libraries so that the resulting
+    # executable is portable.
+    # Also use lld to link the binaries: this solves some issues with catch2
+    # and also speeds the build up considerably.
+    
+    set(
+        MINGW_LD_FLAGS 
+        "-static-libgcc" 
+        "-static-libstdc++" 
+        "-static" "-lpthread" 
+        "-static" "-lz" 
+        "-fuse-ld=lld"
+    )
+
+    target_link_options(kolanut PUBLIC ${MINGW_LD_FLAGS})
+endif(MINGW)
+
+set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser cppfs ${Vulkan_LIBRARIES})
 
 target_link_libraries(kolanut ${LINKLIBS})

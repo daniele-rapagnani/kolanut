@@ -5,6 +5,8 @@
 
 #include <glad/glad.h>
 
+#include <memory>
+
 #ifndef NDEBUG
 #define knM_oglCall(x) \
     do { \

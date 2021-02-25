@@ -112,6 +112,7 @@ void Kolanut::run()
         }
     );
 
+    getScriptingEngine()->start();
     getScriptingEngine()->onLoad();
 
     uint64_t lastFrameTime = getEventSystem()->getTimeMS();

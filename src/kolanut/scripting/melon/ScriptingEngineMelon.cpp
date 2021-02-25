@@ -56,6 +56,7 @@ inline bool convert(VM* vm, Kolanut::Config& res, Value* val)
     getInstanceField(vm, val->pack.obj, "enableGraphicAPIDebug", res.graphics.enableAPIDebug);
     getInstanceField(vm, val->pack.obj, "framesInFlight", res.graphics.framesInFlight);
     getInstanceField(vm, val->pack.obj, "maxGeometryBufferVertices", res.graphics.maxGeometryBufferVertices);
+    getInstanceField(vm, val->pack.obj, "forceGPU", res.graphics.forceGPU);
 
     return true;
 }
@@ -97,8 +98,14 @@ bool ScriptingEngineMelon::init(const Config& config)
         knM_logFatal("Can't init kolanut's melon modules");
         return false;
     }
+
     melon::bindings::registerBindings(&this->vm);
 
+    return true;
+}
+
+bool ScriptingEngineMelon::start()
+{
     std::string bootScript = getScriptPath(this->config.bootScript);
 
     if (!::melon::utils::runScript(&this->vm, bootScript))

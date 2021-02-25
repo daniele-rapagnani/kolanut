@@ -14,6 +14,7 @@
 #include <cstring>
 #include <sstream>
 #include <cassert>
+#include <cmath>
 
 namespace kola {
 namespace graphics {
@@ -306,13 +307,14 @@ void RendererOGL::draw(
     this->drawProgram->use();
 
     Sizei r = getResolution();
+    float resScale = r.x / getDesignResolution().x;
 
     Transform2D cameraTransform = glm::translate(
         glm::scale(
             glm::identity<Transform2D>(),
             glm::vec2 {
-                getPixelsPerPoint() * this->cameraZoom,
-                getPixelsPerPoint() * this->cameraZoom
+                resScale * this->cameraZoom,
+                resScale * this->cameraZoom
             }
         ),
         glm::vec2 {

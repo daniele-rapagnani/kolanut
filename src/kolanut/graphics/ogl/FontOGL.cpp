@@ -13,6 +13,7 @@
 #include <stb_truetype.h>
 
 #include <vector>
+#include <memory>
 
 namespace kola {
 namespace graphics {

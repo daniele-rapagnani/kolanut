@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 		return 1;
 	}
 
-	kola::Kolanut::Config conf;
+	kola::Kolanut::Config conf = {};
 	kola::di::get<kola::Kolanut>()->loadConfig(conf);
 
 	// kola::Kolanut::Config conf;

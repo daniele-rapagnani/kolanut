@@ -8,6 +8,8 @@
 #include <vector>
 #include <string>
 #include <functional>
+#include <memory>
+#include <cassert>
 
 namespace kola {
 namespace graphics {

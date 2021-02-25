@@ -1,6 +1,6 @@
 [submodule "src/libs/melonscript-vm"]
 	path = src/kolanut/libs/melonscript-vm
-	url = git@bitbucket.org:drapagnani/melonscript-vm.git
+	url = git@github.com:daniele-rapagnani/melon.git 
 [submodule "src/kolanut/libs/linalg"]
 	path = src/kolanut/libs/linalg
 	url = git@github.com:sgorsten/linalg.git
@@ -16,3 +16,6 @@
 [submodule "src/kolanut/libs/glm"]
 	path = src/kolanut/libs/glm
 	url = https://github.com/g-truc/glm
+[submodule "src/kolanut/libs/cppfs"]
+	path = src/kolanut/libs/cppfs
+	url = git@github.com:cginternals/cppfs.git

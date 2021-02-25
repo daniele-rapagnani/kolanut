@@ -131,6 +131,8 @@ private:
     uint8_t currentInFlightFrame = 0;
     uint32_t nextImageIdx = 0;
     std::vector<uint64_t> gpuElapsedTimes = {};
+    double gpuAvgTime = {};
+    size_t gpuSamples = 0;
 
     VkSampler sampler = {};
     Config config = {};

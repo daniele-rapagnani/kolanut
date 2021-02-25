@@ -44,7 +44,7 @@
 #if VERBOSITY >= 2
 #define knM_logError(x) knM_log("Error", x)
 #else
-#define knM_logError(x) do {} while(false)
+#define knM_logError(x) do {} while(false)
 #endif
 
 #if VERBOSITY >= 1

@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <functional>
 #include <limits>
+#include <cmath>
 
 namespace kola {
 namespace graphics {
@@ -171,7 +172,27 @@ bool RendererVK::doInit(const Config& config)
         return false;
     }
 
-    this->physicalDevice = vulkan::PhysicalDevice::getDevices(this->instance)[0];
+    if (!this->config.forceGPU.empty())
+    {
+        for (const auto& dev : vulkan::PhysicalDevice::getDevices(this->instance))
+        {
+            knM_logInfo("Available GPU: " << dev->getName());
+
+            if (dev->getName() == this->config.forceGPU)
+            {
+                this->physicalDevice = dev;
+                break;
+            }
+        }
+    }
+
+    if (!this->physicalDevice)
+    {
+        knM_logInfo("No specific GPU requested (or found), falling back to default.");
+        this->physicalDevice = vulkan::PhysicalDevice::getDevices(this->instance)[0];
+    }
+
+    knM_logDebug("Using GPU: " << this->physicalDevice->getName());
 
     if (!this->physicalDevice->hasSwapchainSupport())
     {
@@ -470,12 +491,14 @@ void RendererVK::draw(
         glm::vec3 { -origin.x, -origin.y, 0.0f }
     );
 
+    float resScale = getResolution().x / getDesignResolution().x;
+
     vu.camera = glm::translate(
         glm::scale(
             vu.camera,
             glm::vec3 {
-                getPixelsPerPoint() * this->cameraZoom,
-                getPixelsPerPoint() * this->cameraZoom,
+                resScale * this->cameraZoom,
+                resScale * this->cameraZoom,
                 1.0f
             }
         ),
@@ -493,14 +516,12 @@ void RendererVK::draw(
     vkt->getTexture()->use(this->sampler, ds, 1);
     this->uniformsBuffer->bind(uh, ds, 2);
 
-    for (size_t i = 0; i < 100; i++) {
     std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
     VkCommandBuffer b = gcb->getVkHandle();
     vkCmdBindPipeline(b, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
     ds->bind(b, this->pipeline->layout, VK_PIPELINE_BIND_POINT_GRAPHICS);
     this->geomBuffer->bind(h, gcb);
     vkCmdDraw(b, vertices.size(), 1, 0, 0);
-    }
 }
 
 void RendererVK::draw(
@@ -567,7 +588,7 @@ void RendererVK::clear()
         b, 
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
         this->queryPool->getVkHandle(), 
-        0
+        this->currentInFlightFrame * 2
     );
 
     VkClearValue cv = {};
@@ -601,11 +622,13 @@ void RendererVK::flip()
 
     vkCmdEndRenderPass(gcb->getVkHandle());
 
+    size_t qIdx = this->currentInFlightFrame * 2;
+
     vkCmdWriteTimestamp(
         gcb->getVkHandle(), 
         VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT, 
         this->queryPool->getVkHandle(), 
-        1
+        qIdx + 1
     );
 
     gcb->end();
@@ -630,10 +653,10 @@ void RendererVK::flip()
     if (vkGetQueryPoolResults(
         this->device->getVkHandle(), 
         this->queryPool->getVkHandle(), 
-        0,
+        qIdx,
         2, 
         this->gpuElapsedTimes.size() * sizeof(uint64_t),
-        &this->gpuElapsedTimes[0], 
+        &this->gpuElapsedTimes[qIdx], 
         sizeof(uint64_t), 
         VK_QUERY_RESULT_64_BIT | VK_QUERY_RESULT_WAIT_BIT
     ) != VK_SUCCESS)
@@ -641,16 +664,27 @@ void RendererVK::flip()
         knM_logError("Can't retrieve timestamp");
     }
 
-    uint64_t start = this->gpuElapsedTimes[0];
-    uint64_t end = this->gpuElapsedTimes[1];
+    uint64_t start = this->gpuElapsedTimes[qIdx];
+    uint64_t end = this->gpuElapsedTimes[qIdx + 1];
     uint64_t diff = (end - start);
-
-    knM_logDebug(diff);
 
     double interval = 1000000.0 / this->physicalDevice->getProperties().limits.timestampPeriod;
     double elapsedMs = static_cast<double>(diff) / interval;
 
-    knM_logDebug("[Vulkan] " << elapsedMs << " ms");
+    this->gpuAvgTime += elapsedMs;
+    this->gpuSamples++;
+
+    if (this->gpuSamples == 60)
+    {
+        knM_logDebug(
+            "[Vulkan] rendering took an avg of " 
+            << (this->gpuAvgTime / this->gpuSamples) 
+            << " ms for 60 frames"
+        );
+
+        this->gpuSamples = 0;
+        this->gpuAvgTime = 0.0f;
+    }
 
     this->currentInFlightFrame = 
         (this->currentInFlightFrame + 1) % 
