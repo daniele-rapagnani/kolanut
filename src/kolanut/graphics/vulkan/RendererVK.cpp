@@ -8,9 +8,9 @@
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/DIContainer.h"
 
-#define GLM_FORCE_DEGREES
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_transform_2d.hpp>
 
@@ -377,6 +377,18 @@ bool RendererVK::doInit(const Config& config)
         this->gpuElapsedTimes.resize(config.count);
     }
 
+    for (size_t i = 0; i < this->graphCommandBuffers.size(); i++)
+    {
+        TracyVkCtx ctx = TracyVkContext(
+            this->physicalDevice->getVkHandle(),
+            this->device->getVkHandle(),
+            this->graphQueue->getVkHandle(),
+            this->graphCommandBuffers[i]->getVkHandle()
+        )
+
+        this->tracyContextes.push_back(ctx);
+    }
+
     return true;
 }
 
@@ -517,11 +529,20 @@ void RendererVK::draw(
     this->uniformsBuffer->bind(uh, ds, 2);
 
     std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
-    VkCommandBuffer b = gcb->getVkHandle();
-    vkCmdBindPipeline(b, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
-    ds->bind(b, this->pipeline->layout, VK_PIPELINE_BIND_POINT_GRAPHICS);
-    this->geomBuffer->bind(h, gcb);
-    vkCmdDraw(b, vertices.size(), 1, 0, 0);
+    
+    {
+        TracyVkZone(
+            this->tracyContextes[this->currentInFlightFrame],
+            gcb->getVkHandle(),
+            "Draw"
+        )
+
+        VkCommandBuffer b = gcb->getVkHandle();
+        vkCmdBindPipeline(b, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
+        ds->bind(b, this->pipeline->layout, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        this->geomBuffer->bind(h, gcb);
+        vkCmdDraw(b, vertices.size(), 1, 0, 0);
+    }
 }
 
 void RendererVK::draw(
@@ -630,6 +651,11 @@ void RendererVK::flip()
         this->queryPool->getVkHandle(), 
         qIdx + 1
     );
+
+    TracyVkCollect(
+        this->tracyContextes[this->currentInFlightFrame],
+        gcb->getVkHandle()
+    )
 
     gcb->end();
 

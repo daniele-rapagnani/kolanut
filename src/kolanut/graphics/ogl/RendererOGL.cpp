@@ -7,6 +7,7 @@
 #include "kolanut/core/DIContainer.h"
 
 #include <glad/glad.h>
+#include <TracyOpenGL.hpp>
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/matrix_transform_2d.hpp>
@@ -95,6 +96,8 @@ bool RendererOGL::doInit(const Config& config)
         knM_logFatal("Can't initialize OpenGL.");
         return false;
     }
+
+    TracyGpuContext
 
     updateWindowSize();
 
@@ -363,6 +366,8 @@ void RendererOGL::flip()
 
     assert(this->window);
     glfwSwapBuffers(this->window);
+
+    TracyGpuCollect
 
     if (glGetQueryObjectui64vEXT)
     {

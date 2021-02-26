@@ -35,6 +35,7 @@ add_definitions(-Werror=return-type)
 add_definitions(-Werror=int-conversion)
 
 add_definitions(-D_USE_MATH_DEFINES)
+add_definitions(-DTRACY_ENABLE)
 
 if (NOT WIN32)
 add_definitions(-Werror=macro-redefined)
@@ -111,6 +112,8 @@ set(
     src/kolanut/scripting/melon/modules/ColorModule.cpp
     src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
 
+    src/kolanut/libs/tracy/TracyClient.cpp
+
     src/kolanut/main.cpp
 )
 
@@ -127,6 +130,7 @@ target_include_directories(
     src/kolanut/graphics/ogl/glad/include/
     src/kolanut/libs/cppfs/source/cppfs/include/
     ${cppfs_BINARY_DIR}/source/cppfs/include/
+    src/kolanut/libs/tracy/
     ${Vulkan_INCLUDE_DIR}
 )
 

@@ -21,6 +21,8 @@
 #include "kolanut/graphics/vulkan/utils/Semaphore.h"
 #include "kolanut/graphics/vulkan/utils/Fence.h"
 
+#include <TracyVulkan.hpp>
+
 #define GLFW_INCLUDE_VULKAN
 #include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
@@ -136,6 +138,8 @@ private:
 
     VkSampler sampler = {};
     Config config = {};
+
+    std::vector<TracyVkCtx> tracyContextes = {};
 };
 
 } // namespace graphics

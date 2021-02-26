@@ -5,6 +5,8 @@
 #include "kolanut/events/EventSystem.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
 
+#include <Tracy.hpp>
+
 #include <cassert>
 #include <limits>
 
@@ -112,8 +114,11 @@ void Kolanut::run()
         }
     );
 
-    getScriptingEngine()->start();
-    getScriptingEngine()->onLoad();
+    {
+        ZoneScopedN("OnLoad")
+        getScriptingEngine()->start();
+        getScriptingEngine()->onLoad();
+    }
 
     uint64_t lastFrameTime = getEventSystem()->getTimeMS();
     uint64_t newFrameTime;
@@ -124,21 +129,34 @@ void Kolanut::run()
 
     while(!isQuit)
     {
-        getEventSystem()->poll();
-        getScriptingEngine()->onUpdate(dt);
+        {
+            ZoneScopedN("Events polling")
+            getEventSystem()->poll();
+            getScriptingEngine()->onUpdate(dt);
+        }
 
         getRenderer()->clear();
-        getScriptingEngine()->onDraw();
 
-        cameraPosTmp = getRenderer()->getCameraPosition();
-        cameraZoomTmp = getRenderer()->getCameraZoom();
-        getRenderer()->setCameraPosition({});
-        getRenderer()->setCameraZoom(1.0f);
-        getScriptingEngine()->onDrawUI();
-        getRenderer()->setCameraPosition(cameraPosTmp);
-        getRenderer()->setCameraZoom(cameraZoomTmp);
+        {
+            ZoneScopedN("OnDraw");
+            getScriptingEngine()->onDraw();
+        }
+
+        {
+            ZoneScopedN("OnDrawUI");
+            cameraPosTmp = getRenderer()->getCameraPosition();
+            cameraZoomTmp = getRenderer()->getCameraZoom();
+            getRenderer()->setCameraPosition({});
+            getRenderer()->setCameraZoom(1.0f);
+            getScriptingEngine()->onDrawUI();
+            getRenderer()->setCameraPosition(cameraPosTmp);
+            getRenderer()->setCameraZoom(cameraZoomTmp);
+        }
         
-        getRenderer()->flip();
+        {
+            ZoneScopedN("Swap");
+            getRenderer()->flip();
+        }
 
         newFrameTime = getEventSystem()->getTimeMS();
         dt = std::min(
@@ -149,6 +167,8 @@ void Kolanut::run()
             (1.0f/60.0f) * 5.0f
         );
         lastFrameTime = newFrameTime;
+
+        FrameMark;
     }
 }
 
