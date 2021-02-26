@@ -384,7 +384,7 @@ bool RendererVK::doInit(const Config& config)
             this->device->getVkHandle(),
             this->graphQueue->getVkHandle(),
             this->graphCommandBuffers[i]->getVkHandle()
-        )
+        );
 
         this->tracyContextes.push_back(ctx);
     }

@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.7)
 project(kolanut)
 
+option(ENABLE_TRACY "Builds with Tracy profiling on" OFF)
+
 if (APPLE)
     set(CMAKE_MACOSX_RPATH 0)
     set(ENABLE_CUSTOM_COMPILER_FLAGS Off)
@@ -35,7 +37,10 @@ add_definitions(-Werror=return-type)
 add_definitions(-Werror=int-conversion)
 
 add_definitions(-D_USE_MATH_DEFINES)
+
+if (ENABLE_TRACY)
 add_definitions(-DTRACY_ENABLE)
+endif (ENABLE_TRACY)
 
 if (NOT WIN32)
 add_definitions(-Werror=macro-redefined)
