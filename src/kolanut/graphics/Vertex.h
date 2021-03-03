@@ -4,7 +4,6 @@
 
 namespace kola {
 namespace graphics {
-namespace vulkan {
 
 struct Vertex
 {
@@ -13,6 +12,5 @@ struct Vertex
     Colorf color;
 };
 
-} // namespace vulkan
 } // namespace graphics
 } // namespace kola

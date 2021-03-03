@@ -1,6 +1,12 @@
 #pragma once
 
-#include "kolanut/graphics/Renderer.h"
+#define GLFW_INCLUDE_VULKAN
+
+#include "kolanut/graphics/glfw/RendererGLFW.h"
+#include "kolanut/graphics/vulkan/ShaderVK.h"
+#include "kolanut/graphics/vulkan/ProgramVK.h"
+#include "kolanut/graphics/vulkan/GeometryBufferVK.h"
+
 #include "kolanut/graphics/vulkan/utils/Instance.h"
 #include "kolanut/graphics/vulkan/utils/PhysicalDevice.h"
 #include "kolanut/graphics/vulkan/utils/Device.h"
@@ -15,7 +21,6 @@
 #include "kolanut/graphics/vulkan/utils/DescriptorSet.h"
 #include "kolanut/graphics/vulkan/utils/MemoryManager.h"
 #include "kolanut/graphics/vulkan/utils/CommandBuffer.h"
-#include "kolanut/graphics/vulkan/utils/GeometryBuffer.h"
 #include "kolanut/graphics/vulkan/utils/UniformsBuffer.h"
 #include "kolanut/graphics/vulkan/utils/QueryPool.h"
 #include "kolanut/graphics/vulkan/utils/Semaphore.h"
@@ -23,8 +28,6 @@
 
 #include <TracyVulkan.hpp>
 
-#define GLFW_INCLUDE_VULKAN
-#include <GLFW/glfw3.h>
 #include <vulkan/vulkan.h>
 
 #include <memory>
@@ -33,7 +36,7 @@
 namespace kola {
 namespace graphics {
 
-class RendererVK : public Renderer
+class RendererVK : public RendererGLFW
 { 
 public:
     static constexpr const char* SHADER_FRAG_EXT = ".frag";
@@ -44,30 +47,8 @@ public:
     static constexpr const size_t MAX_DESC_IMAGE_SAMPLERS = 12384;
 
 public:
-    ~RendererVK();
-
-public:
     bool doInit(const Config& config) override;
-    std::shared_ptr<Texture> loadTexture(const std::string& file) override;
-    std::shared_ptr<Font> loadFont(const std::string& file, size_t sizes) override;
-    
-    void draw(
-        std::shared_ptr<Texture> t, 
-        const Vec2f& position, 
-        float angle, 
-        const Vec2f& scale,
-        const Vec2f& origin
-    ) override;
-
-    void draw(
-        std::shared_ptr<Texture> t, 
-        const Vec2f& position, 
-        float angle, 
-        const Vec2f& scale,
-        const Vec2f& origin, 
-        const Vec4i& rect,
-        const Colori& color
-    ) override;
+    std::shared_ptr<Program> createProgram() override;
 
     void draw(
         const Rectf& rect,
@@ -80,21 +61,12 @@ public:
         const Colori& color
     ) override;
 
-    void clear() override;
-    void flip() override;
+    void drawTriangles(const DrawTriangles& req) override;
 
-    Vec2i getResolution() override;
+    void doClear() override;
+    void doFlip() override;
 
-    void setCameraPosition(const Vec2f& pos) override;
-    void setCameraZoom(float zoom) override;
-    Vec2f getCameraPosition() override;
-    float getCameraZoom() override;
-
-    GLFWwindow* getWindow() const
-    { return this->window; }
-
-    Vec2i getPixelResolution();
-    float getPixelsPerPoint();
+    Vec2i getPixelResolution() const override;
 
     std::shared_ptr<vulkan::Device> getDevice() const
     { return this->device; }
@@ -102,21 +74,23 @@ public:
     std::shared_ptr<vulkan::Queue> getGraphicQueue() const
     { return this->graphQueue; }
 
+protected:
+    std::shared_ptr<Texture> createTexture() override;
+    std::shared_ptr<Font> createFont() override;
+    std::shared_ptr<Shader> createShader() override;
+    std::shared_ptr<GeometryBuffer> createGeometryBuffer() override;
+
+    std::string getShadersExt() const override
+    { return ".vk"; }
+
 private:
-    Vec2f cameraPos = {};
-    float cameraZoom = 1.0f;
-
-    GLFWwindow* window = nullptr;
-
     std::shared_ptr<vulkan::Instance> instance = {};
     std::shared_ptr<vulkan::PhysicalDevice> physicalDevice = {};
     std::shared_ptr<vulkan::Device> device = {};
     std::shared_ptr<vulkan::Queue> presQueue = {};
     std::shared_ptr<vulkan::Queue> graphQueue = {};
-    std::shared_ptr<vulkan::ShaderModule> vertexShader = {};
-    std::shared_ptr<vulkan::ShaderModule> fragmentShader = {};
+    
     std::shared_ptr<vulkan::Pipeline2D> pipeline = {};
-    std::shared_ptr<vulkan::GeometryBuffer> geomBuffer = {};
     std::shared_ptr<vulkan::UniformsBuffer> uniformsBuffer = {};
     std::shared_ptr<vulkan::Texture> kitten = {};
     std::shared_ptr<vulkan::DescriptorPool> descriptorPool = {};
@@ -130,14 +104,12 @@ private:
 
     VkSurfaceKHR surface = {};
 
-    uint8_t currentInFlightFrame = 0;
     uint32_t nextImageIdx = 0;
     std::vector<uint64_t> gpuElapsedTimes = {};
     double gpuAvgTime = {};
     size_t gpuSamples = 0;
 
     VkSampler sampler = {};
-    Config config = {};
 
     std::vector<TracyVkCtx> tracyContextes = {};
 };

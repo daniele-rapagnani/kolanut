@@ -31,6 +31,16 @@ add_subdirectory(src/kolanut/libs/glfw)
 add_subdirectory(src/kolanut/libs/glm)
 add_subdirectory(src/kolanut/libs/cppfs)
 
+execute_process(COMMAND src/kolanut/libs/shaderc/utils/git-sync-deps)
+
+option(SHADERC_SKIP_TESTS "" ON)
+set(SHADERC_SKIP_TESTS ON)
+option(SHADERC_SKIP_EXAMPLES "" ON)
+set(SHADERC_SKIP_EXAMPLES ON)
+option(SHADERC_SKIP_INSTALL "" ON)
+set(SHADERC_SKIP_INSTALL ON)
+add_subdirectory(src/kolanut/libs/shaderc)
+
 add_definitions(-Werror=incompatible-pointer-types)
 add_definitions(-Werror=implicit-function-declaration)
 add_definitions(-Werror=return-type)
@@ -57,11 +67,19 @@ set(
     src/kolanut/graphics/Graphics.cpp
     src/kolanut/graphics/Tilemap.cpp
     src/kolanut/graphics/Renderer.cpp
+    src/kolanut/graphics/Shader.cpp
+    src/kolanut/graphics/Program.cpp
+    src/kolanut/graphics/GeometryBuffer.cpp
     
+    src/kolanut/graphics/glfw/RendererGLFW.cpp
+
     src/kolanut/graphics/ogl/glad/src/glad.c
     src/kolanut/graphics/ogl/RendererOGL.cpp
     src/kolanut/graphics/ogl/TextureOGL.cpp
     src/kolanut/graphics/ogl/FontOGL.cpp
+    src/kolanut/graphics/ogl/ShaderOGL.cpp
+    src/kolanut/graphics/ogl/ProgramOGL.cpp
+    src/kolanut/graphics/ogl/GeometryBufferOGL.cpp
     src/kolanut/graphics/ogl/utils/shaders/Shader.cpp
     src/kolanut/graphics/ogl/utils/shaders/Program.cpp
     src/kolanut/graphics/ogl/utils/GenericUtils.cpp
@@ -69,6 +87,10 @@ set(
     src/kolanut/graphics/vulkan/RendererVK.cpp
     src/kolanut/graphics/vulkan/TextureVK.cpp
     src/kolanut/graphics/vulkan/FontVK.cpp
+    src/kolanut/graphics/vulkan/ShaderVK.cpp
+    src/kolanut/graphics/vulkan/ProgramVK.cpp
+    src/kolanut/graphics/vulkan/GeometryBufferVK.cpp
+
     src/kolanut/graphics/vulkan/utils/Instance.cpp
     src/kolanut/graphics/vulkan/utils/Helpers.cpp
     src/kolanut/graphics/vulkan/utils/PhysicalDevice.cpp
@@ -88,7 +110,6 @@ set(
     src/kolanut/graphics/vulkan/utils/DescriptorPool.cpp
     src/kolanut/graphics/vulkan/utils/DescriptorSet.cpp
     src/kolanut/graphics/vulkan/utils/StagedBuffer.cpp
-    src/kolanut/graphics/vulkan/utils/GeometryBuffer.cpp
     src/kolanut/graphics/vulkan/utils/UniformsBuffer.cpp
     src/kolanut/graphics/vulkan/utils/QueryPool.cpp
 
@@ -135,6 +156,7 @@ target_include_directories(
     src/kolanut/graphics/ogl/glad/include/
     src/kolanut/libs/cppfs/source/cppfs/include/
     ${cppfs_BINARY_DIR}/source/cppfs/include/
+    src/kolanut/libs/shaderc/libshaderc/include/
     src/kolanut/libs/tracy/
     ${Vulkan_INCLUDE_DIR}
 )
@@ -157,6 +179,6 @@ if (MINGW)
     target_link_options(kolanut PUBLIC ${MINGW_LD_FLAGS})
 endif(MINGW)
 
-set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser cppfs ${Vulkan_LIBRARIES})
+set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser cppfs shaderc ${Vulkan_LIBRARIES})
 
 target_link_libraries(kolanut ${LINKLIBS})

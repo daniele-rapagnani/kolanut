@@ -1,9 +1,11 @@
 #include "kolanut/graphics/vulkan/RendererVK.h"
 #include "kolanut/graphics/vulkan/TextureVK.h"
 #include "kolanut/graphics/vulkan/FontVK.h"
+#include "kolanut/graphics/vulkan/ShaderVK.h"
+#include "kolanut/graphics/vulkan/ProgramVK.h"
 #include "kolanut/graphics/vulkan/utils/Helpers.h"
 #include "kolanut/graphics/vulkan/utils/MappedMemory.h"
-#include "kolanut/graphics/vulkan/utils/Vertex.h"
+#include "kolanut/graphics/Vertex.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/DIContainer.h"
@@ -30,22 +32,7 @@
 namespace kola {
 namespace graphics {
 
-RendererVK::~RendererVK()
-{
-    if (this->window)
-    {
-        glfwDestroyWindow(this->window);
-        this->window = nullptr;
-    }
-}
-
 namespace {
-
-void onWindowResize(GLFWwindow* window, int width, int height)
-{
-    auto r = std::static_pointer_cast<RendererVK>(di::get<Renderer>());
-    //r->updateWindowSize();
-}
 
 void onVulkanValidationLayerMessage(
     VkDebugUtilsMessageSeverityFlagBitsEXT messageSeverity,
@@ -80,55 +67,14 @@ struct ViewUniform
 
 bool RendererVK::doInit(const Config& config)
 {
-    this->config = config;
+    setUseNoAPI(true);
+    
+    if (!RendererGLFW::doInit(config))
+    {
+        return false;
+    }
 
     knM_logDebug("Initilizing Vulkan renderer");
-
-    if (!glfwInit())
-    {
-        knM_logFatal("Can't init GLFW");
-        return false;
-    }
-
-    GLFWmonitor* monitor = nullptr;
-
-    if (config.resolution.fullScreen)
-    {
-        int monitorsCount = 0;
-        GLFWmonitor** monitors = glfwGetMonitors(&monitorsCount);
-
-        if (!monitors || monitorsCount == 0)
-        {
-            knM_logFatal("GLFW couldn't enumerate monitors or none is connected.");
-            return false;
-        }
-
-        monitor = monitors[0];
-    }
-
-    glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-
-    this->window = glfwCreateWindow(
-        config.resolution.screenSize.x,
-        config.resolution.screenSize.y,
-        config.windowTitle.c_str(), 
-        monitor, 
-        NULL
-    );
-
-    if (!this->window)
-    {
-        glfwTerminate();
-
-        knM_logFatal("Can't create window with GLFW");
-        return false;
-    }
-
-    glfwSetWindowAspectRatio(
-        this->window, 
-        config.resolution.screenSize.x, 
-        config.resolution.screenSize.y
-    );
 
     uint32_t glfwExtensionsCount = 0;
     const char** glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionsCount);
@@ -141,7 +87,7 @@ bool RendererVK::doInit(const Config& config)
         instConf.extensions.push_back("VK_KHR_get_physical_device_properties2");
     }
 
-    if (this->config.enableAPIDebug)
+    if (getConfig().enableAPIDebug)
     {
         instConf.layers.push_back("VK_LAYER_KHRONOS_validation");
         instConf.extensions.push_back("VK_EXT_debug_utils");
@@ -158,7 +104,7 @@ bool RendererVK::doInit(const Config& config)
     assert(this->instance);
 
     if (
-        glfwCreateWindowSurface(this->instance->getVkHandle(), this->window, nullptr, &this->surface)
+        glfwCreateWindowSurface(this->instance->getVkHandle(), getWindow(), nullptr, &this->surface) 
         != VK_SUCCESS
     )
     {
@@ -172,13 +118,13 @@ bool RendererVK::doInit(const Config& config)
         return false;
     }
 
-    if (!this->config.forceGPU.empty())
+    if (!getConfig().forceGPU.empty())
     {
         for (const auto& dev : vulkan::PhysicalDevice::getDevices(this->instance))
         {
             knM_logInfo("Available GPU: " << dev->getName());
 
-            if (dev->getName() == this->config.forceGPU)
+            if (dev->getName() == getConfig().forceGPU)
             {
                 this->physicalDevice = dev;
                 break;
@@ -222,7 +168,7 @@ bool RendererVK::doInit(const Config& config)
 
     vulkan::Device::Config devConfig = {};
 
-    devConfig.framesInFlight = this->config.framesInFlight;
+    devConfig.framesInFlight = getConfig().framesInFlight;
     devConfig.extensions.push_back("VK_KHR_swapchain");
     
     if (this->physicalDevice->isExtensionSupported("VK_KHR_portability_subset"))
@@ -260,22 +206,6 @@ bool RendererVK::doInit(const Config& config)
         knM_logFatal("Can't create graphic command buffers");
         return false;
     }
-
-    this->vertexShader = vulkan::make_init_fatal<vulkan::ShaderModule>(
-        this->device,
-        di::get<filesystem::FilesystemEngine>(),
-        "assets/mainv.svert"
-    );
-
-    assert(this->vertexShader);
-
-    this->fragmentShader = vulkan::make_init_fatal<vulkan::ShaderModule>(
-        this->device,
-        di::get<filesystem::FilesystemEngine>(),
-        "assets/mainv.sfrag"
-    );
-
-    assert(this->fragmentShader);
 
     VkSamplerCreateInfo sci = {};
     sci.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
@@ -325,13 +255,6 @@ bool RendererVK::doInit(const Config& config)
     }
 
     {
-        vulkan::GeometryBuffer::Config c = {};
-        c.maxFrames = this->device->getConfig().framesInFlight;
-        c.maxVerts = this->config.maxGeometryBufferVertices;
-        this->geomBuffer = vulkan::make_init_fatal<vulkan::GeometryBuffer>(this->device, c);
-    }
-
-    {
         vulkan::UniformsBuffer::Config c = {};
         c.maxSets = MAX_DESC_SETS;
 
@@ -339,17 +262,6 @@ bool RendererVK::doInit(const Config& config)
     }
 
     this->device->getSwapchain()->initFramebuffers(this->device->getRenderPasses().back());
-
-    VkSurfaceCapabilitiesKHR sc = this->physicalDevice->getSurfaceCapabilities(this->surface);
-
-    vulkan::Pipeline2D::Config p2dConf = {};
-    p2dConf.fragmentShader = this->fragmentShader;
-    p2dConf.vertexShader = this->vertexShader;
-    p2dConf.renderPass = this->device->getRenderPasses().back();
-    p2dConf.viewportWidth = sc.currentExtent.width;
-    p2dConf.viewportHeight = sc.currentExtent.height;
-
-    this->pipeline = vulkan::make_init_fatal<vulkan::Pipeline2D>(this->device, p2dConf);
 
     {
         vulkan::DescriptorPool::Config poolConfig = {};
@@ -392,156 +304,49 @@ bool RendererVK::doInit(const Config& config)
     return true;
 }
 
-std::shared_ptr<Texture> RendererVK::loadTexture(const std::string& file)
+void RendererVK::drawTriangles(const DrawTriangles& req)
 {
-    knM_logDebug("Loading texture: " << file);
-    
-    std::shared_ptr<TextureVK> texture = std::make_shared<TextureVK>();
-    
-    if (!texture->load(file))
-    {
-        return nullptr;
-    }
+    std::shared_ptr<ProgramVK> program = 
+        std::static_pointer_cast<ProgramVK>(req.program)
+    ;
 
-    return std::static_pointer_cast<Texture>(texture);
-}
-
-std::shared_ptr<Font> RendererVK::loadFont(const std::string& file, size_t size)
-{
-    knM_logDebug("Loading font: " << file);
-
-    std::shared_ptr<FontVK> font = std::make_shared<FontVK>();
-    
-    if (!font->load(file, size))
-    {
-        return nullptr;
-    }
-
-    return std::static_pointer_cast<Font>(font);
-}
-
-void RendererVK::draw(
-    std::shared_ptr<Texture> t, 
-    const Vec2f& position, 
-    float angle, 
-    const Vec2f& scale,
-    const Vec2f& origin
-)
-{
-    Sizei ts = t->getSize();
-
-    draw(
-        t, 
-        position,
-        angle,
-        scale,
-        origin,
-        Recti { 0, 0, ts.x, ts.y },
-        {}
-    );
-}
-
-void RendererVK::draw(
-    std::shared_ptr<Texture> t, 
-    const Vec2f& position, 
-    float angle, 
-    const Vec2f& scale,
-    const Vec2f& origin,
-    const Recti& rect,
-    const Colori& color
-)
-{
-    assert(t);
-
-    auto ds = this->descriptorPool->allocateSet(this->pipeline->descriptorSetLayout);
-    assert(ds);
-
-    this->descriptorSets.push_back(ds);
-
-    std::shared_ptr<TextureVK> vkt = std::static_pointer_cast<TextureVK>(t);
-
-    Sizei s = vkt->getSize();
-
-    Rectf tcRect = { 
-        rect.x / static_cast<float>(s.x), 
-        rect.y / static_cast<float>(s.y),
-        0.0f,
-        0.0f
-    };
-    
-    tcRect.z = tcRect.x + (rect.z / static_cast<float>(s.x));
-    tcRect.w = tcRect.y + (rect.w / static_cast<float>(s.y));
-
-    std::vector<vulkan::Vertex> vertices = {
-        { Vec2f { 0.0f, 0.0f }, { tcRect.x, tcRect.y }, color },
-        { Vec2f { 0.0f, rect.w }, { tcRect.x, tcRect.w }, color },
-        { Vec2f { rect.z, 0.0f }, { tcRect.z, tcRect.y }, color },
-        { Vec2f { rect.z, 0.0f }, { tcRect.z, tcRect.y }, color },
-        { Vec2f { 0.0f, rect.w }, { tcRect.x, tcRect.w }, color },
-        { Vec2f { rect.z, rect.w }, { tcRect.z, tcRect.w }, color },
-    };
-
-    vulkan::GeometryBuffer::Handle h = this->geomBuffer->addVertices(vertices, this->currentInFlightFrame);
+    std::shared_ptr<TextureVK> texture = 
+        std::static_pointer_cast<TextureVK>(req.texture)
+    ;
 
     ViewUniform vu = {};
     vu.screenSize.x = getDesignResolution().x;
     vu.screenSize.y = getDesignResolution().y;
-
-    // T * S * R * O, outer comes first
-    vu.transform = glm::translate(
-        glm::rotate(
-            glm::scale(
-                glm::translate(
-                    vu.transform,
-                    glm::vec3 { position.x, position.y, 0.0f }
-                ),
-                glm::vec3 { scale.x, scale.y, 0.0f }
-            ),
-            static_cast<float>(angle * (M_PI / 180.0)),
-            glm::vec3 { 0.0f, 0.0f, 1.0f }
-        ),
-        glm::vec3 { -origin.x, -origin.y, 0.0f }
-    );
-
-    float resScale = getResolution().x / getDesignResolution().x;
-
-    vu.camera = glm::translate(
-        glm::scale(
-            vu.camera,
-            glm::vec3 {
-                resScale * this->cameraZoom,
-                resScale * this->cameraZoom,
-                1.0f
-            }
-        ),
-        glm::vec3 {
-            -this->cameraPos.x, 
-            -this->cameraPos.y,
-            0.0f
-        }
-    );
+    vu.camera = req.camera;
+    vu.transform = req.transform;
 
     vulkan::UniformsBuffer::Handle uh = 
-        this->uniformsBuffer->addUniform(&vu, sizeof(vu), this->currentInFlightFrame)
+        this->uniformsBuffer->addUniform(&vu, sizeof(vu), getCurrentFrame())
     ;
 
-    vkt->getTexture()->use(this->sampler, ds, 1);
+    auto ds = this->descriptorPool->allocateSet(program->getVKPipeline()->descriptorSetLayout);
+    assert(ds);
+
+    this->descriptorSets.push_back(ds);
+
+    texture->getTexture()->use(this->sampler, ds, 1);
     this->uniformsBuffer->bind(uh, ds, 2);
 
-    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
-    
+    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[getCurrentFrame()];
+    auto h = reinterpret_cast<GeometryBuffer::Handle>(req.vertices);
+
     {
         TracyVkZone(
-            this->tracyContextes[this->currentInFlightFrame],
+            this->tracyContextes[getCurrentFrame()],
             gcb->getVkHandle(),
             "Draw"
         )
 
         VkCommandBuffer b = gcb->getVkHandle();
-        vkCmdBindPipeline(b, VK_PIPELINE_BIND_POINT_GRAPHICS, this->pipeline->getVkHandle());
-        ds->bind(b, this->pipeline->layout, VK_PIPELINE_BIND_POINT_GRAPHICS);
-        this->geomBuffer->bind(h, gcb);
-        vkCmdDraw(b, vertices.size(), 1, 0, 0);
+        vkCmdBindPipeline(b, VK_PIPELINE_BIND_POINT_GRAPHICS, program->getVKPipeline()->getVkHandle());
+        ds->bind(b, program->getVKPipeline()->layout, VK_PIPELINE_BIND_POINT_GRAPHICS);
+        std::static_pointer_cast<GeometryBufferVK>(getGeometryBuffer())->bind(h, gcb);
+        vkCmdDraw(b, req.verticesCount, 1, 0, 0);
     }
 }
 
@@ -562,14 +367,13 @@ void RendererVK::draw(
 
 }
 
-void RendererVK::clear()
+void RendererVK::doClear()
 {
     this->descriptorPool->reset();
     this->descriptorSets.clear();
-    this->geomBuffer->reset(this->currentInFlightFrame);
-    this->uniformsBuffer->reset(this->currentInFlightFrame);
+    this->uniformsBuffer->reset(getCurrentFrame());
 
-    std::shared_ptr<vulkan::Fence> frameFence = this->frameCompletedFence[this->currentInFlightFrame];
+    std::shared_ptr<vulkan::Fence> frameFence = this->frameCompletedFence[getCurrentFrame()];
 
     if (!frameFence->wait())
     {
@@ -586,7 +390,7 @@ void RendererVK::clear()
     if (
         !this->device->getSwapchain()->acquireNext(
             &this->nextImageIdx, 
-            this->imageReadySemaphores[this->currentInFlightFrame]
+            this->imageReadySemaphores[getCurrentFrame()]
         )
     )
     {
@@ -594,7 +398,7 @@ void RendererVK::clear()
         return;
     }
 
-    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
+    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[getCurrentFrame()];
     gcb->begin();
     VkCommandBuffer b = gcb->getVkHandle();
 
@@ -609,7 +413,7 @@ void RendererVK::clear()
         b, 
         VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT, 
         this->queryPool->getVkHandle(), 
-        this->currentInFlightFrame * 2
+        getCurrentFrame() * 2
     );
 
     VkClearValue cv = {};
@@ -625,7 +429,7 @@ void RendererVK::clear()
     rpbi.renderPass = this->device->getRenderPasses().back()->getVkHandle();
     rpbi.framebuffer = this->device->getSwapchain()->getFramebuffer(
         this->nextImageIdx, 
-        this->currentInFlightFrame
+        getCurrentFrame()
     );
 
     rpbi.renderArea.extent = sc.currentExtent;
@@ -637,13 +441,13 @@ void RendererVK::clear()
     vkCmdBeginRenderPass(b, &rpbi, VK_SUBPASS_CONTENTS_INLINE);
 }
 
-void RendererVK::flip()
+void RendererVK::doFlip()
 {
-    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[this->currentInFlightFrame];
+    std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[getCurrentFrame()];
 
     vkCmdEndRenderPass(gcb->getVkHandle());
 
-    size_t qIdx = this->currentInFlightFrame * 2;
+    size_t qIdx = getCurrentFrame() * 2;
 
     vkCmdWriteTimestamp(
         gcb->getVkHandle(), 
@@ -653,18 +457,18 @@ void RendererVK::flip()
     );
 
     TracyVkCollect(
-        this->tracyContextes[this->currentInFlightFrame],
+        this->tracyContextes[getCurrentFrame()],
         gcb->getVkHandle()
     )
 
     gcb->end();
 
     vulkan::Queue::Sync sync = {};
-    sync.submitFence = this->frameCompletedFence[this->currentInFlightFrame];
-    sync.waitFor = this->imageReadySemaphores[this->currentInFlightFrame];
-    sync.completeSignal = this->renderCompleteSemaphores[this->currentInFlightFrame];
+    sync.submitFence = this->frameCompletedFence[getCurrentFrame()];
+    sync.waitFor = this->imageReadySemaphores[getCurrentFrame()];
+    sync.completeSignal = this->renderCompleteSemaphores[getCurrentFrame()];
     
-    if (!this->graphQueue->submit(this->graphCommandBuffers[this->currentInFlightFrame], sync))
+    if (!this->graphQueue->submit(this->graphCommandBuffers[getCurrentFrame()], sync))
     {
         knM_logFatal("Can't submit graphic queue");
         return;
@@ -711,44 +515,9 @@ void RendererVK::flip()
         this->gpuSamples = 0;
         this->gpuAvgTime = 0.0f;
     }
-
-    this->currentInFlightFrame = 
-        (this->currentInFlightFrame + 1) % 
-        this->device->getConfig().framesInFlight
-    ;
 }
 
-void RendererVK::setCameraPosition(const Vec2f& pos)
-{
-    this->cameraPos = pos;
-}
-
-void RendererVK::setCameraZoom(float zoom)
-{
-    this->cameraZoom = zoom;
-}
-
-Vec2f RendererVK::getCameraPosition()
-{
-    return this->cameraPos;
-}
-
-float RendererVK::getCameraZoom()
-{
-    return this->cameraZoom;
-}
-
-Vec2i RendererVK::getResolution()
-{
-    assert(this->window);
-
-    int w, h;
-    glfwGetWindowSize(this->window, &w, &h);
-
-    return { w, h };
-}
-
-Vec2i RendererVK::getPixelResolution()
+Vec2i RendererVK::getPixelResolution() const
 {
     assert(this->physicalDevice);
     assert(this->device);
@@ -760,12 +529,47 @@ Vec2i RendererVK::getPixelResolution()
     return { sc.currentExtent.width, sc.currentExtent.height };
 }
 
-float RendererVK::getPixelsPerPoint()
+std::shared_ptr<Texture> RendererVK::createTexture()
 {
-    Vec2i r = getResolution();
-    Vec2i pr = getPixelResolution();
+    return std::make_shared<TextureVK>();
+}
 
-    return pr.x / r.x;
+std::shared_ptr<Font> RendererVK::createFont()
+{
+    return std::make_shared<FontVK>();
+}
+
+std::shared_ptr<Shader> RendererVK::createShader()
+{
+    assert(this->device);
+
+    auto shader = std::make_shared<ShaderVK>();
+    shader->setDevice(this->device);
+    return shader;
+}
+
+std::shared_ptr<Program> RendererVK::createProgram()
+{
+    assert(this->surface);
+    assert(this->device);
+
+    auto program = std::make_shared<ProgramVK>();
+
+    VkSurfaceCapabilitiesKHR sc = 
+        getDevice()->getPhysicalDevice()->getSurfaceCapabilities(this->surface)
+    ;
+
+    program->setDevice(this->device);
+    program->setViewportSize({ sc.currentExtent.width, sc.currentExtent.height });
+    return program;
+}
+
+std::shared_ptr<GeometryBuffer> RendererVK::createGeometryBuffer()
+{
+    assert(this->device);
+    auto geo = std::make_shared<GeometryBufferVK>();
+    geo->setDevice(this->device);
+    return geo;
 }
 
 } // namespace graphics

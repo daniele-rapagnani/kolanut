@@ -13,6 +13,7 @@ class FilesystemEngine
 public:
     virtual bool init(const Config& config) = 0;
     virtual bool getFileContent(const std::string& file, std::vector<char>& content) = 0;
+    virtual bool isFile(const std::string& path) = 0;
     
     bool getFileContent(const std::string& file, std::string& content);
 };

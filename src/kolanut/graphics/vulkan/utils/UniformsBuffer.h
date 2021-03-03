@@ -2,7 +2,7 @@
 
 #include "kolanut/graphics/vulkan/utils/DeviceDependent.h"
 #include "kolanut/graphics/vulkan/utils/Buffer.h"
-#include "kolanut/graphics/vulkan/utils/Vertex.h"
+#include "kolanut/graphics/Vertex.h"
 #include "kolanut/graphics/vulkan/utils/CommandBuffer.h"
 
 #include <vulkan/vulkan.h>

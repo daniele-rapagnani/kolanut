@@ -47,7 +47,7 @@ namespace _internal {
     {
         static bool set(GLint loc, const Mat3f& val)
         {
-            knM_oglCall(glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(glm::transpose(val))));
+            knM_oglCall(glUniformMatrix3fv(loc, 1, GL_FALSE, glm::value_ptr(val)));
             return true;
         }
     };
@@ -55,9 +55,9 @@ namespace _internal {
     template<>
     struct UniformSetter<Mat4f>
     {
-        static bool set(GLint loc, const Mat3f& val)
+        static bool set(GLint loc, const Mat4f& val)
         {
-            knM_oglCall(glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(glm::transpose(val))));
+            knM_oglCall(glUniformMatrix4fv(loc, 1, GL_FALSE, glm::value_ptr(val)));
             return true;
         }
     };

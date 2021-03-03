@@ -12,10 +12,6 @@ extern "C" {
 namespace kola {
 namespace filesystem {
 
-namespace {
-const char PATH_SEP = '/';
-}
-
 bool FilesFilesystemEngine::init(const Config& config)
 {
     this->root = config.root;
@@ -25,9 +21,9 @@ bool FilesFilesystemEngine::init(const Config& config)
         this->root = ".";
     }
 
-    if (this->root[this->root.size() - 1] != PATH_SEP)
+    if (this->root[this->root.size() - 1] != '/')
     {
-        this->root += PATH_SEP;
+        this->root += '/';
     }
 
     return true;
@@ -66,6 +62,14 @@ bool FilesFilesystemEngine::getFileContent(const std::string& file, std::vector<
     }
 
     return success;
+}
+
+bool FilesFilesystemEngine::isFile(const std::string& path)
+{
+    cppfs::FilePath fpath = this->root + path;
+    cppfs::FileHandle fh = cppfs::fs::open(fpath.path());
+
+    return fh.isFile();
 }
 
 } // namespace filesystem

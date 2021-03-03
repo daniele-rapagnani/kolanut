@@ -1,11 +1,6 @@
 #pragma once
 
-#include "kolanut/graphics/vulkan/utils/DeviceDependent.h"
-#include "kolanut/graphics/vulkan/utils/Buffer.h"
-#include "kolanut/graphics/vulkan/utils/Vertex.h"
-#include "kolanut/graphics/vulkan/utils/CommandBuffer.h"
-
-#include <vulkan/vulkan.h>
+#include "kolanut/graphics/Vertex.h"
 
 #include <vector>
 #include <string>
@@ -14,9 +9,8 @@
 
 namespace kola {
 namespace graphics {
-namespace vulkan {
 
-class GeometryBuffer : public DeviceDependent
+class GeometryBuffer
 {
 public:
     using Handle = uint64_t;
@@ -35,7 +29,7 @@ public:
     };
 
 public:
-    bool init(std::shared_ptr<Device> device, const Config& config = {});
+    bool init(const Config& config = {});
 
     const Config& getConfig() const
     { return this->config; }
@@ -47,20 +41,26 @@ public:
         return addVertices(vertices.data(), vertices.size(), frame);
     }
 
-    bool bind(Handle h, std::shared_ptr<CommandBuffer> commandBuf);
-
     void reset(uint8_t frame)
     {
         this->bufferBase[frame] = this->frameBufferSize * frame;
     }
 
+    size_t getBase(Handle h) const
+    { return (h >> 32) & 0xFFFFFFFF; }
+
+protected:
+    virtual bool createBuffer() = 0;
+    virtual bool copy(const Vertex* vertices, size_t base, size_t size, size_t* realSize) = 0;
+
+    size_t getFrameBufferSize() const
+    { return this->frameBufferSize; }
+
 private:
     Config config = {};
-    std::shared_ptr<Buffer> buffer = {};
-    std::vector<VkDeviceSize> bufferBase = {};
-    VkDeviceSize frameBufferSize = {};
+    std::vector<size_t> bufferBase = {};
+    size_t frameBufferSize = {};
 };
 
-} // namespace vulkan
 } // namespace graphics
 } // namespace kola

@@ -1,6 +1,6 @@
 #include "kolanut/graphics/vulkan/utils/Pipeline2D.h"
 #include "kolanut/graphics/vulkan/utils/Device.h"
-#include "kolanut/graphics/vulkan/utils/Vertex.h"
+#include "kolanut/graphics/Vertex.h"
 #include "kolanut/graphics/vulkan/utils/Helpers.h"
 
 #include <cassert>

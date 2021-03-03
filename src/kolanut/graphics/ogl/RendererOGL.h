@@ -1,47 +1,25 @@
 #pragma once
 
-#include "kolanut/graphics/Renderer.h"
-#include "kolanut/graphics/ogl/utils/shaders/Program.h"
-
 #include <glad/glad.h>
-#include <GLFW/glfw3.h>
+
+#include "kolanut/graphics/glfw/RendererGLFW.h"
+#include "kolanut/graphics/ogl/ProgramOGL.h"
+#include "kolanut/graphics/ogl/GeometryBufferOGL.h"
 
 #include <memory>
 
 namespace kola {
 namespace graphics {
 
-class RendererOGL : public Renderer
+class RendererOGL : public RendererGLFW
 { 
 public:
-    static constexpr const char* SHADER_FRAG_EXT = ".frag";
-    static constexpr const char* SHADER_VERT_EXT = ".vert";
-
-public:
-    ~RendererOGL();
+    virtual ~RendererOGL();
 
 public:
     bool doInit(const Config& config) override;
-    std::shared_ptr<Texture> loadTexture(const std::string& file) override;
-    std::shared_ptr<Font> loadFont(const std::string& file, size_t sizes) override;
-    
-    void draw(
-        std::shared_ptr<Texture> t, 
-        const Vec2f& position, 
-        float angle, 
-        const Vec2f& scale,
-        const Vec2f& origin
-    ) override;
 
-    void draw(
-        std::shared_ptr<Texture> t, 
-        const Vec2f& position, 
-        float angle, 
-        const Vec2f& scale,
-        const Vec2f& origin, 
-        const Vec4i& rect,
-        const Colori& color
-    ) override;
+    std::shared_ptr<Program> createProgram() override;
 
     void draw(
         const Rectf& rect,
@@ -54,38 +32,23 @@ public:
         const Colori& color
     ) override;
 
-    void clear() override;
-    void flip() override;
+    void drawTriangles(const DrawTriangles& req) override;
 
-    Vec2i getResolution() override;
+    void doClear() override;
+    void doFlip() override;
 
-    void setCameraPosition(const Vec2f& pos) override;
-    void setCameraZoom(float zoom) override;
-    Vec2f getCameraPosition() override;
-    float getCameraZoom() override;
+    void onUpdateWindowSize() override;
 
-    std::shared_ptr<utils::ogl::Shader> loadShader(
-        const std::string& path,
-        std::string& error,
-        utils::ogl::Shader::Type type = utils::ogl::Shader::Type::NONE
-    );
+protected:
+    std::shared_ptr<Texture> createTexture() override;
+    std::shared_ptr<Font> createFont() override;
+    std::shared_ptr<Shader> createShader() override;
+    std::shared_ptr<GeometryBuffer> createGeometryBuffer() override;
 
-    Vec2i getPixelResolution();
-    uint8_t getPixelsPerPoint();
-
-    GLFWwindow* getWindow() const
-    { return this->window; }
-
-    void updateWindowSize();
+    std::string getShadersExt() const override
+    { return ".ogl"; }
 
 private:
-    Vec2f cameraPos = {};
-    float cameraZoom = 1.0f;
-
-    GLFWwindow* window = {};
-
-    std::shared_ptr<utils::ogl::Program> drawProgram = {};
-
     GLuint perfQuery = {};
     double gpuElapsed = {};
     GLuint gpuSamples = {};
