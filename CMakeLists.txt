@@ -69,6 +69,7 @@ set(
     src/kolanut/graphics/Renderer.cpp
     src/kolanut/graphics/Shader.cpp
     src/kolanut/graphics/Program.cpp
+    src/kolanut/graphics/TextureSTB.cpp
     src/kolanut/graphics/GeometryBuffer.cpp
     
     src/kolanut/graphics/glfw/RendererGLFW.cpp
