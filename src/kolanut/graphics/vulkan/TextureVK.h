@@ -20,7 +20,7 @@ public:
     TextureVK() = default;
 
 public:
-    bool load(unsigned char* data, size_t w, size_t h);
+    bool doLoad(unsigned char* data, size_t w, size_t h) override;
 
     std::shared_ptr<vulkan::Texture> getTexture() const
     { return this->texture; }

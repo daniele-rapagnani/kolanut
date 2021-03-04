@@ -41,8 +41,6 @@ bool TextureSTB::load(const std::string& file)
 
     setDataOwned(false);
 
-    this->size = { w, h };
-
     if (!load(data, w, h))
     {
         return false;

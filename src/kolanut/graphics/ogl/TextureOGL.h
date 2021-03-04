@@ -18,7 +18,7 @@ public:
     ~TextureOGL();
 
 public:
-    bool load(unsigned char* data, size_t w, size_t h);
+    bool doLoad(unsigned char* data, size_t w, size_t h) override;
     void bind() const;
 
 private:

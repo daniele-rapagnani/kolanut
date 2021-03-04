@@ -11,7 +11,7 @@
 namespace kola {
 namespace graphics {
 
-bool TextureVK::load(unsigned char* data, size_t w, size_t h)
+bool TextureVK::doLoad(unsigned char* data, size_t w, size_t h)
 {
     std::shared_ptr<RendererVK> renderer = 
         std::static_pointer_cast<RendererVK>(di::get<graphics::Renderer>())

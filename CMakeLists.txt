@@ -56,7 +56,7 @@ if (NOT WIN32)
 add_definitions(-Werror=macro-redefined)
 endif (NOT WIN32)
 
-add_definitions(-Wdouble-promotion)
+add_definitions(-Wno-double-promotion)
 add_definitions(-Wno-format)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
@@ -70,6 +70,7 @@ set(
     src/kolanut/graphics/Shader.cpp
     src/kolanut/graphics/Program.cpp
     src/kolanut/graphics/TextureSTB.cpp
+    src/kolanut/graphics/FontSTB.cpp
     src/kolanut/graphics/GeometryBuffer.cpp
     
     src/kolanut/graphics/glfw/RendererGLFW.cpp

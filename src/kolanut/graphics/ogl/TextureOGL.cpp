@@ -15,7 +15,7 @@ TextureOGL::~TextureOGL()
     knM_oglCall(glDeleteTextures(1, &this->texture));
 }
 
-bool TextureOGL::load(unsigned char* data, size_t w, size_t h)
+bool TextureOGL::doLoad(unsigned char* data, size_t w, size_t h)
 {
     knM_oglCall(glGenTextures(1, &this->texture));
 
