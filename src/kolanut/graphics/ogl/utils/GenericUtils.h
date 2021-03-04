@@ -20,26 +20,3 @@
 #else
 #define knM_oglCall(x) x;
 #endif
-
-namespace kola {
-namespace utils {
-namespace ogl {
-
-class Program;
-
-struct DrawRequest
-{
-    std::shared_ptr<kola::graphics::TextureOGL> texture = nullptr;
-    std::shared_ptr<utils::ogl::Program> program = nullptr;
-    Transform2D transform = {};
-    Rectf textureRect = {};
-};
-
-struct QuadDrawRequest : DrawRequest
-{ };
-
-void draw(QuadDrawRequest dr);
-
-} // namespace ogl
-} // namespace utils
-} // namespace kola
