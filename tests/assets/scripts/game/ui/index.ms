@@ -1,3 +1,4 @@
 return {
-    Lives = import("./Lives")
+    Lives = import("./Lives"),
+    Stats = import("./Stats")
 };

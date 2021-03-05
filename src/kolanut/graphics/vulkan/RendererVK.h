@@ -61,7 +61,7 @@ public:
         const Colori& color
     ) override;
 
-    void drawTriangles(const DrawTriangles& req) override;
+    void drawSurface(const DrawSurface& req) override;
 
     void doClear() override;
     void doFlip() override;
@@ -106,8 +106,6 @@ private:
 
     uint32_t nextImageIdx = 0;
     std::vector<uint64_t> gpuElapsedTimes = {};
-    double gpuAvgTime = {};
-    size_t gpuSamples = 0;
 
     VkSampler sampler = {};
 

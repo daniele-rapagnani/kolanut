@@ -6,7 +6,8 @@ let Label = {
             text = text ?? "",
             color = Color.white,
             inWorldView = false,
-            font = font
+            font = font,
+            size = null
         } @ Label;
     },
 

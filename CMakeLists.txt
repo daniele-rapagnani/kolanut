@@ -64,6 +64,8 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
 
 set(
     SRC_FILES
+    src/kolanut/stats/Stats.cpp
+
     src/kolanut/graphics/Graphics.cpp
     src/kolanut/graphics/Tilemap.cpp
     src/kolanut/graphics/Renderer.cpp

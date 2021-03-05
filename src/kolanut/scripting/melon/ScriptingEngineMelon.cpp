@@ -56,10 +56,30 @@ inline bool convert(VM* vm, Kolanut::Config& res, Value* val)
     getInstanceField(vm, val->pack.obj, "enableGraphicAPIDebug", res.graphics.enableAPIDebug);
     getInstanceField(vm, val->pack.obj, "framesInFlight", res.graphics.framesInFlight);
     getInstanceField(vm, val->pack.obj, "maxGeometryBufferVertices", res.graphics.maxGeometryBufferVertices);
+    getInstanceField(vm, val->pack.obj, "jobQueueInitialSize", res.graphics.jobQueueInitialSize);
     getInstanceField(vm, val->pack.obj, "forceGPU", res.graphics.forceGPU);
+    getInstanceField(vm, val->pack.obj, "enableStats", res.enableStats);
 
     return true;
 }
+
+template <>
+class Push<stats::StatsEngine::Result>
+{
+public:
+    static TByte push(VM* vm, const stats::StatsEngine::Result& val)
+    {
+        GCItem* obj = melNewObject(vm);
+        melM_vstackPushGCItem(&vm->stack, obj);
+
+        setInstanceField(vm, obj, "label", *val.label);
+        setInstanceField(vm, obj, "avg", val.avg);
+        setInstanceField(vm, obj, "total", val.total);
+        setInstanceField(vm, obj, "samplesCount", val.samplesCount);
+
+        return 1;
+    }
+};
 
 } // namespace ffi
 } // namespace melon
@@ -146,6 +166,11 @@ void ScriptingEngineMelon::onDraw()
 void ScriptingEngineMelon::onDrawUI()
 {
     melon::ffi::callModuleClosure(this->vm, "Kolanut", "onDrawUI");
+}
+
+void ScriptingEngineMelon::onStatsUpdated(const stats::StatsEngine::Result& result)
+{
+    melon::ffi::callModuleClosure(this->vm, "Kolanut", "onStatsUpdated", result);
 }
 
 bool ScriptingEngineMelon::onQuit()

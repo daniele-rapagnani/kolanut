@@ -6,7 +6,7 @@ let GameOverLabel = {
         let gameOverText = ECS.Entity.create();
         gameOverText->addComponent(ECS.Components.Transform.create());
         gameOverText->addComponent(
-            ECS.Components.Label.create(Assets.Fonts.Title, "Game Over")
+            ECS.Components.Label.create(Assets.Fonts.Pixel, "Game Over")
         );
 
         gameOverText->setTag("Game Over Label");

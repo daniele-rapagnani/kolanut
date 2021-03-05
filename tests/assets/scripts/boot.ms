@@ -2,6 +2,7 @@ let ECS = import("ecs");
 let Game = import("game");
 
 let world = ECS.World.create();
+let statsElem = null;
 
 Kolanut.onKeyPressed = |key, pressed| => {
     world.scene->onKeyPressed(key, pressed);
@@ -12,6 +13,11 @@ Kolanut.onLoad = func kolanutOnLoad => {
 
     world.scene = Game.Scenes.Game.create(world);
     world.scene->load();
+
+    statsElem = Game.UI.Stats.create(
+        Game.Assets.Fonts.Pixel,
+        8.0
+    );
 };
 
 Kolanut.onUpdate = |dt| => {
@@ -22,6 +28,12 @@ Kolanut.onUpdate = |dt| => {
 
 Kolanut.onDraw = => {
     world->draw();
+};
+
+let statsData = {};
+
+Kolanut.onStatsUpdated = |result| => {
+    statsData[result.label] = result;
 };
 
 let uiState = {
@@ -43,4 +55,5 @@ Kolanut.onDrawUI = => {
     world->drawUI();
     updateUIState();
     Game.UI.Lives.draw(Vector.create(10, 10), uiState.lives);
+    statsElem->draw(Vector.create(10, 40), statsData);
 };

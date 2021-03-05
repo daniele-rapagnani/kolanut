@@ -21,20 +21,25 @@ static TByte draw(VM* vm)
     melM_this(vm, thisObj);
     melM_arg(vm, text, MELON_TYPE_STRING, 0);
     melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 1);
-    melM_argOptional(vm, scaleVal, MELON_TYPE_OBJECT, 2);
+    melM_argOptional(vm, sizeVal, MELON_TYPE_NUMBER, 2);
     melM_argOptional(vm, colorVal, MELON_TYPE_OBJECT, 3);
-
-    Vec2f position = {};
-    Vec2f scale = {1.0f, 1.0f};
-    Colori color = { };
-
-    kola::melon::ffi::convert(vm, position, positionVal);
-    kola::melon::ffi::convert(vm, scale, scaleVal);
-    kola::melon::ffi::convert(vm, color, colorVal);
-
+    
     std::shared_ptr<graphics::Font> font = 
         ffi::getInstance<graphics::Font>(vm, thisObj->pack.obj)
     ;
+
+    Vec2f position = {};
+    float size = static_cast<float>(font->getNativeFontSize());
+    Colori color = { };
+
+    kola::melon::ffi::convert(vm, position, positionVal);
+    kola::melon::ffi::convert(vm, size, sizeVal);
+    kola::melon::ffi::convert(vm, color, colorVal);
+
+    Vec2f scale = {
+        size / font->getNativeFontSize(),
+        size / font->getNativeFontSize()
+    };
 
     di::get<graphics::Renderer>()->draw(
         melM_strFromObj(text->pack.obj)->string,
@@ -65,10 +70,24 @@ static TByte getTextSize(VM* vm)
     return 1;
 }
 
+static TByte getNativeSize(VM* vm)
+{
+    melM_this(vm, thisObj);
+
+    std::shared_ptr<graphics::Font> font = 
+        ffi::getInstance<graphics::Font>(vm, thisObj->pack.obj)
+    ;
+
+    ffi::push(vm, font->getNativeFontSize());
+
+    return 1;
+}
+
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
     { "draw", 5, 0, &draw, 1 },
     { "getTextSize", 1, 0, &getTextSize, 1 },
+    { "getNativeSize", 1, 0, &getNativeSize, 1 },
     { NULL, 0, 0, NULL }
 };
 

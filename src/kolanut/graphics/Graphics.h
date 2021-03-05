@@ -33,6 +33,7 @@ struct Config
     bool enableAPIDebug = false;
     uint8_t framesInFlight = 2;
     size_t maxGeometryBufferVertices = 20000 * 6;
+    size_t jobQueueInitialSize = 5000;
     std::string forceGPU = {};
 };
 

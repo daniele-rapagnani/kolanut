@@ -32,7 +32,7 @@ public:
         const Colori& color
     ) override;
 
-    void drawTriangles(const DrawTriangles& req) override;
+    void drawSurface(const DrawSurface& req) override;
 
     void doClear() override;
     void doFlip() override;
@@ -50,8 +50,7 @@ protected:
 
 private:
     GLuint perfQuery = {};
-    double gpuElapsed = {};
-    GLuint gpuSamples = {};
+    std::shared_ptr<Texture> lastTexture = {};
 };
 
 } // namespace graphics

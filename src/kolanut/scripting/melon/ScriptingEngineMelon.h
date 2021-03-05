@@ -19,6 +19,7 @@ public:
     void onUpdate(float dt) override;
     void onDraw() override;
     void onDrawUI() override;
+    void onStatsUpdated(const stats::StatsEngine::Result& result) override;
     bool onQuit() override;
     void onKeyPressed(events::KeyCode key, bool pressed) override;
 

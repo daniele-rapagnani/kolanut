@@ -4,6 +4,9 @@
 #include "kolanut/scripting/ScriptingEngine.h"
 #include "kolanut/events/EventSystem.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
+#include "kolanut/stats/StatsEngine.h"
+#include "kolanut/stats/Stats.h"
+#include "kolanut/stats/DummyStats.h"
 
 #include <Tracy.hpp>
 
@@ -76,6 +79,34 @@ bool Kolanut::init(const Config& conf)
     knM_logDebug("Initializing Kolanut");
     this->config = conf;
 
+    di::registerType<stats::StatsEngine>(
+        [this] () {
+            std::shared_ptr<stats::StatsEngine> s = {};
+
+            if (getConfig().enableStats)
+            {
+                s = std::static_pointer_cast<stats::StatsEngine>(
+                    std::make_shared<stats::Stats>()
+                );
+            }
+            else
+            {
+                s = std::static_pointer_cast<stats::StatsEngine>(
+                    std::make_shared<stats::DummyStats>()
+                );
+            }
+            
+            stats::StatsEngine::Config c = {};
+            c.resultCb = [] (const stats::Stats::Result& r) {
+                di::get<scripting::ScriptingEngine>()->onStatsUpdated(r);
+            };
+            
+            s->init(c);
+
+            return s;
+        }
+    );
+
     di::registerType<graphics::Renderer>(
         std::bind(
             initSubsystem<graphics::Renderer, graphics::Config>,
@@ -127,13 +158,21 @@ void Kolanut::run()
     Vec2f cameraPosTmp = {};
     float cameraZoomTmp;
 
+    auto stats = di::get<stats::StatsEngine>();
+
     while(!isQuit)
     {
+        stats->startTimeSample(stats::StatsEngine::Measure::FRAME_TIME);
+        stats->startTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
+
         {
             ZoneScopedN("Events polling")
             getEventSystem()->poll();
             getScriptingEngine()->onUpdate(dt);
         }
+
+        stats->endTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
+        stats->startTimeSample(stats::StatsEngine::Measure::DRAW_TIME);
 
         getRenderer()->clear();
 
@@ -158,6 +197,8 @@ void Kolanut::run()
             getRenderer()->flip();
         }
 
+        stats->endTimeSample(stats::StatsEngine::Measure::DRAW_TIME);
+
         newFrameTime = getEventSystem()->getTimeMS();
         dt = std::min(
             std::max(
@@ -169,6 +210,7 @@ void Kolanut::run()
         lastFrameTime = newFrameTime;
 
         FrameMark;
+        stats->endTimeSample(stats::StatsEngine::Measure::FRAME_TIME);
     }
 }
 

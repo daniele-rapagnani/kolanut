@@ -1,6 +1,7 @@
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/core/Logging.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
+#include "kolanut/stats/StatsEngine.h"
 #include "kolanut/core/DIContainer.h"
 
 #include <glm/gtc/matrix_transform.hpp>
@@ -55,6 +56,8 @@ bool Renderer::init(const Config& config)
     {
         return false;
     }
+
+    this->jobs.reserve(getConfig().jobQueueInitialSize);
 
     return true;
 }
@@ -120,10 +123,11 @@ void Renderer::draw(
 {
     assert(t);
 
-    DrawTriangles dr = {};
+    jobs.emplace_back();
+    DrawSurface& ds = jobs.back();
 
-    dr.texture = t;
-    dr.program = getProgram();
+    ds.texture = t;
+    ds.program = getProgram();
 
     Sizei s = t->getSize();
 
@@ -147,11 +151,11 @@ void Renderer::draw(
     };
 
     GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
-    dr.vertices = reinterpret_cast<void*>(h);
-    dr.verticesCount = vertices.size();
+    ds.vertices = reinterpret_cast<void*>(h);
+    ds.verticesCount = vertices.size();
 
     // T * S * R * O, outer comes first
-    dr.transform = glm::translate(
+    ds.transform = glm::translate(
         glm::rotate(
             glm::scale(
                 glm::translate(
@@ -168,7 +172,7 @@ void Renderer::draw(
 
     float resScale = getResolution().x / getDesignResolution().x;
 
-    dr.camera = glm::translate(
+    ds.camera = glm::translate(
         glm::scale(
             Transform3D { 1.0f },
             glm::vec3 {
@@ -183,8 +187,6 @@ void Renderer::draw(
             0.0f
         }
     );
-
-    drawTriangles(dr);
 }
 
 void Renderer::draw(
@@ -230,6 +232,7 @@ void Renderer::draw(
 
 void Renderer::clear()
 {
+    this->jobs.clear();
     getGeometryBuffer()->reset(getCurrentFrame());
 
     doClear();
@@ -237,6 +240,15 @@ void Renderer::clear()
 
 void Renderer::flip()
 {
+    auto stats = di::get<stats::StatsEngine>();
+    stats->addSample(stats::StatsEngine::Measure::TRIANGLES, 0);
+
+    for (const auto& job : this->jobs)
+    {
+        stats->addToCurrentSample(stats::StatsEngine::Measure::TRIANGLES, job.verticesCount);
+        drawSurface(job);
+    }
+
     doFlip();
 
     this->currentInFlightFrame = 

@@ -18,7 +18,7 @@ let LabelRenderSystem = {
                 }
 
                 let tr = components.Transform;
-                lb.font->draw(lb.text, tr.position, null, lb.color);
+                lb.font->draw(lb.text, tr.position, lb.size, lb.color);
             }
         );
     }

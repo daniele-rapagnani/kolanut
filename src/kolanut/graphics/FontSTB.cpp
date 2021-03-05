@@ -46,6 +46,8 @@ bool FontSTB::load(const std::string& file, size_t size)
     stbtt_pack_context pack;
     unsigned char* dataMono = new unsigned char[w*h];
 
+    stbtt_PackSetOversampling(&pack, 2, 2);
+
     if (!stbtt_PackBegin(&pack, dataMono, w, h, 0, 1, nullptr))
     {
         knM_logError("Can't begin font packing: '" << file << "'");

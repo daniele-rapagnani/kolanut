@@ -8,6 +8,7 @@
 #include "kolanut/graphics/Program.h"
 #include "kolanut/graphics/GeometryBuffer.h"
 
+#include <vector>
 #include <memory>
 
 namespace kola {
@@ -16,7 +17,7 @@ namespace graphics {
 class Renderer
 {
 public:
-    struct DrawTriangles
+    struct DrawSurface
     {
         std::shared_ptr<Program> program = {};
         std::shared_ptr<Texture> texture = {};
@@ -88,7 +89,7 @@ public:
         const Colori& color
     ) = 0;
 
-    virtual void drawTriangles(const DrawTriangles& req) = 0;
+    virtual void drawSurface(const DrawSurface& req) = 0;
 
     virtual void setCameraPosition(const Vec2f& pos);
     virtual void setCameraZoom(float zoom);
@@ -140,6 +141,8 @@ private:
     float cameraZoom = 1.0f;
     Vec2i designResolution = {};
     uint8_t currentInFlightFrame = 0;
+
+    std::vector<DrawSurface> jobs = {};
 };
 
 } // namespace graphics

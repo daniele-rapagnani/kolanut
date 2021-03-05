@@ -7,6 +7,7 @@
 #include "kolanut/graphics/vulkan/utils/MappedMemory.h"
 #include "kolanut/graphics/Vertex.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
+#include "kolanut/stats/Stats.h"
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/DIContainer.h"
 
@@ -304,7 +305,7 @@ bool RendererVK::doInit(const Config& config)
     return true;
 }
 
-void RendererVK::drawTriangles(const DrawTriangles& req)
+void RendererVK::drawSurface(const DrawSurface& req)
 {
     std::shared_ptr<ProgramVK> program = 
         std::static_pointer_cast<ProgramVK>(req.program)
@@ -501,20 +502,8 @@ void RendererVK::doFlip()
     double interval = 1000000.0 / this->physicalDevice->getProperties().limits.timestampPeriod;
     double elapsedMs = static_cast<double>(diff) / interval;
 
-    this->gpuAvgTime += elapsedMs;
-    this->gpuSamples++;
-
-    if (this->gpuSamples == 60)
-    {
-        knM_logDebug(
-            "[Vulkan] rendering took an avg of " 
-            << (this->gpuAvgTime / this->gpuSamples) 
-            << " ms for 60 frames"
-        );
-
-        this->gpuSamples = 0;
-        this->gpuAvgTime = 0.0f;
-    }
+    auto stats = di::get<stats::StatsEngine>();
+    stats->addSample(stats::StatsEngine::Measure::GPU_TIME, elapsedMs);
 }
 
 Vec2i RendererVK::getPixelResolution() const

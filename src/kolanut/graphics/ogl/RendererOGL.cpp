@@ -7,10 +7,12 @@
 #include "kolanut/graphics/ogl/ProgramOGL.h"
 #include "kolanut/graphics/ogl/utils/GenericUtils.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
+#include "kolanut/stats/StatsEngine.h"
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/DIContainer.h"
 
 #include <TracyOpenGL.hpp>
+#include <Tracy.hpp>
 
 #include <glm/gtc/matrix_transform.hpp>
 
@@ -66,7 +68,7 @@ void RendererOGL::onUpdateWindowSize()
     knM_oglCall(glViewport(0, 0, resolution.x, resolution.y));
 }
 
-void RendererOGL::drawTriangles(const DrawTriangles& req)
+void RendererOGL::drawSurface(const DrawSurface& req)
 {
     auto h = reinterpret_cast<GeometryBuffer::Handle>(req.vertices);
 
@@ -119,7 +121,11 @@ void RendererOGL::drawTriangles(const DrawTriangles& req)
     knM_oglCall(glEnableVertexAttribArray(tcAtt));
     knM_oglCall(glVertexAttribPointer(tcAtt, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetUv));
 
-    texture->bind();
+    if (texture != this->lastTexture)
+    {
+        texture->bind();
+        this->lastTexture = texture;
+    }
 
     knM_oglCall(glDrawArrays(GL_TRIANGLES, 0, req.verticesCount));
 }
@@ -160,20 +166,10 @@ void RendererOGL::doFlip()
         GLuint64 elapsed = 0;
         knM_oglCall(glGetQueryObjectui64vEXT(this->perfQuery, GL_QUERY_RESULT, &elapsed));
 
-        this->gpuElapsed += static_cast<double>(elapsed) / 1000000.0;
-        this->gpuSamples++;
-    }
-
-    if (this->gpuSamples == 60)
-    {
-        knM_logDebug(
-            "[OpenGL] rendering took an avg of " 
-            << (this->gpuElapsed / this->gpuSamples) 
-            << " ms for 60 frames"
-        );
-
-        this->gpuSamples = 0;
-        this->gpuElapsed = 0.0f;
+        double e = static_cast<double>(elapsed) / 1000000.0;
+        
+        auto stats = di::get<stats::StatsEngine>();
+        stats->addSample(stats::StatsEngine::Measure::GPU_TIME, e);
     }
 }
 

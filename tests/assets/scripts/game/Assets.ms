@@ -1,6 +1,7 @@
 let Assets = {
     Fonts = {
-        Title = null
+        Title = null,
+        Small = null
     },
 
     Sprites = {
@@ -14,7 +15,7 @@ let Assets = {
     },
 
     load = => {
-        Assets.Fonts.Title = Kolanut.loadFont("assets/Pokemon Classic.ttf", 48);
+        Assets.Fonts.Pixel = Kolanut.loadFont("assets/Pokemon Classic.ttf", 48);
 
         Assets.Sprites.Hero = Kolanut.loadSprite("assets/herochar_spritesheet.png");
         Assets.Sprites.Goblin = Kolanut.loadSprite("assets/goblin_spritesheet.png");

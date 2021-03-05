@@ -23,6 +23,7 @@ public:
     {
         graphics::Config graphics;
         events::Config events;
+        bool enableStats = false;
     };
 
 public:
