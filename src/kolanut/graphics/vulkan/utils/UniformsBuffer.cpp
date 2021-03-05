@@ -37,30 +37,29 @@ UniformsBuffer::Handle UniformsBuffer::addUniform(const void* data, size_t bytes
 {
     frame = frame % getConfig().maxFrames;
 
-    size_t size = bytes * sizeof(Vertex);
     VkDeviceSize base = this->bufferBase[static_cast<size_t>(frame)];
 
-    if (base + size > this->buffer->getAllocation()->size)
+    if (base + bytes > this->buffer->getAllocation()->size)
     {
         return NULL_HANDLE;
     }
 
-    if (!this->buffer->copy(data, size, base))
+    if (!this->buffer->copy(data, bytes, base))
     {
         return NULL_HANDLE;
     }
 
     VkDeviceSize alignment = this->buffer->getAllocation()->pool->alignment;
-    VkDeviceSize reminder = size % alignment;
+    VkDeviceSize reminder = bytes % alignment;
 
     if (reminder > 0)
     {
-        size = size + alignment - reminder;
+        bytes = bytes + alignment - reminder;
     }
 
-    this->bufferBase[frame] += size;
+    this->bufferBase[frame] += bytes;
 
-    return (base << 32) | ((size & 0xFFFFFFF) << 4) | ((frame + 1) & 0xF);
+    return (base << 32) | ((bytes & 0xFFFFFFF) << 4) | ((frame + 1) & 0xF);
 }
 
 bool UniformsBuffer::bind(
