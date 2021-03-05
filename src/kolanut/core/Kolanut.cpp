@@ -7,6 +7,7 @@
 #include "kolanut/stats/StatsEngine.h"
 #include "kolanut/stats/Stats.h"
 #include "kolanut/stats/DummyStats.h"
+#include "kolanut/audio/AudioEngine.h"
 
 #include <Tracy.hpp>
 
@@ -107,6 +108,15 @@ bool Kolanut::init(const Config& conf)
         }
     );
 
+    di::registerType<audio::AudioEngine>(
+        std::bind(
+            initSubsystem<audio::AudioEngine, audio::Config>,
+            "audio",
+            audio::createAudioEngine,
+            this->config.audio
+        )
+    );
+
     di::registerType<graphics::Renderer>(
         std::bind(
             initSubsystem<graphics::Renderer, graphics::Config>,
@@ -124,6 +134,8 @@ bool Kolanut::init(const Config& conf)
             this->config.events
         )
     );
+
+    di::create<audio::AudioEngine>();
 
     return true;
 }

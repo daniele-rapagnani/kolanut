@@ -3,6 +3,7 @@
 #include "kolanut/scripting/melon/bindings/Camera.h"
 #include "kolanut/scripting/melon/bindings/Font.h"
 #include "kolanut/scripting/melon/bindings/Tilemap.h"
+#include "kolanut/scripting/melon/bindings/Sound.h"
 
 namespace kola {
 namespace melon {
@@ -14,6 +15,7 @@ void registerBindings(VM* vm)
     registerTextureBindings(vm);
     registerFontBindings(vm);
     registerTilemapBindings(vm);
+    registerSoundBindings(vm);
 }
 
 } // namespace binding

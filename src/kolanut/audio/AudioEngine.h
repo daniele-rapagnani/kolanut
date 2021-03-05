@@ -1,0 +1,22 @@
+#pragma once
+
+#include "kolanut/audio/Audio.h"
+#include "kolanut/audio/Sound.h"
+
+#include <cstdint>
+#include <string>
+#include <memory>
+
+namespace kola {
+namespace audio {
+
+class AudioEngine
+{
+public:
+    virtual bool init(const Config& config) = 0;
+    virtual std::shared_ptr<Sound> loadSound(const std::string& fileName) = 0;
+    virtual void playSound(std::shared_ptr<Sound> sample) = 0;
+};
+
+} // namespace audio
+} // namespace kola

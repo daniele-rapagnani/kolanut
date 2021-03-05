@@ -4,6 +4,7 @@
 #include "kolanut/scripting/Scripting.h"
 #include "kolanut/events/Events.h"
 #include "kolanut/filesystem/Filesystem.h"
+#include "kolanut/audio/Audio.h"
 #include "kolanut/core/DIContainer.h"
 
 #include <memory>
@@ -23,6 +24,7 @@ public:
     {
         graphics::Config graphics;
         events::Config events;
+        audio::Config audio;
         bool enableStats = false;
     };
 

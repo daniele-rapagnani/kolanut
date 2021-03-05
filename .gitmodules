@@ -25,3 +25,6 @@
 [submodule "src/kolanut/libs/shaderc"]
 	path = src/kolanut/libs/shaderc
 	url = git@github.com:google/shaderc.git
+[submodule "src/kolanut/libs/miniaudio"]
+	path = src/kolanut/libs/miniaudio
+	url = git@github.com:mackron/miniaudio.git

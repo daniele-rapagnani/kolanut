@@ -4,6 +4,8 @@
 #include "kolanut/scripting/melon/ffi/PushVectors.h"
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/events/EventSystem.h"
+#include "kolanut/audio/AudioEngine.h"
+#include "kolanut/audio/Sound.h"
 #include "kolanut/core/DIContainer.h"
 
 extern "C" {
@@ -100,6 +102,28 @@ static TByte loadFont(VM* vm)
     return 1;
 }
 
+static TByte loadSound(VM* vm)
+{
+    melM_arg(vm, file, MELON_TYPE_STRING, 0);
+
+    std::shared_ptr<kola::audio::AudioEngine> audio = 
+        kola::di::get<kola::audio::AudioEngine>()
+    ;
+
+    std::shared_ptr<kola::audio::Sound> sound = 
+        audio->loadSound(melM_strDataFromObj(file->pack.obj))
+    ;
+
+    if (!sound)
+    {
+        melM_vstackPushNull(&vm->stack);
+        return 1;
+    }
+
+    kola::melon::ffi::pushInstance(vm, "Kolanut", "Sound", sound);
+    return 1;
+}
+
 static TByte getScreenSize(VM* vm)
 {
     std::shared_ptr<kola::graphics::Renderer> renderer = 
@@ -187,6 +211,7 @@ static const ModuleFunction funcs[] = {
     
     { "loadSprite", 1, 0, &loadSprite },
     { "loadFont", 2, 0, &loadFont },
+    { "loadSound", 1, 0, &loadSound },
     { "getScreenSize", 0, 0, &getScreenSize },
     { "getDesignResolution", 0, 0, &getDesignResolution },
 

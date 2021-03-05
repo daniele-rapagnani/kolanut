@@ -11,14 +11,14 @@ namespace filesystem {
 
 std::shared_ptr<FilesystemEngine> createFilesystemEngine(const Config& conf)
 {
-    switch(conf.renderer)
+    switch(conf.engine)
     {
         case Engine::FILES:
             return std::make_shared<FilesFilesystemEngine>();
         
         default:
             assert(false);
-            knM_logFatal("Unknown renderer: " << static_cast<int>(conf.renderer));
+            knM_logFatal("Unknown renderer: " << static_cast<int>(conf.engine));
     }
 
     return nullptr;

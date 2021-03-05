@@ -5,7 +5,7 @@ return {
     screenSize = screenSize,
     designResolution = screenSize * 0.5,
     fullscreen = false,
-    graphicBackend = "opengl",
+    graphicBackend = "vulkan",
     enableGraphicAPIDebug = false,
     framesInFlight = 2,
     maxGeometryBufferVertices = null,

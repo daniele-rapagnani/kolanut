@@ -134,14 +134,18 @@ set(
     src/kolanut/scripting/melon/bindings/Bindings.cpp
     src/kolanut/scripting/melon/bindings/Tilemap.cpp
     src/kolanut/scripting/melon/bindings/Font.cpp
+    src/kolanut/scripting/melon/bindings/Sound.cpp
     src/kolanut/scripting/melon/modules/KolanutModule.cpp
     src/kolanut/scripting/melon/modules/SourceModule.cpp
     src/kolanut/scripting/melon/modules/VectorModule.cpp
     src/kolanut/scripting/melon/modules/SpriteModule.cpp
     src/kolanut/scripting/melon/modules/RectModule.cpp
     src/kolanut/scripting/melon/modules/ColorModule.cpp
-    src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
 
+    src/kolanut/audio/Audio.cpp
+    src/kolanut/audio/miniaudio/MiniaudioAudioEngine.cpp
+
+    src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
     src/kolanut/libs/tracy/TracyClient.cpp
 
     src/kolanut/main.cpp
@@ -162,6 +166,7 @@ target_include_directories(
     ${cppfs_BINARY_DIR}/source/cppfs/include/
     src/kolanut/libs/shaderc/libshaderc/include/
     src/kolanut/libs/tracy/
+    src/kolanut/libs/miniaudio/
     ${Vulkan_INCLUDE_DIR}
 )
 

@@ -19,6 +19,9 @@ let PlatformController = {
                 idle = "idle",
                 dash = "dash"
             },
+            sounds = {
+                jump = null,
+            },
             controls = {
                 left = false,
                 right = false,

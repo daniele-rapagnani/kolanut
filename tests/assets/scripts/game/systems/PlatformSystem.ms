@@ -64,6 +64,10 @@ let PlatformSystem = {
                         pc.controls.jump = false;
                         pc.jumpTime = 0.0;
                         rb.velocity.y = rb.velocity.y - pc.jumpSpeed;
+
+                        if (pc.sounds.jump != null) {
+                            pc.sounds.jump->play();
+                        }
                     }
                 }
 

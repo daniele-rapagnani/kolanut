@@ -60,6 +60,7 @@ let Hero = {
 
         hero.PlatformController.animations.run = "idle";
         hero.PlatformController.animations.dash = "idle";
+        hero.PlatformController.sounds.jump = GameAssets.Sounds.Beep;
 
         return hero;
     }

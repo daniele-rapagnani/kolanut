@@ -18,7 +18,7 @@ enum class Engine
 
 struct Config
 {
-    Engine renderer = Engine::FILES;
+    Engine engine = Engine::FILES;
     std::string root = ".";
 };
 
