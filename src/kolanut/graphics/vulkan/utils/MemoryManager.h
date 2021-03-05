@@ -9,7 +9,7 @@
 #include <vector>
 #include <unordered_map>
 #include <cstdint>
-#include <deque>
+#include <list>
 #include <algorithm>
 
 namespace kola {
@@ -75,27 +75,30 @@ public:
     {
         size_t size = {};
         size_t offset = {};
+        bool free = true;
     };
 
     struct MemoryPool
     {
         std::shared_ptr<MemoryManager> memoryMgr = {};
 
-        size_t size;
+        size_t size = 0;
         MemoryType type = {};
         uint32_t typeIdx = {};
         Heap heap = {};
         VkDeviceMemory memory = VK_NULL_HANDLE;
         VkDeviceSize alignment = 16;
-        std::deque<MemoryBlock> freeList = {};
+        VkDeviceSize used = 0;
+        std::list<MemoryBlock> blocksList = {};
 
-        std::deque<MemoryBlock>::iterator findBlock(size_t size)
+        std::list<MemoryBlock>::iterator findBlock(size_t size)
         {
+            // Simple first-fit
             return std::find_if(
-                this->freeList.begin(), 
-                this->freeList.end(), 
+                this->blocksList.begin(), 
+                this->blocksList.end(), 
                 [size] (const MemoryBlock& b) {
-                    return b.size >= size;
+                    return b.free && b.size >= size;
                 }
             );
         }
@@ -108,6 +111,8 @@ public:
         VkDeviceMemory ptr = {};
         size_t size = {};
         size_t offset = {};
+        std::list<MemoryBlock>::iterator block = {};
+        std::list<Allocation>::iterator selfIt = {};
         
         mutable bool mapped = false;
 
@@ -126,6 +131,9 @@ public:
     );
 
     void free(const Allocation* a);
+
+    const std::vector<std::shared_ptr<MemoryPool>>& getPools() const
+    { return this->pools; }
 
 protected:
     bool findMemoryType(
@@ -153,8 +161,7 @@ private:
     std::vector<MemoryType> types = {};
 
     std::vector<std::shared_ptr<MemoryPool>> pools = {};
-    std::vector<std::shared_ptr<MemoryPool>> elegiblePools = {};
-    std::deque<Allocation> allocations = {};
+    std::list<Allocation> allocations = {};
 
     VkDeviceSize totalSize;
 };

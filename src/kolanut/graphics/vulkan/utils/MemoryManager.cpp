@@ -50,15 +50,16 @@ const MemoryManager::Allocation* MemoryManager::allocate(
     auto allocateFromPool = [this, flags, requirements] (std::shared_ptr<MemoryPool> pool) -> const Allocation* {
         auto it = pool->findBlock(requirements.size);
 
-        if (it == pool->freeList.end())
+        if (it == pool->blocksList.end())
         {
             return nullptr;
         }
             
         this->allocations.emplace_back();
         Allocation& a = this->allocations.back();
+        a.selfIt = std::prev(this->allocations.end());
 
-        assert(pool->alignment = requirements.alignment);
+        assert(pool->alignment == requirements.alignment);
 
         VkDeviceSize reminder = requirements.size % requirements.alignment;
         VkDeviceSize realSize = 
@@ -67,33 +68,42 @@ const MemoryManager::Allocation* MemoryManager::allocate(
                 : requirements.size + requirements.alignment - reminder
         ;
 
+        pool->used += realSize;
+
+        size_t blockSize = it->size;
+
         a.flags = flags;
         a.pool = pool;
         a.ptr = pool->memory;
         a.size = realSize;
         a.offset = it->offset;
+        a.block = it;
 
-        it->size -= realSize;
-        it->offset += realSize;
+        it->size = realSize;
+        it->free = false;
 
-        if (it->size == 0)
+        if (blockSize > realSize)
         {
-            pool->freeList.erase(it);
+            MemoryBlock newBlock = {};
+            newBlock.size = blockSize - realSize;
+            newBlock.offset = it->offset + realSize;
+            newBlock.free = true;
 
-            if (pool->freeList.empty())
-            {
-                auto it = std::find(this->elegiblePools.begin(), this->elegiblePools.end(), pool);
-                assert(it != this->elegiblePools.end());
-                this->elegiblePools.erase(it);
-            }
+            pool->blocksList.insert(it++, std::move(newBlock));
         }
 
-        knM_logDebug("Allocated " << a.size << " bytes at " << a.ptr << " offset " << a.offset  << " with alignment " << pool->alignment << " from pool: " << pool.get());
+        knM_logDebug(
+            "Allocated " << a.size << " bytes at " 
+            << a.ptr << " offset " 
+            << a.offset  << " with alignment " << pool->alignment 
+            << " from pool: " << pool.get()
+            << " (" << pool->used << " / " << pool->size << ")"
+        );
 
         return &this->allocations.back();
     };
 
-    std::shared_ptr<MemoryPool> pool = findPool(this->elegiblePools, requirements, flags);
+    std::shared_ptr<MemoryPool> pool = findPool(this->pools, requirements, flags);
 
     if (pool)
     {
@@ -133,7 +143,65 @@ const MemoryManager::Allocation* MemoryManager::allocate(
 
 void MemoryManager::free(const Allocation* a)
 {
-    knM_logWarning("FREE NOT IMPLEMENTED");
+    auto& blocks = a->pool->blocksList;
+
+    std::list<MemoryBlock>::iterator start = a->block;
+    std::list<MemoryBlock>::iterator end = a->block;
+
+    end->free = true;
+
+    // Find last prev free block
+    while (start != blocks.begin())
+    {
+        auto it = std::prev(start);
+        
+        if (!it->free)
+        {
+            break;
+        }
+
+        start = it;
+    }
+    
+    // Find last next free block
+    while (end != std::prev(blocks.end()))
+    {
+        auto it = std::next(end);
+
+        if (!it->free)
+        {
+            break;
+        }
+
+        end = it;
+    }
+
+    size_t totalSize = 0;
+
+    auto it = start;
+
+    while(true)
+    {
+        totalSize += it->size;
+        
+        if (it == end)
+        {
+            break;
+        }
+
+        it = blocks.erase(it);
+    }
+
+    a->pool->used -= a->size;
+    end->size = totalSize;
+
+    knM_logDebug(
+        "Freed " << a->ptr << "/" << a->offset 
+        << " of size bytes " << a->size 
+        << " for a total of " << totalSize 
+        << " bytes from pool " << a->pool.get()
+        << " (" << a->pool->used << " / " << a->pool->size << ")"
+    );    
 }
 
 bool MemoryManager::findMemoryType(
@@ -203,13 +271,14 @@ MemoryManager::allocatePool(size_t size, VkMemoryRequirements req, VkMemoryPrope
     pool->typeIdx = typeIdx;
     pool->heap = this->heaps[pool->type.heapIndex];
     pool->alignment = req.alignment;
+    pool->size = size;
 
-    pool->freeList.emplace_back();
-    pool->freeList.back().size = size;
-    pool->freeList.back().offset = 0;
+    pool->blocksList.emplace_back();
+    pool->blocksList.back().size = size;
+    pool->blocksList.back().offset = 0;
+    pool->blocksList.back().free = true;
 
     this->pools.push_back(pool);
-    this->elegiblePools.push_back(pool);
 
     return pool;
 }
@@ -223,6 +292,11 @@ MemoryManager::findPool(
 {
     for (auto& p : pools)
     {
+        if ((p->size - p->used) < req.size)
+        {
+            continue;
+        }
+
         if (!testFlag(req.memoryTypeBits, (1 << p->typeIdx)))
         {
             continue;

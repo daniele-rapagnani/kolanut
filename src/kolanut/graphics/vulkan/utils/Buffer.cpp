@@ -127,7 +127,7 @@ Buffer::~Buffer()
 
         if (this->allocation)
         {
-            getDevice()->getMemoryManager()->free(this->allocation);
+            this->allocation->free();
             this->allocation = nullptr;
         }
     }

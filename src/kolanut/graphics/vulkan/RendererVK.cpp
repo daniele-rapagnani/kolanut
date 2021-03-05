@@ -197,8 +197,8 @@ bool RendererVK::doInit(const Config& config)
         : this->presQueue
     ;
 
-    if (!
-        this->graphQueue->createCommandBuffers(
+    if (
+        !this->graphQueue->createCommandBuffers(
             this->graphCommandBuffers, 
             this->device->getConfig().framesInFlight
         )
