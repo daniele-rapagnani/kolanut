@@ -26,6 +26,14 @@ let PlatformSystem = {
                     }
                 }
 
+                if (pc.jumpTime != null) {
+                    pc.jumpTime = pc.jumpTime + dt;
+
+                    if (pc.jumpTime >= pc.jumpRecharge) {
+                        pc.jumpTime = null;
+                    }
+                }
+
                 let isDashing = pc.curDashingTime != null && pc.curDashingTime < dashingTimeInterval;
 
                 if (!isDashing) {
@@ -51,9 +59,10 @@ let PlatformSystem = {
                     }
                 }
 
-                if (tc.colliding.bottom) {
+                if (pc.jumpTime == null && tc.colliding.bottom) {
                     if (pc.controls.jump && !isDashing) {
                         pc.controls.jump = false;
+                        pc.jumpTime = 0.0;
                         rb.velocity.y = rb.velocity.y - pc.jumpSpeed;
                     }
                 }

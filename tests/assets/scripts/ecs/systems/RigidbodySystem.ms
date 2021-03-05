@@ -14,7 +14,7 @@ let RigidbodySystem = {
                 let tr = components.Transform;
 
                 rb.velocity = rb.velocity + (rb.gravity * dt);
-                rb.velocity = rb.velocity + rb.acceleration * dt;
+                rb.velocity = rb.velocity + (rb.acceleration * dt);
 
                 if (rb.maxVelocity != null) {
                     if (rb.velocity.x > rb.maxVelocity.x) {
@@ -26,8 +26,8 @@ let RigidbodySystem = {
                     }
                 }
 
-                tr.position = (tr.position + rb.velocity * dt);
-                tr.angle = tr.angle + rb.angularVelocity * dt;
+                tr.position = tr.position + (rb.velocity * dt);
+                tr.angle = tr.angle + (rb.angularVelocity * dt);
             }
         );
     }
