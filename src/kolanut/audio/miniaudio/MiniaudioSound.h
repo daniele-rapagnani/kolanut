@@ -2,10 +2,9 @@
 
 #include "kolanut/audio/Sound.h"
 
-#include <miniaudio.h>
-
 #include <cstdint>
 #include <vector>
+#include <string>
 
 namespace kola {
 namespace audio {
@@ -13,7 +12,7 @@ namespace audio {
 class MiniaudioSound : public Sound
 {
 public:
-    ma_decoder decoder;
+    std::string fileName;
     std::vector<char> data;
 };
 

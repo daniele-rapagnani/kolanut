@@ -6,6 +6,9 @@
 #define MINIAUDIO_IMPLEMENTATION
 #include <miniaudio.h>
 
+#include <algorithm>
+#include <limits>
+
 namespace kola {
 namespace audio {
 
@@ -13,22 +16,100 @@ namespace {
 
 void dataCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uint32 frameCount)
 {
+    static std::vector<int16_t> tempBuffer = {};
+
     auto mae = reinterpret_cast<MiniaudioAudioEngine*>(pDevice->pUserData);
-    
-    if (mae->getPlayingSounds().empty())
+    auto playingSounds = mae->getPlayingSounds();
+
+    mae->getPlayingMutex().lock();
+
+    if (playingSounds.empty())
     {
+        mae->getPlayingMutex().unlock();
         return;
     }
 
-    auto s = mae->getPlayingSounds().back();
-    
-    if (ma_decoder_read_pcm_frames(&s->decoder, pOutput, frameCount) < frameCount)
+    size_t samplesCount = frameCount * MiniaudioAudioEngine::NUM_CHANNELS;
+
+    if (tempBuffer.size() < samplesCount)
     {
-        //mae->getPlayingSounds().pop_back();
+        tempBuffer.resize(samplesCount);
     }
+
+    for (MiniaudioAudioEngine::PlayingSound& ps : playingSounds)
+    {
+        if (ps.finished)
+        {
+            continue;
+        }
+        
+        uint64_t framesRead = ma_decoder_read_pcm_frames(&ps.decoder, tempBuffer.data(), frameCount);
+        ps.finished = framesRead < frameCount;
+
+        if (framesRead > 0)
+        {
+            int16_t* samples = reinterpret_cast<int16_t*>(pOutput);
+
+            for (
+                size_t i = 0; 
+                i < framesRead * MiniaudioAudioEngine::NUM_CHANNELS; 
+                i += MiniaudioAudioEngine::NUM_CHANNELS
+            )
+            {
+                samples[i] += tempBuffer[i] / ps.gainDiv[1];
+                samples[i + 1] += tempBuffer[i + 1] / ps.gainDiv[0];
+            }
+        }
+    }
+
+    mae->getPlayingMutex().unlock();
 }
 
 } // namespace
+
+void MiniaudioAudioEngine::PlayingSound::setGain(float gain, float pan)
+{
+    assert(NUM_CHANNELS == 2);
+
+    // Back to 0 hard left, 1 hard right
+    pan = (pan + 1.0f) / 2.0f;
+
+    float gainL = std::max(
+        std::numeric_limits<float>::epsilon(),
+        (gain * (1.0f - pan))
+    );
+
+    float gainR = std::max(
+        std::numeric_limits<float>::epsilon(),
+        (gain * pan)
+    );
+
+    this->gainDiv[0] = std::max(
+        static_cast<int16_t>(1), 
+        static_cast<int16_t>(round(1.0f / gainL))
+    );
+
+    this->gainDiv[1] = std::max(
+        static_cast<int16_t>(1), 
+        static_cast<int16_t>(round(1.0f / gainR))
+    );
+}
+
+MiniaudioAudioEngine::~MiniaudioAudioEngine()
+{
+    knM_logDebug("Stopping Miniaudio engine");
+
+    ma_device_stop(&this->device);
+
+    for (PlayingSound& ps : this->playing)
+    {
+        ma_decoder_uninit(&ps.decoder);
+    }
+
+    this->playing.clear();
+
+    ma_device_uninit(&this->device);
+}
 
 bool MiniaudioAudioEngine::init(const Config& config)
 {
@@ -38,8 +119,8 @@ bool MiniaudioAudioEngine::init(const Config& config)
 
     deviceConfig = ma_device_config_init(ma_device_type_playback);
     deviceConfig.playback.format = ma_format_s16;
-    deviceConfig.playback.channels = 2;
-    deviceConfig.sampleRate = 44100;
+    deviceConfig.playback.channels = NUM_CHANNELS;
+    deviceConfig.sampleRate = SAMPLE_RATE;
     deviceConfig.dataCallback = dataCallback;
     deviceConfig.pUserData = this;
 
@@ -70,33 +151,48 @@ std::shared_ptr<Sound> MiniaudioAudioEngine::loadSound(const std::string& fileNa
         return {};
     }
 
-    ma_result result = ma_decoder_init_memory(
-        sound->data.data(), 
-        sound->data.size(), 
-        nullptr, 
-        &sound->decoder
-    );
-
-    if (result != MA_SUCCESS)
-    {
-        knM_logError("Can't decode sound: " << fileName);
-        return {};
-    }
+    sound->fileName = fileName;
 
     return sound;
 }
 
-void MiniaudioAudioEngine::playSound(std::shared_ptr<Sound> sample)
+void MiniaudioAudioEngine::playSound(
+    std::shared_ptr<Sound> sample,
+    float gain /* = 1.0f */,
+    float pan /* = 0.0f */
+)
 {
     if (!sample)
     {
         return;
     }
 
-    auto s = std::static_pointer_cast<MiniaudioSound>(sample);
-    ma_decoder_seek_to_pcm_frame(&s->decoder, 0);
+    getPlayingMutex().lock();
+    
+    std::remove_if(this->playing.begin(), this->playing.end(), [] (PlayingSound& ps) {
+        return ps.finished;
+    });
 
-    this->playing.push_back(s);
+    this->playing.emplace_back();
+
+    PlayingSound& ps = this->playing.back();
+    ps.sound = std::static_pointer_cast<MiniaudioSound>(sample);
+    ps.setGain(gain, pan);
+
+    ma_result result = ma_decoder_init_memory(
+        ps.sound->data.data(), 
+        ps.sound->data.size(), 
+        nullptr, 
+        &ps.decoder
+    );
+
+    if (result != MA_SUCCESS)
+    {
+        this->playing.pop_back();
+        knM_logError("Can't decode sound: " << ps.sound->fileName);
+    }
+
+    getPlayingMutex().unlock();
 }
 
 } // namespace audio

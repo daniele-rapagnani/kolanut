@@ -18,6 +18,8 @@ Kolanut.onLoad = func kolanutOnLoad => {
         Game.Assets.Fonts.Pixel,
         8.0
     );
+
+    Game.Assets.Sounds.Music->play(0.25);
 };
 
 Kolanut.onUpdate = |dt| => {

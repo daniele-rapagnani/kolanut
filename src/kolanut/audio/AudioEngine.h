@@ -15,7 +15,7 @@ class AudioEngine
 public:
     virtual bool init(const Config& config) = 0;
     virtual std::shared_ptr<Sound> loadSound(const std::string& fileName) = 0;
-    virtual void playSound(std::shared_ptr<Sound> sample) = 0;
+    virtual void playSound(std::shared_ptr<Sound> sample, float gain = 1.0f, float pan = 0.0f) = 0;
 };
 
 } // namespace audio

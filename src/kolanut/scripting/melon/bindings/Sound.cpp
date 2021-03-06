@@ -18,19 +18,27 @@ extern "C" {
 static TByte play(VM* vm)
 {
     melM_this(vm, thisObj);
+    melM_argOptional(vm, gainVal, MELON_TYPE_NUMBER, 0);
+    melM_argOptional(vm, panVal, MELON_TYPE_NUMBER, 1);
+
+    float gain = 1.0f;
+    float pan = 0.0f;
+
+    kola::melon::ffi::convert(vm, gain, gainVal);
+    kola::melon::ffi::convert(vm, pan, panVal);
 
     std::shared_ptr<audio::Sound> sound = 
         ffi::getInstance<audio::Sound>(vm, thisObj->pack.obj)
     ;
 
-    di::get<audio::AudioEngine>()->playSound(sound);
+    di::get<audio::AudioEngine>()->playSound(sound, gain, pan);
 
     return 0;
 }
 
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
-    { "play", 1, 0, &play, 1 },
+    { "play", 3, 0, &play, 1 },
     { NULL, 0, 0, NULL }
 };
 
