@@ -114,12 +114,6 @@ static TByte loadSound(VM* vm)
         audio->loadSound(melM_strDataFromObj(file->pack.obj))
     ;
 
-    if (!sound)
-    {
-        melM_vstackPushNull(&vm->stack);
-        return 1;
-    }
-
     kola::melon::ffi::pushInstance(vm, "Kolanut", "Sound", sound);
     return 1;
 }

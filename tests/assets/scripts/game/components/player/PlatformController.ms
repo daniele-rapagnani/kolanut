@@ -10,6 +10,7 @@ let PlatformController = {
             dashingSpeedMult = 3.0,
             dashingRecharge = 0.3,
             jumpRecharge = 0.3,
+            grounded = false,
             curDashingTime = null,
             dashSpeed = null,
             jumpTime = null,
@@ -21,6 +22,8 @@ let PlatformController = {
             },
             sounds = {
                 jump = null,
+                land = null,
+                dash = null
             },
             controls = {
                 left = false,

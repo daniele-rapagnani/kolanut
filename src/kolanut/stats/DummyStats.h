@@ -21,6 +21,9 @@ public:
 
     void addSample(size_t m, double value) override {}
     void addToCurrentSample(size_t m, double value) override {}
+    void enqueueSample(size_t m, double value, bool addToCurrent = false) override {};
+
+    void processEnqueued() override {};
 
     bool hasResult(size_t m) const override
     { return false; }

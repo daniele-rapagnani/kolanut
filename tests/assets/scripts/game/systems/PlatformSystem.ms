@@ -59,7 +59,15 @@ let PlatformSystem = {
                     }
                 }
 
-                if (pc.jumpTime == null && tc.colliding.bottom) {
+                if (!pc.grounded && tc.colliding.bottom) {
+                    if (pc.sounds.land != null) {
+                        pc.sounds.land->play();
+                    }
+                }
+
+                pc.grounded = tc.colliding.bottom;
+
+                if (pc.jumpTime == null && pc.grounded) {
                     if (pc.controls.jump && !isDashing) {
                         pc.controls.jump = false;
                         pc.jumpTime = 0.0;
@@ -73,6 +81,10 @@ let PlatformSystem = {
 
                 if (pc.controls.dash && moving && pc.curDashingTime == null) {
                     pc.controls.dash = false;
+
+                    if (pc.sounds.dash != null) {
+                        pc.sounds.dash->play();
+                    }
 
                     rb.velocity.x = 0;
                     rb.velocity.y = 0;

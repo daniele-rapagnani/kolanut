@@ -15,14 +15,23 @@ let Assets = {
     },
 
     Sounds = {
-        Beep = null
+        Jump = null,
+        Land = null,
+        Hit = null,
+        Death = null,
+        Attack = null,
+        Music = null
     },
 
     load = => {
         Assets.Fonts.Pixel = Kolanut.loadFont("assets/Pokemon Classic.ttf", 48);
 
-        Assets.Sounds.Beep = Kolanut.loadSound("assets/beep.mp3");
-        Assets.Sounds.Music = Kolanut.loadSound("assets/music.mp3");
+        Assets.Sounds.Jump = Kolanut.loadSound("assets/jump.wav");
+        Assets.Sounds.Land = Kolanut.loadSound("assets/land.wav");
+        Assets.Sounds.Hit = Kolanut.loadSound("assets/hit.wav");
+        Assets.Sounds.Death = Kolanut.loadSound("assets/death.wav");
+        Assets.Sounds.Attack = Kolanut.loadSound("assets/attack.wav");
+        Assets.Sounds.Music = Kolanut.loadSound("assets/music.wav");
 
         Assets.Sprites.Hero = Kolanut.loadSprite("assets/herochar_spritesheet.png");
         Assets.Sprites.Goblin = Kolanut.loadSprite("assets/goblin_spritesheet.png");

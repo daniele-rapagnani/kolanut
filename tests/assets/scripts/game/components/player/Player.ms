@@ -6,7 +6,11 @@ let Player = {
             onDeath = null,
             dead = false,
             invincible = false,
-            energy = 3
+            energy = 3,
+            sounds = {
+                death = null,
+                hit = null
+            }
         } @ Player;
     },
     

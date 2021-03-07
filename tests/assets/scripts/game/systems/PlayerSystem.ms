@@ -38,11 +38,15 @@ let PlayerSystem = {
     onPlayerHit = -> {
         let player = this.world->getTaggedEntities("Player")[0];
 
-        if (player.Player.invincible) {
+        if (player.Player.invincible || player.Player.dead) {
             return;
         }
 
         player.Player.energy = player.Player.energy - 1;
+
+        if (player.Player.sounds.hit != null) {
+            player.Player.sounds.hit->play();
+        }
 
         if (player.Player.energy <= 0) {
             Events.OnPlayerDeath->trigger(this.world);
@@ -63,11 +67,15 @@ let PlayerSystem = {
     killPlayer = |disableComps, animation| -> {
         let player = this.world->getTaggedEntities("Player")[0];
 
-        if (player.Player.dead) {
+        if (player == null || player.Player.dead) {
             return;
         }
 
         player.Player.dead = true;
+
+        if (player.Player.sounds.death != null) {
+            player.Player.sounds.death->play();
+        }
 
         for (let c in disableComps) {
             player->getComponent(c).enabled = false;

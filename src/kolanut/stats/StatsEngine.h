@@ -23,6 +23,7 @@ public:
         TRIANGLES,
         UPDATE_TIME,
         DRAW_TIME,
+        AUDIO_PROC,
         MAX_BUILTIN
     };
 
@@ -54,6 +55,9 @@ public:
 
     virtual void addSample(size_t m, double value) = 0;
     virtual void addToCurrentSample(size_t m, double value) = 0;
+    virtual void enqueueSample(size_t m, double value, bool addToCurrent = false) = 0;
+
+    virtual void processEnqueued() = 0;
 
     virtual bool hasResult(size_t m) const = 0;
 

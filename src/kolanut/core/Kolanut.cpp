@@ -174,14 +174,17 @@ void Kolanut::run()
 
     while(!isQuit)
     {
+        stats->addSample(stats::StatsEngine::Measure::AUDIO_PROC, 0);
         stats->startTimeSample(stats::StatsEngine::Measure::FRAME_TIME);
         stats->startTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
 
         {
             ZoneScopedN("Events polling")
             getEventSystem()->poll();
-            getScriptingEngine()->onUpdate(dt);
         }
+        
+        getStatsEngine()->processEnqueued();
+        getScriptingEngine()->onUpdate(dt);
 
         stats->endTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
         stats->startTimeSample(stats::StatsEngine::Measure::DRAW_TIME);
@@ -239,6 +242,11 @@ std::shared_ptr<scripting::ScriptingEngine> Kolanut::getScriptingEngine() const
 std::shared_ptr<graphics::Renderer> Kolanut::getRenderer() const
 { 
     return di::get<graphics::Renderer>(); 
+}
+
+std::shared_ptr<stats::StatsEngine> Kolanut::getStatsEngine() const
+{
+    return di::get<stats::StatsEngine>(); 
 }
 
 } // namespace kola

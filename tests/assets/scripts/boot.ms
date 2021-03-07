@@ -19,7 +19,8 @@ Kolanut.onLoad = func kolanutOnLoad => {
         8.0
     );
 
-    Game.Assets.Sounds.Music->play(0.25);
+    let music = Game.Assets.Sounds.Music->play(0.15);
+    music->setLooping(true);
 };
 
 Kolanut.onUpdate = |dt| => {

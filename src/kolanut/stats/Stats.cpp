@@ -15,6 +15,35 @@ void Stats::init(const Config& config)
     addLabel(Measure::TRIANGLES, "TRIANGLES");
     addLabel(Measure::UPDATE_TIME, "UPDATE_TIME");
     addLabel(Measure::DRAW_TIME, "DRAW_TIME");
+    addLabel(Measure::AUDIO_PROC, "AUDIO_PROC");
+}
+
+void Stats::enqueueSample(size_t m, double value, bool addToCurrent /* = false */)
+{
+    this->addSampleTasksMutex.lock();
+    this->addSampleTasks.emplace_back(m, value, addToCurrent);
+    this->addSampleTasksMutex.unlock();
+}
+
+void Stats::processEnqueued()
+{
+    this->addSampleTasksMutex.lock();
+    
+    for (const AddSampleTask& t : this->addSampleTasks)
+    {
+        if (t.addToCurrent)
+        {
+            addToCurrentSample(t.measure, t.value);
+        }
+        else
+        {
+            addSample(t.measure, t.value);
+        }
+    }
+
+    this->addSampleTasks.clear();
+
+    this->addSampleTasksMutex.unlock();
 }
 
 void Stats::addSample(size_t measure, double value)

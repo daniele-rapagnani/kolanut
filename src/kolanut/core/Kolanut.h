@@ -4,6 +4,7 @@
 #include "kolanut/scripting/Scripting.h"
 #include "kolanut/events/Events.h"
 #include "kolanut/filesystem/Filesystem.h"
+#include "kolanut/stats/StatsEngine.h"
 #include "kolanut/audio/Audio.h"
 #include "kolanut/core/DIContainer.h"
 
@@ -44,6 +45,7 @@ protected:
     std::shared_ptr<events::EventSystem> getEventSystem() const;
     std::shared_ptr<scripting::ScriptingEngine> getScriptingEngine() const;
     std::shared_ptr<graphics::Renderer> getRenderer() const;
+    std::shared_ptr<stats::StatsEngine> getStatsEngine() const;
 
     Config config = {};
     BoostrapConfig bootstrapConfig = {};

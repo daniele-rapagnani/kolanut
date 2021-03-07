@@ -12,8 +12,15 @@ namespace audio {
 class MiniaudioSound : public Sound
 {
 public:
-    std::string fileName;
-    std::vector<char> data;
+    MiniaudioSound(const std::string& filename)
+        : Sound(filename)
+    { }
+
+    std::vector<char>& getData()
+    { return this->data; }
+
+private:
+    std::vector<char> data = {};
 };
 
 } // namespace audio

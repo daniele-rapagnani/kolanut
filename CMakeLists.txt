@@ -41,11 +41,10 @@ option(SHADERC_SKIP_INSTALL "" ON)
 set(SHADERC_SKIP_INSTALL ON)
 add_subdirectory(src/kolanut/libs/shaderc)
 
-add_definitions(-Werror=incompatible-pointer-types)
-add_definitions(-Werror=implicit-function-declaration)
-add_definitions(-Werror=return-type)
-add_definitions(-Werror=int-conversion)
-
+add_compile_options(-Werror=incompatible-pointer-types)
+add_compile_options(-Werror=implicit-function-declaration)
+add_compile_options(-Werror=return-type)
+add_compile_options(-Werror=int-conversion)
 add_definitions(-D_USE_MATH_DEFINES)
 
 if (ENABLE_TRACY)
@@ -53,11 +52,11 @@ add_definitions(-DTRACY_ENABLE)
 endif (ENABLE_TRACY)
 
 if (NOT WIN32)
-add_definitions(-Werror=macro-redefined)
+add_compile_options(-Werror=macro-redefined)
 endif (NOT WIN32)
 
-add_definitions(-Wno-double-promotion)
-add_definitions(-Wno-format)
+add_compile_options(-Wno-double-promotion)
+add_compile_options(-Wno-format)
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
@@ -135,6 +134,7 @@ set(
     src/kolanut/scripting/melon/bindings/Tilemap.cpp
     src/kolanut/scripting/melon/bindings/Font.cpp
     src/kolanut/scripting/melon/bindings/Sound.cpp
+    src/kolanut/scripting/melon/bindings/SoundInstance.cpp
     src/kolanut/scripting/melon/modules/KolanutModule.cpp
     src/kolanut/scripting/melon/modules/SourceModule.cpp
     src/kolanut/scripting/melon/modules/VectorModule.cpp
@@ -144,6 +144,7 @@ set(
 
     src/kolanut/audio/Audio.cpp
     src/kolanut/audio/miniaudio/MiniaudioAudioEngine.cpp
+    src/kolanut/audio/miniaudio/MiniaudioSoundInstance.cpp
 
     src/kolanut/libs/melonscript-vm/src/melon/tools/utils.cpp
     src/kolanut/libs/tracy/TracyClient.cpp

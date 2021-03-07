@@ -5,6 +5,8 @@
 
 #include <string>
 #include <vector>
+#include <list>
+#include <mutex>
 #include <unordered_map>
 #include <chrono>
 
@@ -17,6 +19,18 @@ private:
     using SamplesDb = std::unordered_map<size_t, std::vector<double>>;
 
 public:
+    struct AddSampleTask
+    {
+        AddSampleTask(size_t measure, double value, bool addToCurrent = false)
+            : measure(measure), value(value), addToCurrent(addToCurrent)
+        { }
+
+        bool addToCurrent = false;
+        size_t measure = {};
+        double value = {};
+    };
+
+public:
     void init(const Config& config) override;
 
     void startTimeSample(size_t m) override;
@@ -24,6 +38,9 @@ public:
 
     void addSample(size_t m, double value) override;
     void addToCurrentSample(size_t m, double value) override;
+    void enqueueSample(size_t m, double value, bool addToCurrent = false) override;
+
+    void processEnqueued() override;
 
     bool hasResult(size_t m) const override
     {
@@ -75,6 +92,9 @@ private:
 
     std::unordered_map<size_t, std::string> measuresLabels = {};
     std::unordered_map<size_t, Result> results = {};
+    
+    std::list<AddSampleTask> addSampleTasks = {};
+    std::mutex addSampleTasksMutex = {};
 };
 
 } // namespace stats

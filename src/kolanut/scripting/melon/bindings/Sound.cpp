@@ -31,9 +31,13 @@ static TByte play(VM* vm)
         ffi::getInstance<audio::Sound>(vm, thisObj->pack.obj)
     ;
 
-    di::get<audio::AudioEngine>()->playSound(sound, gain, pan);
+    std::shared_ptr<audio::SoundInstance> si = 
+        di::get<audio::AudioEngine>()->playSound(sound, gain, pan)
+    ;
 
-    return 0;
+    kola::melon::ffi::pushInstance(vm, "Kolanut", "SoundInstance", si);
+
+    return 1;
 }
 
 static const ModuleFunction funcs[] = {

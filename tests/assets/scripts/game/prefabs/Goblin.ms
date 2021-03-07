@@ -25,6 +25,7 @@ let Goblin = {
         goblin.PlatformController.dashingRecharge = 1.0;
         goblin.PlatformController.dashingSpeedMult = 5.0;
         goblin.PlatformController.animations.dash = "attack";
+        goblin.PlatformController.sounds.dash = GameAssets.Sounds.Attack;
 
         fa->addAnimation({
             name = "run",
