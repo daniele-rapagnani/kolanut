@@ -132,30 +132,22 @@ void RendererOGL::drawSurface(const DrawSurface& req)
     knM_oglCall(glEnableVertexAttribArray(colAtt));
     knM_oglCall(glVertexAttribPointer(colAtt, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetColor));
 
-    if (texture != this->lastTexture)
+    if (texture && texture != this->lastTexture)
     {
         texture->bind();
         this->lastTexture = texture;
     }
 
-    knM_oglCall(glDrawArrays(GL_TRIANGLES, 0, req.verticesCount));
-}
+    switch(req.mode)
+    {
+        case DrawMode::TRIANGLES:
+            knM_oglCall(glDrawArrays(GL_TRIANGLES, 0, req.verticesCount));
+            break;
 
-void RendererOGL::draw(
-    const Rectf& rect,
-    const Colori& color
-)
-{
-
-}
-
-void RendererOGL::draw(
-    const Vec2f& a,
-    const Vec2f& b,
-    const Colori& color
-)
-{
-
+        case DrawMode::LINES:
+            knM_oglCall(glDrawArrays(GL_LINES, 0, req.verticesCount));
+            break;
+    };
 }
 
 void RendererOGL::doClear()
@@ -199,7 +191,7 @@ std::shared_ptr<Shader> RendererOGL::createShader()
     return std::make_shared<ShaderOGL>();
 }
 
-std::shared_ptr<Program> RendererOGL::createProgram()
+std::shared_ptr<Program> RendererOGL::createProgram(DrawMode mode)
 {
     return std::make_shared<ProgramOGL>();
 }

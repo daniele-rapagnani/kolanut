@@ -23,6 +23,7 @@ public:
         std::shared_ptr<RenderPass> renderPass = {};
         uint32_t viewportWidth = {};
         uint32_t viewportHeight = {};
+        VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     };
 
 public:

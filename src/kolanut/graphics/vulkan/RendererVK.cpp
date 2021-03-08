@@ -330,7 +330,11 @@ void RendererVK::drawSurface(const DrawSurface& req)
 
     this->descriptorSets.push_back(ds);
 
-    texture->getTexture()->use(this->sampler, ds, 1);
+    if (texture)
+    {
+        texture->getTexture()->use(this->sampler, ds, 1);
+    }
+
     this->uniformsBuffer->bind(uh, ds, 2);
 
     std::shared_ptr<vulkan::CommandBuffer> gcb = this->graphCommandBuffers[getCurrentFrame()];
@@ -349,23 +353,6 @@ void RendererVK::drawSurface(const DrawSurface& req)
         std::static_pointer_cast<GeometryBufferVK>(getGeometryBuffer())->bind(h, gcb);
         vkCmdDraw(b, req.verticesCount, 1, 0, 0);
     }
-}
-
-void RendererVK::draw(
-    const Rectf& rect,
-    const Colori& color
-)
-{
-
-}
-
-void RendererVK::draw(
-    const Vec2f& a,
-    const Vec2f& b,
-    const Colori& color
-)
-{
-
 }
 
 void RendererVK::doClear()
@@ -537,7 +524,7 @@ std::shared_ptr<Shader> RendererVK::createShader()
     return shader;
 }
 
-std::shared_ptr<Program> RendererVK::createProgram()
+std::shared_ptr<Program> RendererVK::createProgram(DrawMode mode)
 {
     assert(this->surface);
     assert(this->device);
@@ -548,6 +535,14 @@ std::shared_ptr<Program> RendererVK::createProgram()
         getDevice()->getPhysicalDevice()->getSurfaceCapabilities(this->surface)
     ;
 
+    vulkan::Pipeline2D::Config pc = {};
+
+    if (mode == DrawMode::LINES)
+    {
+        pc.topology = VK_PRIMITIVE_TOPOLOGY_LINE_LIST;
+    }
+
+    program->setVKPipelineConfig(pc);
     program->setDevice(this->device);
     program->setViewportSize({ sc.currentExtent.width, sc.currentExtent.height });
     return program;

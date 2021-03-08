@@ -21,7 +21,7 @@ bool ProgramVK::link()
         return false;
     }
 
-    vulkan::Pipeline2D::Config p2dConf = {};
+    vulkan::Pipeline2D::Config p2dConf = this->pipelineConfig;
     p2dConf.fragmentShader = std::static_pointer_cast<ShaderVK>(fragment)->getVKShader();
     p2dConf.vertexShader = std::static_pointer_cast<ShaderVK>(vertex)->getVKShader();
     p2dConf.renderPass = this->device->getRenderPasses().back();

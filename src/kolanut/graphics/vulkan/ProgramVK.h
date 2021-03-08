@@ -25,10 +25,17 @@ public:
     Sizei getViewportSize() const
     { return this->viewportSize; }
 
+    const vulkan::Pipeline2D::Config& getVKPipelineConfig() const
+    { return this->pipelineConfig; }
+
+    void setVKPipelineConfig(const vulkan::Pipeline2D::Config& c)
+    { this->pipelineConfig = c; }
+
     std::shared_ptr<vulkan::Pipeline2D> getVKPipeline() const
     { return this->pipeline; }
 
 private:
+    vulkan::Pipeline2D::Config pipelineConfig = {};
     std::shared_ptr<vulkan::Pipeline2D> pipeline = {};
     Sizei viewportSize = {};
 };

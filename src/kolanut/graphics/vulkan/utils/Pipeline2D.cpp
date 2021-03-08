@@ -39,7 +39,7 @@ bool Pipeline2D::init(
 
     VkPipelineInputAssemblyStateCreateInfo paci = {};
     paci.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
-    paci.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
+    paci.topology = config.topology;
     paci.primitiveRestartEnable = VK_FALSE;
 
     VkVertexInputAttributeDescription viad[3] = {};

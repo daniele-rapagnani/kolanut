@@ -17,6 +17,13 @@ namespace graphics {
 class Renderer
 {
 public:
+    enum class DrawMode
+    {
+        NONE,
+        TRIANGLES,
+        LINES
+    };
+
     struct DrawSurface
     {
         std::shared_ptr<Program> program = {};
@@ -24,6 +31,7 @@ public:
         Transform3D transform = {};
         Transform3D camera = {};
         void* vertices = {};
+        DrawMode mode = DrawMode::TRIANGLES;
         size_t verticesCount = 0;
     };
 
@@ -38,7 +46,7 @@ public:
         Shader::Type type = Shader::Type::NONE
     );
 
-    virtual std::shared_ptr<Program> createProgram() = 0;
+    virtual std::shared_ptr<Program> createProgram(DrawMode mode) = 0;
 
     virtual void draw(
         std::shared_ptr<Texture> t, 
@@ -81,13 +89,13 @@ public:
     virtual void draw(
         const Rectf& rect,
         const Colori& color
-    ) = 0;
+    );
 
     virtual void draw(
         const Vec2f& a,
         const Vec2f& b,
         const Colori& color
-    ) = 0;
+    );
 
     virtual void drawSurface(const DrawSurface& req) = 0;
 
@@ -106,7 +114,7 @@ public:
     virtual float getPixelsPerPoint() const;
     virtual Vec2i getPixelResolution() const = 0;
 
-    virtual Vec2i getDesignResolution()
+    virtual Vec2i getDesignResolution() const
     { return this->designResolution; }
 
     uint8_t getCurrentFrame() const
@@ -118,8 +126,13 @@ public:
     std::shared_ptr<Program> getProgram() const
     { return this->program; }
 
+    std::shared_ptr<Program> getLineProgram() const
+    { return this->lineProgram; }
+
     std::shared_ptr<GeometryBuffer> getGeometryBuffer() const
     { return this->geometryBuffer; }
+
+    void createCameraTransform(Transform3D& tr) const;
 
 protected:
     virtual std::shared_ptr<Font> createFont() = 0;
@@ -127,12 +140,14 @@ protected:
     virtual std::shared_ptr<Texture> createTexture() = 0;
     virtual std::shared_ptr<GeometryBuffer> createGeometryBuffer() = 0;
     virtual std::shared_ptr<Program> createMainProgram();
+    virtual std::shared_ptr<Program> createLineProgram();
 
     virtual std::string getShadersExt() const
     { return ""; }
 
 protected:
     std::shared_ptr<Program> program = {};
+    std::shared_ptr<Program> lineProgram = {};
     std::shared_ptr<GeometryBuffer> geometryBuffer = {};
 
 private:

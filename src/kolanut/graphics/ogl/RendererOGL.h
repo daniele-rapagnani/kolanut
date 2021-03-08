@@ -19,18 +19,7 @@ public:
 public:
     bool doInit(const Config& config) override;
 
-    std::shared_ptr<Program> createProgram() override;
-
-    void draw(
-        const Rectf& rect,
-        const Colori& color
-    ) override;
-
-    void draw(
-        const Vec2f& a,
-        const Vec2f& b,
-        const Colori& color
-    ) override;
+    std::shared_ptr<Program> createProgram(DrawMode mode) override;
 
     void drawSurface(const DrawSurface& req) override;
 

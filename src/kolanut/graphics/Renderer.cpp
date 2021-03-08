@@ -40,10 +40,17 @@ bool Renderer::init(const Config& config)
     }
 
     this->program = createMainProgram();
+    this->lineProgram = createLineProgram();
 
     if (!this->program->link())
     {
         knM_logFatal("Can't link main program");
+        return false;
+    }
+
+    if (!this->lineProgram->link())
+    {
+        knM_logFatal("Can't link line program");
         return false;
     }
 
@@ -170,30 +177,14 @@ void Renderer::draw(
         glm::vec3 { -origin.x, -origin.y, 0.0f }
     );
 
-    float resScale = getResolution().x / getDesignResolution().x;
-
-    ds.camera = glm::translate(
-        glm::scale(
-            Transform3D { 1.0f },
-            glm::vec3 {
-                resScale * getCameraZoom(),
-                resScale * getCameraZoom(),
-                1.0f
-            }
-        ),
-        glm::vec3 {
-            -getCameraPosition().x, 
-            -getCameraPosition().y,
-            0.0f
-        }
-    );
+    createCameraTransform(ds.camera);
 }
 
 void Renderer::draw(
     const char* str,
     size_t len,
-    std::shared_ptr<Font> f, 
-    const Vec2f& position, 
+    std::shared_ptr<Font> f,
+    const Vec2f& position,
     const Vec2f& scale,
     const Colori& color
 )
@@ -228,6 +219,86 @@ void Renderer::draw(
         draw(f->getTexture(), glyphPos, 0.0f, scale, {}, g->textureCoords, color);
         curPos.x += g->xAdvance * scale.x;
     }
+}
+
+void Renderer::draw(
+    const Vec2f& a,
+    const Vec2f& b,
+    const Colori& color
+)
+{
+    jobs.emplace_back();
+    DrawSurface& ds = jobs.back();
+
+    ds.texture = nullptr;
+    ds.program = getLineProgram();
+
+    std::vector<Vertex> vertices = {
+        { Vec2f { a.x, a.y }, { 0.0f, 0.0f }, color },
+        { Vec2f { b.x, b.y }, { 0.0f, 0.0f }, color },
+    };
+
+
+    GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
+    ds.vertices = reinterpret_cast<void*>(h);
+    ds.verticesCount = vertices.size();
+    ds.transform = Transform3D { 1.0f };
+    ds.mode = DrawMode::LINES;
+    createCameraTransform(ds.camera);
+}
+
+void Renderer::draw(
+    const Rectf& rect,
+    const Colori& color
+)
+{
+    jobs.emplace_back();
+    DrawSurface& ds = jobs.back();
+
+    ds.texture = nullptr;
+    ds.program = getLineProgram();
+
+    std::vector<Vertex> vertices = {
+        { rect.xy(), { 0.0f, 0.0f }, color },
+        { rect.xy() + Vec2f{ rect.z, 0.0f }, { 0.0f, 0.0f }, color },
+
+        { rect.xy() + Vec2f{ rect.z, 0.0f }, { 0.0f, 0.0f }, color },
+        { rect.xy() + Vec2f{ rect.z, rect.w }, { 0.0f, 0.0f }, color },
+
+        { rect.xy() + Vec2f{ rect.z, rect.w }, { 0.0f, 0.0f }, color },
+        { rect.xy() + Vec2f{ 0.0f, rect.w }, { 0.0f, 0.0f }, color },
+
+        { rect.xy() + Vec2f{ 0.0f, rect.w }, { 0.0f, 0.0f }, color },
+        { rect.xy(), { 0.0f, 0.0f }, color },
+    };
+
+    GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
+    ds.vertices = reinterpret_cast<void*>(h);
+    ds.verticesCount = vertices.size();
+    ds.transform = Transform3D { 1.0f };
+    ds.mode = DrawMode::LINES;
+    createCameraTransform(ds.camera);
+}
+
+void Renderer::createCameraTransform(Transform3D& tr) const
+{
+    float resScale = getResolution().x / getDesignResolution().x;
+
+    tr = glm::translate(
+        glm::scale(
+            Transform3D { 1.0f },
+            glm::vec3 {
+                resScale * getCameraZoom(),
+                resScale * getCameraZoom(),
+                1.0f
+            }
+        ),
+        glm::vec3 {
+            -getCameraPosition().x, 
+            -getCameraPosition().y,
+            0.0f
+        }
+    );   
 }
 
 void Renderer::clear()
@@ -265,7 +336,22 @@ std::shared_ptr<Program> Renderer::createMainProgram()
     assert(vertexShader);
     assert(fragmentShader);
 
-    auto drawProgram = createProgram();
+    auto drawProgram = createProgram(DrawMode::TRIANGLES);
+    drawProgram->addShader(fragmentShader);
+    drawProgram->addShader(vertexShader);
+
+    return drawProgram;
+}
+
+std::shared_ptr<Program> Renderer::createLineProgram()
+{
+    auto vertexShader = loadShader("assets/main.vert", Shader::Type::VERTEX);
+    auto fragmentShader = loadShader("assets/solid.frag", Shader::Type::FRAGMENT);
+
+    assert(vertexShader);
+    assert(fragmentShader);
+
+    auto drawProgram = createProgram(DrawMode::LINES);
     drawProgram->addShader(fragmentShader);
     drawProgram->addShader(vertexShader);
 
