@@ -1,5 +1,6 @@
 return {
     PlayerSystem = import("./PlayerSystem"),
     PlatformSystem = import("./PlatformSystem"),
-    PatrollingSystem = import("./PatrollingSystem")
+    PatrollingSystem = import("./PatrollingSystem"),
+    CollectibleSystem = import("./CollectibleSystem")
 };

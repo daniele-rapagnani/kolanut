@@ -30,6 +30,7 @@ let Game = {
         this.world->addSystem(ECS.Systems.PanControllerSystem.create());
         this.world->addSystem(Systems.PlatformSystem.create());
         this.world->addSystem(Systems.PatrollingSystem.create("Player"));
+        this.world->addSystem(Systems.CollectibleSystem.create());
         this.world->addSystem(ECS.Systems.RigidbodySystem.create());
         this.world->addSystem(ECS.Systems.FrameAnimationSystem.create());
         this.world->addSystem(ECS.Systems.CameraSystem.create());

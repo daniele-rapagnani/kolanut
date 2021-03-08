@@ -6,7 +6,8 @@ let Assets = {
 
     Sprites = {
         Hero = null,
-        Goblin = null
+        Goblin = null,
+        Kitten = null
     },
 
     UI = {
@@ -20,6 +21,7 @@ let Assets = {
         Hit = null,
         Death = null,
         Attack = null,
+        Collect = null,
         Music = null
     },
 
@@ -31,10 +33,12 @@ let Assets = {
         Assets.Sounds.Hit = Kolanut.loadSound("assets/hit.wav");
         Assets.Sounds.Death = Kolanut.loadSound("assets/death.wav");
         Assets.Sounds.Attack = Kolanut.loadSound("assets/attack.wav");
+        Assets.Sounds.Collected = Kolanut.loadSound("assets/collect.wav");
         Assets.Sounds.Music = Kolanut.loadSound("assets/music.wav");
 
         Assets.Sprites.Hero = Kolanut.loadSprite("assets/herochar_spritesheet.png");
         Assets.Sprites.Goblin = Kolanut.loadSprite("assets/goblin_spritesheet.png");
+        Assets.Sprites.Kitten = Kolanut.loadSprite("assets/kitten.png");
         
         Assets.UI.Heart = Kolanut.loadSprite("assets/hearts_hud.png");
         Assets.UI.NoHeart = Kolanut.loadSprite("assets/no_hearts_hud.png");

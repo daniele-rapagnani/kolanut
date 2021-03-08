@@ -26,8 +26,8 @@ let SpriteRenderer = {
             top = tr.position.y - tr.origin.y
         };
 
-        res.right = res.left + (this.sprite->getSize().w ?? 0.0);
-        res.bottom = res.top + (this.sprite->getSize().h ?? 0.0);
+        res.right = res.left + (this.sprite->getSize().x ?? 0.0);
+        res.bottom = res.top + (this.sprite->getSize().y ?? 0.0);
 
         return res;
     },

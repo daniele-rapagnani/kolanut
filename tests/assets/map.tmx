@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="17">
+<map version="1.4" tiledversion="1.4.1" orientation="orthogonal" renderorder="right-down" width="200" height="200" tilewidth="16" tileheight="16" infinite="0" nextlayerid="6" nextobjectid="22">
  <editorsettings>
   <export target="map.tmx" format="tmx"/>
  </editorsettings>
  <tileset firstgid="1" source="Forest 16 Colors.tsx"/>
  <layer id="1" name="Tile Layer 1" width="200" height="200">
   <data encoding="base64" compression="zlib">
-   eJzt2tlqhDAUBmC7QjewG/T9n7QGKrWSOEndMuP3wbmaxHhxfpc4TQMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAwLm5/qmbvU8EKvTa1VtX73ufCAAX66r5fR7LrbnPbafW9FxILR66eiysp5XXnHt8jue2q7tE3U/MG1+rx9dm+eASTPVU30/tYHybmDfuvS3y8VW4pnxQKicfOfPGY/u9rmG9TKzl/kGNQk89N/FenpOPnDlL9W9/H5EPlhZ6KtY34fo/9Z2jpnxsdXyOJ5WPnHl758P7B2urOR+xvbWpPTX5YGmpfITeHPZiO/p9jXx8NH+z8Jkx5tR4+WCO0LOxngu9tvX7+dolH5Raa3+3dC35oEY15SO2z7xk+d8xpbbMR+ybof6lZlvmA86NfECafECafECafECafECafECafEDaf/MBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAcBTfpF0Xqg==
+   eJzt2t1qgzAYBmD3C/sDt27Q+7/SGViZC8ZGrTGdzwPfQWliPPheq7FNAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAtbn9qbutTwQq9N7VR1eHrU8EgH/rpvm9H8utpfdt59Z0X0gtnrp6nlgvM9c6Zq459/js131XD4l6HJkXX6vja3PJfOSuKR9MNdZTp35qe+PbxLy490rk4xh9lg8uLScfOfPisae9rn69jazl94MahZ56bYZ7eUk+cuZ4/qB2oaeG+iZc/8fec9SUj1LHZ39S+ciZt3U+PH+wtprzMbS3NranJh9cWiofoTf7vdhG36+Rj8/mbxa+MsacGy8fLBF6dqjnQq+Vfj5fu+SDqdba3526lnxQo5ryMbTPfMnyv2OmKpmPoXeG+pealcwHXBv5gDT5gDT5gDT5gDT5gDT5gDT5gLS5+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADYi286pBfC
   </data>
  </layer>
  <layer id="4" name="Tile Layer 2" width="200" height="200">
@@ -39,6 +39,21 @@
    <point/>
   </object>
   <object id="16" name="Goblin" type="Enemy Spawn" x="1648" y="928">
+   <point/>
+  </object>
+  <object id="17" name="Kitten" type="Enemy Spawn" x="1232" y="944">
+   <point/>
+  </object>
+  <object id="18" name="Kitten" type="Enemy Spawn" x="864" y="1088">
+   <point/>
+  </object>
+  <object id="19" name="Kitten" type="Enemy Spawn" x="999" y="976">
+   <point/>
+  </object>
+  <object id="20" name="Kitten" type="Enemy Spawn" x="1472" y="1088">
+   <point/>
+  </object>
+  <object id="21" name="Kitten" type="Enemy Spawn" x="1558" y="1003">
    <point/>
   </object>
  </objectgroup>
