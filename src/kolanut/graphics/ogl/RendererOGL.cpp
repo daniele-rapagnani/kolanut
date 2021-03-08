@@ -109,10 +109,19 @@ void RendererOGL::drawSurface(const DrawSurface& req)
         return;
     }
 
+    GLint colAtt = glProgram->getAttributeLocation("a_color");
+
+    if (colAtt < 0)
+    {
+        knM_logError("Can't find a_color attribute in main vertex shader");
+        return;
+    }
+
     GLuint* buffers = reinterpret_cast<GLuint*>(req.vertices);
 
     void* offset = reinterpret_cast<void*>(this->geometryBuffer->getBase(h));
     void* offsetUv = reinterpret_cast<void*>(this->geometryBuffer->getBase(h) + sizeof(Vec2f));
+    void* offsetColor = reinterpret_cast<void*>(this->geometryBuffer->getBase(h) + sizeof(Vec2f) * 2);
 
     std::static_pointer_cast<GeometryBufferOGL>(getGeometryBuffer())->bind();
     
@@ -120,6 +129,8 @@ void RendererOGL::drawSurface(const DrawSurface& req)
     knM_oglCall(glVertexAttribPointer(posAtt, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offset));
     knM_oglCall(glEnableVertexAttribArray(tcAtt));
     knM_oglCall(glVertexAttribPointer(tcAtt, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetUv));
+    knM_oglCall(glEnableVertexAttribArray(colAtt));
+    knM_oglCall(glVertexAttribPointer(colAtt, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetColor));
 
     if (texture != this->lastTexture)
     {
@@ -167,7 +178,7 @@ void RendererOGL::doFlip()
         knM_oglCall(glGetQueryObjectui64vEXT(this->perfQuery, GL_QUERY_RESULT, &elapsed));
 
         double e = static_cast<double>(elapsed) / 1000000.0;
-        
+
         auto stats = di::get<stats::StatsEngine>();
         stats->addSample(stats::StatsEngine::Measure::GPU_TIME, e);
     }
