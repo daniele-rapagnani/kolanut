@@ -141,6 +141,7 @@ set(
     src/kolanut/scripting/melon/modules/Vector2Module.cpp
     src/kolanut/scripting/melon/modules/Vector3Module.cpp
     src/kolanut/scripting/melon/modules/Vector4Module.cpp
+    src/kolanut/scripting/melon/modules/BoundingboxModule.cpp
     src/kolanut/scripting/melon/modules/RectModule.cpp
     src/kolanut/scripting/melon/modules/ColorModule.cpp
 

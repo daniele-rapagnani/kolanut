@@ -6,6 +6,7 @@
 #include "kolanut/scripting/melon/modules/Vector4Module.h"
 #include "kolanut/scripting/melon/modules/RectModule.h"
 #include "kolanut/scripting/melon/modules/ColorModule.h"
+#include "kolanut/scripting/melon/modules/BoundingboxModule.h"
 #include "kolanut/scripting/melon/ffi/FFI.h"
 #include "kolanut/scripting/melon/ffi/Modules.h"
 #include "kolanut/scripting/melon/ffi/PopVectors.h"
@@ -93,6 +94,7 @@ Module KOLANUT_MODULES[] = {
     { "Vector2", vector2ModuleInit },
     { "Vector3", vector3ModuleInit },
     { "Vector4", vector4ModuleInit },
+    { "BoundingBox", boundingboxModuleInit },
     { "Rect", rectModuleInit },
     { "Color", colorModuleInit },
     { "Kolanut", kolanutModuleInit },

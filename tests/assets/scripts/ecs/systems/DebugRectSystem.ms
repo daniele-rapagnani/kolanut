@@ -16,21 +16,24 @@ let DebugRectSystem = {
             let tr = e.Transform;
             let sr = e.SpriteRenderer;
             let fa = e.FrameAnimation;
-            let bb = null;
 
             if (tr == null) {
                 continue;
             }
 
+            let size = null;
+
             if (fa != null) {
-                bb = fa->getBB(tr);
+                size = fa->getSize();
             } else if (sr != null) {
-                bb = sr->getBB(tr);
+                size = sr->getSize();
             }
 
-            if (bb == null) {
+            if (size == null) {
                 continue;
             }
+
+            let bb = tr->getBB(size);
 
             r.origin.x = bb.left;
             r.origin.y = bb.top;

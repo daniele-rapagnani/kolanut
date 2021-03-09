@@ -109,6 +109,20 @@ static TByte scale(VM* vm)
     return 0;
 }
 
+static TByte copy(VM* vm)
+{
+    melM_this(vm, thisObj);
+
+    std::shared_ptr<Transform3D> mat = 
+        ffi::getInstance<Transform3D>(vm, thisObj->pack.obj)
+    ;
+    
+    std::shared_ptr<Transform3D> mat2 = std::make_shared<Transform3D>(*mat);
+    ffi::pushInstance(vm, "Kolanut", "Transform3D", mat2);
+
+    return 1;
+}
+
 static TByte transpose(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -118,6 +132,19 @@ static TByte transpose(VM* vm)
     ;
 
     *mat = glm::transpose(*mat);
+
+    return 0;
+}
+
+static TByte inverse(VM* vm)
+{
+    melM_this(vm, thisObj);
+
+    std::shared_ptr<Transform3D> mat = 
+        ffi::getInstance<Transform3D>(vm, thisObj->pack.obj)
+    ;
+
+    *mat = glm::inverse(*mat);
 
     return 0;
 }
@@ -166,16 +193,12 @@ static TByte opMultiply(VM* vm)
 
     if (ffi::convert(vm, vec4, otherVal))
     {
-        glm::vec4 res = glm::operator*(*mat, vec4);
+        glm::vec4 res = *mat * vec4;
         ffi::push(vm, res);
     }
     else if (ffi::convert(vm, vec3, otherVal))
     {
-        glm::vec4 res = glm::operator*(
-            *mat, 
-            glm::vec4 { vec3.x, vec3.y, vec3.z, 1.0f }
-        );
-        
+        glm::vec4 res = *mat * glm::vec4 { vec3.x, vec3.y, vec3.z, 1.0f };
         ffi::push(vm, glm::vec3 { res.x, res.y, res.z });
     }
     else
@@ -189,11 +212,13 @@ static TByte opMultiply(VM* vm)
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
     { "create", 0, 0, &create, 0 },
+    { "copy", 1, 0, &copy, 1 },
     { "identity", 1, 0, &identity, 1 },
     { "rotate", 3, 0, &rotate, 1 },
     { "translate", 2, 0, &translate, 1 },
     { "scale", 2, 0, &scale, 1 },
     { "transpose", 1, 0, &transpose, 1 },
+    { "inverse", 1, 0, &inverse, 1 },
     { "determinant", 1, 0, &determinant, 1 },
     { NULL, 2, 0, &opMultiply, 1, 0, MELON_OBJSYM_MUL },
     { NULL, 0, 0, NULL }

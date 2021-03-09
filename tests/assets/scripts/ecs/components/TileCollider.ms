@@ -4,6 +4,7 @@ let TileCollider = {
     create = => {
         return { 
             layer = 0,
+            padding = { h = 5.0, v = 5.0 },
             colliding = {
                 top = false,
                 bottom = false,

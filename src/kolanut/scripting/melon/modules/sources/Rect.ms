@@ -1,5 +1,8 @@
 let Rect = {
-    create = |origin, size| => {
+    create = func rectCreate |origin, size| => {
+        origin = origin ?? Vector2.create();
+        size = size ?? Vector2.create();
+
         return { 
             origin = Vector2.create(origin.x, origin.y),
             size = Vector2.create(size.x, size.y)

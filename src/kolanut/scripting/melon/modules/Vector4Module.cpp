@@ -20,12 +20,12 @@ namespace scripting {
 
 const char* VECTOR4_MODULE_SOURCE = R"##ENDSOURCE##(
 let Vector4 = {
-    create = func vectorCreate |x, y, z, w| => {
+    create = func vector4Create |x, y, z, w| => {
         return { 
             x = number.fromNumber(x ?? 0), 
             y = number.fromNumber(y ?? 0),
-            y = number.fromNumber(z ?? 0),
-            y = number.fromNumber(w ?? 0)
+            z = number.fromNumber(z ?? 0),
+            w = number.fromNumber(w ?? 0)
         } @ Vector4;
     },
     [object.symbols.sumOperator] = |other| -> {

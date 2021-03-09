@@ -16,15 +16,15 @@ let CollisionSystem = {
             return null;
         }
 
-        let bb = null;
+        let size = null;
 
         if (fa != null) {
-            bb = fa->getBB(tr);
+            size = fa->getSize();
         } else if (sr != null) {
-            bb = sr->getBB(tr);
+            size = sr->getSize();
         }
 
-        return bb;
+        return tr->getBB(size);
     },
 
     update = |dt, entities| -> {
@@ -46,10 +46,7 @@ let CollisionSystem = {
                     let aBB = CollisionSystem.getRendererBB(entities[i]);
                     let bBB = CollisionSystem.getRendererBB(entities[j]);
 
-                    let overlapH = (aBB.left < bBB.right && aBB.right > bBB.left);
-                    let overlapV = (aBB.bottom > bBB.top && aBB.top < bBB.bottom);
-
-                    if (overlapH && overlapV) {
+                    if (aBB->overlaps(bBB)) {
                         Events.Collision->trigger(this.world, entities[i], entities[j]);
                     }
                 }

@@ -39,10 +39,10 @@ let PlatformSystem = {
                 if (!isDashing) {
                     if (pc.controls.left) {
                         rb.velocity.x = -pc.speed;
-                        tr.scale.x = -1.0;
+                        tr.scale.x = -math.abs(tr.scale.x);
                     } else if (pc.controls.right) {
                         rb.velocity.x = pc.speed;
-                        tr.scale.x = 1.0;
+                        tr.scale.x = math.abs(tr.scale.x);
                     }
                 }
 

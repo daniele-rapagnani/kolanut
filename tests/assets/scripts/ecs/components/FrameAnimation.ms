@@ -55,24 +55,14 @@ let FrameAnimation = {
         return this.animations[this.curAnimation];
     },
 
-    getBB = |tr| -> {
+    getSize = -> {
         let ca = this->getCurAnimation();
 
-        let res = {
-            left = tr.position.x - tr.origin.x,
-            top = tr.position.y - tr.origin.y,
-        };
-
         if (ca == null) {
-            res.right = res.left;
-            res.bottom = res.top;
-            return res;
+            return Vector2.create();
         }
-
-        res.right = res.left + ca.frameSize.size.x;
-        res.bottom = res.top + ca.frameSize.size.y;
-
-        return res;
+        
+        return ca.frameSize.size;
     },
 
     getType = -> {

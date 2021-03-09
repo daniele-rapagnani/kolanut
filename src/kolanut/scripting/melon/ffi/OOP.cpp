@@ -16,14 +16,17 @@ bool isa(VM* vm, GCItem* obj, const std::string& module, const std::string& clas
     }
 
     GCItem* proto = nullptr;
+    GCItem* root = obj;
     
     do {
-        proto = melGetPrototypeObject(vm, obj);
+        proto = melGetPrototypeObject(vm, root);
 
         if (proto == classObj->pack.obj)
         {
             return true;
         }
+
+        root = proto;
     }
     while (proto);
 

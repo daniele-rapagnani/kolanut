@@ -20,16 +20,12 @@ let SpriteRenderer = {
         }
     },
 
-    getBB = |tr| -> {
-        let res = {
-            left = tr.position.x - tr.origin.x,
-            top = tr.position.y - tr.origin.y
-        };
+    getSize = -> {
+        if (this.sprite == null) {
+            return Vector2.create();
+        }
 
-        res.right = res.left + (this.sprite->getSize().x ?? 0.0);
-        res.bottom = res.top + (this.sprite->getSize().y ?? 0.0);
-
-        return res;
+        return this.sprite->getSize();
     },
 
     getType = -> {

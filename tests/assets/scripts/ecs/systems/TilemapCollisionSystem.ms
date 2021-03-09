@@ -5,7 +5,45 @@ let TilemapCollisionSystem = {
         return { tilemap = tilemap } @ TilemapCollisionSystem;
     },
 
-    update = |dt, entities| -> {
+    getTileRange = |layer, bb, padding, lock, vertical| -> {
+        let pos = bb->getOrigin();
+        let size = bb->getSize();
+        let dist = null;
+        
+        if (vertical) {
+            dist = size.y - padding * 2.0;
+        } else {
+            dist = size.x - padding * 2.0;
+        }
+
+        let inc = dist / 3.0;
+
+        let point = null;
+        
+        if (vertical) {
+            point = Vector2.create(pos.x + lock * size.x, pos.y + padding);
+        } else {
+            point = Vector2.create(pos.x + padding, pos.y + lock * size.y);
+        }
+
+        for (let i in 0..4) {
+            let tile = this.tilemap->getTileAt(layer, point);
+
+            if (tile != null) {
+                return tile;
+            }
+
+            if (vertical) {
+                point.y = point.y + inc;
+            } else { 
+                point.x = point.x + inc;
+            }
+        }
+
+        return null;
+    },
+
+    update = func tilemapSystemUpdate |dt, entities| -> {
         let self = this;
 
         if (this.tilemap == null) {
@@ -27,28 +65,27 @@ let TilemapCollisionSystem = {
                     let sr = entity.SpriteRenderer;
                     let fa = entity.FrameAnimation;
 
-                    let bb = null;
+                    let size = null;
 
                     if (fa != null) {
-                        bb = fa->getBB(tr);
+                        size = fa->getSize();
                     } else {
-                        bb = sr->getBB(tr);
+                        size = sr->getSize();
                     }
 
-                    let w = bb.right - bb.left;
-                    let h = bb.bottom - bb.top;
+                    let bb = tr->getBB(size);
+
+                    let w = bb->getSize().x;
+                    let h = bb->getSize().y;
                     let pos = Vector2.create(bb.left, bb.top);
 
-                    let topTile = self.tilemap->getTileAt(
-                        tc.layer,
-                        pos + Vector2.create(w * 0.5, -1.0)
-                    );
+                    let topTile = self->getTileRange(tc.layer, bb, tc.padding.h, 0.0, false);
 
                     if (topTile != null) {
                         let point = (topTile.position.y + topTile.rect.size.y);
 
-                        if (bb.top < point * 1.0) {
-                            tr.position.y = point + tr.origin.y;
+                        if (bb.top < point) {
+                            tr.position.y = tr.position.y + (point - bb.top);
                         }
 
                         if (rb.velocity.y < 0.0) {
@@ -56,16 +93,13 @@ let TilemapCollisionSystem = {
                         }
                     }
 
-                    let bottomTile = self.tilemap->getTileAt(
-                        tc.layer,
-                        pos + Vector2.create(w * 0.5, h + 1.0)
-                    );
+                    let bottomTile = self->getTileRange(tc.layer, bb, tc.padding.h, 1.0, false);
 
                     if (bottomTile != null) {
                         let point = bottomTile.position.y;
 
                         if (bb.bottom > point) {
-                            tr.position.y = point - (h - tr.origin.y);
+                            tr.position.y = tr.position.y - (bb.bottom - point);
                         }
 
                         if (rb.velocity.y > 0.0) {
@@ -83,16 +117,13 @@ let TilemapCollisionSystem = {
                         pos + Vector2.create(w + 1.0, h + 1.0)
                     );
 
-                    let rightTile = self.tilemap->getTileAt(
-                        tc.layer, 
-                        pos + Vector2.create(w + 1.0, h * 0.5)
-                    );
+                    let rightTile = self->getTileRange(tc.layer, bb, tc.padding.v, 1.0, true);
 
                     if (rightTile != null) {
                         let point = rightTile.position.x;
                         
                         if (bb.right > point) {
-                            tr.position.x = point - (w - tr.origin.x);
+                            tr.position.x = tr.position.x - (bb.right - point);
                         }
                         
                         if (rb.velocity.x > 0.0) {
@@ -100,16 +131,13 @@ let TilemapCollisionSystem = {
                         }
                     }
 
-                    let leftTile = self.tilemap->getTileAt(
-                        tc.layer, 
-                        pos + Vector2.create(-1.0, h * 0.5)
-                    );
+                    let leftTile = self->getTileRange(tc.layer, bb, tc.padding.v, 0, true);
 
                     if (leftTile != null) {
                         let point = leftTile.position.x + leftTile.rect.size.x;
 
                         if (bb.left < point) {
-                            tr.position.x = point + tr.origin.x;
+                            tr.position.x = tr.position.x + (point - bb.left);
                         }
 
                         if (rb.velocity.x < 0.0) {

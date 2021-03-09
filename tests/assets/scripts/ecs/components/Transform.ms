@@ -24,6 +24,14 @@ let Transform = {
         return children;
     },
 
+    setWorldPosition = |pos| -> {
+        let wt = this->getWorldTransform();
+        let iwt = wt->copy();
+        iwt->inverse();
+
+        this.position = iwt * pos;
+    },
+
     getWorldTransform = |e| -> {
         if (this.dirty) {
             this.transform->identity();
@@ -41,6 +49,15 @@ let Transform = {
         this.worldTransform = this.parent->getWorldTransform() * this.transform;
 
         return this.worldTransform;
+    },
+
+    getBB = |size| -> {
+        let res = BoundingBox.createFromPos(
+            Vector2.create(),
+            size
+        );
+
+        return res * this->getWorldTransform();
     },
 
     [object.symbols.setPropertyOperator] = |prop, val| -> {
