@@ -80,6 +80,17 @@ public:
 };
 
 template <>
+class Push<glm::vec4>
+{
+public:
+    static TByte push(VM* vm, const glm::vec4& val)
+    {
+        createInstance(vm, "", "Vector4", "create", val.x, val.y, val.z, val.w);
+        return 1;
+    }
+};
+
+template <>
 class Push<Vec4f>
 {
 public:

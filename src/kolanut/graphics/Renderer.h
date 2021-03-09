@@ -50,18 +50,7 @@ public:
 
     virtual void draw(
         std::shared_ptr<Texture> t, 
-        const Vec2f& position, 
-        float angle, 
-        const Vec2f& scale,
-        const Vec2f& origin
-    );
-
-    virtual void draw(
-        std::shared_ptr<Texture> t, 
-        const Vec2f& position, 
-        float angle, 
-        const Vec2f& scale,
-        const Vec2f& origin,
+        const Transform3D& tr,
         const Recti& rect,
         const Colori& color
     );

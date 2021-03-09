@@ -19,24 +19,19 @@ extern "C" {
 static TByte draw(VM* vm)
 {
     melM_this(vm, thisObj);
-    melM_argOptional(vm, positionVal, MELON_TYPE_OBJECT, 0);
-    melM_argOptional(vm, angle, MELON_TYPE_NUMBER, 1);
-    melM_argOptional(vm, scaleVal, MELON_TYPE_OBJECT, 2);
-    melM_argOptional(vm, originVal, MELON_TYPE_OBJECT, 3);
-    melM_argOptional(vm, rectVal, MELON_TYPE_OBJECT, 4);
-    melM_argOptional(vm, colorVal, MELON_TYPE_OBJECT, 5);
+    melM_argOptional(vm, transformVal, MELON_TYPE_OBJECT, 0);
+    melM_argOptional(vm, rectVal, MELON_TYPE_OBJECT, 1);
+    melM_argOptional(vm, colorVal, MELON_TYPE_OBJECT, 2);
 
-    Vec2f position = {};
-    Vec2f scale = {};
-    Vec2f origin = {};
     Recti rect = {};
     Colori color = { 255, 255, 255, 255 };
 
-    kola::melon::ffi::convert(vm, position, positionVal);
-    kola::melon::ffi::convert(vm, scale, scaleVal);
-    kola::melon::ffi::convert(vm, origin, originVal);
-    kola::melon::ffi::convert(vm, rect, rectVal);
-    kola::melon::ffi::convert(vm, color, colorVal);
+    std::shared_ptr<Transform3D> transform = 
+        ffi::getInstance<Transform3D>(vm, transformVal->pack.obj)
+    ;
+
+    ffi::convert(vm, rect, rectVal);
+    ffi::convert(vm, color, colorVal);
 
     std::shared_ptr<graphics::Texture> tex = 
         ffi::getInstance<graphics::Texture>(vm, thisObj->pack.obj)
@@ -44,10 +39,7 @@ static TByte draw(VM* vm)
 
     di::get<graphics::Renderer>()->draw(
         tex, 
-        position, 
-        angle->pack.value.number, 
-        scale,
-        origin,
+        *transform.get(),
         rect,
         color
     );

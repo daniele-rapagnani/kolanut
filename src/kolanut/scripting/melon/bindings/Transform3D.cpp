@@ -67,15 +67,20 @@ static TByte rotate(VM* vm)
 static TByte translate(VM* vm)
 {
     melM_this(vm, thisObj);
-    melM_argOptional(vm, amountVal, MELON_TYPE_OBJECT, 1);
+    melM_argOptional(vm, amountVal, MELON_TYPE_OBJECT, 0);
 
     std::shared_ptr<Transform3D> mat = 
         ffi::getInstance<Transform3D>(vm, thisObj->pack.obj)
     ;
 
     glm::vec3 amount;
+    Vec2f amount2;
 
-    ffi::convert(vm, amount, amountVal);
+    if (!ffi::convert(vm, amount, amountVal))
+    {
+        ffi::convert(vm, amount2, amountVal);
+        amount = { amount2.x, amount2.y, 1.0f };
+    }
 
     *mat = glm::translate(*mat, amount);
 
@@ -85,18 +90,22 @@ static TByte translate(VM* vm)
 static TByte scale(VM* vm)
 {
     melM_this(vm, thisObj);
-    melM_argOptional(vm, amountVal, MELON_TYPE_OBJECT, 1);
+    melM_argOptional(vm, amountVal, MELON_TYPE_OBJECT, 0);
 
     std::shared_ptr<Transform3D> mat = 
         ffi::getInstance<Transform3D>(vm, thisObj->pack.obj)
     ;
 
     glm::vec3 amount;
+    Vec2f amount2;
 
-    ffi::convert(vm, amount, amountVal);
+    if (!ffi::convert(vm, amount, amountVal))
+    {
+        ffi::convert(vm, amount2, amountVal);
+        amount = { amount2.x, amount2.y, 1.0f };
+    }
 
     *mat = glm::scale(*mat, amount);
-
     return 0;
 }
 
@@ -152,15 +161,29 @@ static TByte opMultiply(VM* vm)
         return 1;
     }
 
-    // glm::vec4 vec;
+    glm::vec4 vec4;
+    glm::vec3 vec3;
 
-    // if (ffi::convert(vm, vec, otherVal))
-    // {
-    //     glm::vec4 res = glm::operator*(*mat, vec);
-    //     ffi::push(res);
-    // }
+    if (ffi::convert(vm, vec4, otherVal))
+    {
+        glm::vec4 res = glm::operator*(*mat, vec4);
+        ffi::push(vm, res);
+    }
+    else if (ffi::convert(vm, vec3, otherVal))
+    {
+        glm::vec4 res = glm::operator*(
+            *mat, 
+            glm::vec4 { vec3.x, vec3.y, vec3.z, 1.0f }
+        );
+        
+        ffi::push(vm, glm::vec3 { res.x, res.y, res.z });
+    }
+    else
+    {
+        melM_vstackPushNull(&vm->stack);
+    }
 
-    return 0;
+    return 1;
 }
 
 static const ModuleFunction funcs[] = {

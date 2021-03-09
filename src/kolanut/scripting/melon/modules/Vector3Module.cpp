@@ -24,7 +24,7 @@ let Vector3 = {
         return { 
             x = number.fromNumber(x ?? 0), 
             y = number.fromNumber(y ?? 0),
-            y = number.fromNumber(z ?? 0)
+            z = number.fromNumber(z ?? 0)
         } @ Vector3;
     },
     [object.symbols.sumOperator] = |other| -> {

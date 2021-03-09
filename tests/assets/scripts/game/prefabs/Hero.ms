@@ -65,8 +65,6 @@ let Hero = {
         hero.Player.sounds.hit = GameAssets.Sounds.Hit;
         hero.Player.sounds.death = GameAssets.Sounds.Death;
 
-        hero.SpriteRenderer.color = Color.red;
-
         return hero;
     }
 };

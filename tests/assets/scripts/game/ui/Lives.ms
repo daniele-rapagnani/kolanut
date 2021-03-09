@@ -15,11 +15,14 @@ let Lives = {
             
             let sz = sprite->getSize();
 
+            let transform = Kolanut.Transform3D.create();
+            transform->translate(
+                pos + Vector2.create((sz.x * scale.x * i) + (padding * i), 0.0)
+            );
+            transform->scale(scale);
+            
             sprite->draw(
-                pos + Vector2.create((sz.x * scale.x * i) + (padding * i), 0.0),
-                0.0,
-                scale,
-                Vector2.create(0.0, 0.0),
+                transform,
                 Rect.create(Vector2.create(), Vector2.create(sz.x, sz.y)),
                 Color.white
             );

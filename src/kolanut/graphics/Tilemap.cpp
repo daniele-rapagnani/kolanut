@@ -3,6 +3,8 @@
 #include "kolanut/core/DIContainer.h"
 #include "kolanut/core/Logging.h"
 
+#include <glm/gtc/matrix_transform.hpp>
+
 #include <cassert>
 #include <limits>
 
@@ -160,12 +162,17 @@ bool Tilemap::draw()
 
             const Tile& tile = itt->second;
 
+            Transform3D tr = glm::scale(
+                glm::translate(
+                    Transform3D { 1.0f },
+                    glm::vec3 { tile.position.x, tile.position.y, 0.0f }
+                ),
+                glm::vec3 { tile.scale.x, tile.scale.y, 0.0f }
+            );
+
             renderer->draw(
                 tile.texture,
-                tile.position,
-                0.0f,
-                tile.scale,
-                Vec2f { 0.0f, 0.0f },
+                tr,
                 tile.rect,
                 {}
             );   

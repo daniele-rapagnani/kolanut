@@ -99,31 +99,7 @@ std::shared_ptr<Shader> Renderer::loadShader(
 
 void Renderer::draw(
     std::shared_ptr<Texture> t, 
-    const Vec2f& position, 
-    float angle, 
-    const Vec2f& scale,
-    const Vec2f& origin
-)
-{
-    Sizei ts = t->getSize();
-
-    draw(
-        t, 
-        position,
-        angle,
-        scale,
-        origin,
-        Recti { { 0, 0 }, { ts.x, ts.y } },
-        {}
-    );
-}
-
-void Renderer::draw(
-    std::shared_ptr<Texture> t, 
-    const Vec2f& position, 
-    float angle, 
-    const Vec2f& scale,
-    const Vec2f& origin,
+    const Transform3D& tr,
     const Recti& rect,
     const Colori& color
 )
@@ -165,21 +141,23 @@ void Renderer::draw(
     ds.vertices = reinterpret_cast<void*>(h);
     ds.verticesCount = vertices.size();
 
-    // T * S * R * O, outer comes first
-    ds.transform = glm::translate(
-        glm::rotate(
-            glm::scale(
-                glm::translate(
-                    Transform3D { 1.0f },
-                    glm::vec3 { position.x, position.y, 0.0f }
-                ),
-                glm::vec3 { scale.x, scale.y, 0.0f }
-            ),
-            static_cast<float>(angle * (M_PI / 180.0)),
-            glm::vec3 { 0.0f, 0.0f, 1.0f }
-        ),
-        glm::vec3 { -origin.x, -origin.y, 0.0f }
-    );
+    // // T * S * R * O, outer comes first
+    // ds.transform = glm::translate(
+    //     glm::rotate(
+    //         glm::scale(
+    //             glm::translate(
+    //                 Transform3D { 1.0f },
+    //                 glm::vec3 { position.x, position.y, 0.0f }
+    //             ),
+    //             glm::vec3 { scale.x, scale.y, 0.0f }
+    //         ),
+    //         static_cast<float>(angle * (M_PI / 180.0)),
+    //         glm::vec3 { 0.0f, 0.0f, 1.0f }
+    //     ),
+    //     glm::vec3 { -origin.x, -origin.y, 0.0f }
+    // );
+
+    ds.transform = tr;
 
     createCameraTransform(ds.camera);
 }
@@ -220,7 +198,21 @@ void Renderer::draw(
 
         Vec2f glyphPos = curPos + Vec2f(g->xOffset * scale.x, g->yOffset * scale.y);
 
-        draw(f->getTexture(), glyphPos, 0.0f, scale, {}, g->textureCoords, color);
+        Transform3D tr = glm::scale(
+            glm::translate(
+                Transform3D { 1.0f },
+                glm::vec3 { glyphPos.x, glyphPos.y, 0.0f }
+            ),
+            glm::vec3 { scale.x, scale.y, 0.0f }
+        );
+
+        draw(
+            f->getTexture(),
+            tr,
+            g->textureCoords,
+            color
+        );
+
         curPos.x += g->xAdvance * scale.x;
     }
 }
@@ -241,7 +233,6 @@ void Renderer::draw(
         { Vec2f { a.x, a.y }, { 0.0f, 0.0f }, color },
         { Vec2f { b.x, b.y }, { 0.0f, 0.0f }, color },
     };
-
 
     GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
     ds.vertices = reinterpret_cast<void*>(h);
