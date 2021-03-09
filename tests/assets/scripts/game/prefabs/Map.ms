@@ -29,7 +29,7 @@ let Map = {
     load = |folder, file| -> {
         this.tilemap = Kolanut.Tilemap.create();
         this.tilemap->load(folder, file);
-        this.tilemap->instantiate(Vector.create(0, 0));
+        this.tilemap->instantiate(Vector2.create(0, 0));
 
         let playerSpawn = this.tilemap->getObjectByName(0, "Player Spawn");
 

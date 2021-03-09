@@ -1,29 +1,23 @@
 let Rect = {
-    create = |x, y, w, h| => {
+    create = |origin, size| => {
         return { 
-            x = x, 
-            y = y, 
-            w = w, 
-            h = h 
+            origin = Vector2.create(origin.x, origin.y),
+            size = Vector2.create(size.x, size.y)
         } @ Rect;
     },
     [object.symbols.sumOperator] = |other| -> {
         if (@other == Rect)
         {
             return Rect.create(
-                this.x + other.x, 
-                this.y + other.y,
-                this.w + other.w,
-                this.h + other.h
+                this.origin + other.origin, 
+                this.size + other.size
             );
         }
-        else if (@other == Vector)
+        else if (@other == Vector2)
         {
             return Rect.create(
-                this.x + other.x, 
-                this.y + other.y,
-                this.w,
-                this.h
+                this.origin + other,
+                this.size
             );
         }
 
@@ -31,22 +25,18 @@ let Rect = {
     },
     [object.symbols.mulOperator] = |other| -> {
         return Rect.create(
-            this.x * other, 
-            this.y * other, 
-            this.w * other, 
-            this.h * other
+            this.origin * other, 
+            this.size * other
         );
     },
     [object.symbols.divOperator] = |other| -> {
         return Rect.create(
-            this.x / other, 
-            this.y / other, 
-            this.w / other, 
-            this.h / other
+            this.origin / other, 
+            this.size / other
         );
     },
     [object.symbols.sizeOperator] = -> {
-        return this.w * this.h;
+        return this.size.x * this.size.y;
     },
     [object.symbols.compareOperator] = |other| -> {
         if (!types.isObject(other))
@@ -55,10 +45,8 @@ let Rect = {
         }
         
         if (
-            this.x == other.x 
-            && this.y == other.y
-            && this.w == other.w
-            && this.h == other.h
+            this.origin == other.origin 
+            && this.size == other.size
         )
         {
             return 0;

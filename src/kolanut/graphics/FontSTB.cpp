@@ -127,14 +127,18 @@ Font::Glyph FontSTB::createGlyphInfo(int codepoint) const
     Recti& r = g.textureCoords;
 
     r = { 
-        static_cast<int32_t>(this->atlasSize.x * q.s0), 
-        static_cast<int32_t>(this->atlasSize.y * q.t0), 
-        static_cast<int32_t>(this->atlasSize.x * q.s1), 
-        static_cast<int32_t>(this->atlasSize.y * q.t1)
+        { 
+            static_cast<int32_t>(this->atlasSize.x * q.s0), 
+            static_cast<int32_t>(this->atlasSize.y * q.t0)
+        },
+        {
+            static_cast<size_t>(this->atlasSize.x * q.s1), 
+            static_cast<size_t>(this->atlasSize.y * q.t1)
+        }
     };
 
-    r.z -= r.x;
-    r.w -= r.y;
+    r.size.x -= r.origin.x;
+    r.size.y -= r.origin.y;
 
     g.xAdvance = this->charsMap[idx].xadvance;
     g.xOffset = this->charsMap[idx].xoff;

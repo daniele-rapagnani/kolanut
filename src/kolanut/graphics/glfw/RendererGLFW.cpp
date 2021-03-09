@@ -88,24 +88,24 @@ void RendererGLFW::doFlip()
     glfwSwapBuffers(this->window);
 }
 
-Vec2i RendererGLFW::getResolution() const
+Sizei RendererGLFW::getResolution() const
 {
     assert(this->window);
 
     int w, h;
     glfwGetWindowSize(this->window, &w, &h);
 
-    return { w, h };
+    return { static_cast<size_t>(w), static_cast<size_t>(h) };
 }
 
-Vec2i RendererGLFW::getPixelResolution() const
+Sizei RendererGLFW::getPixelResolution() const
 {
     assert(this->window);
 
     int w, h;
     glfwGetFramebufferSize(this->window, &w, &h);
 
-    return { w, h };
+    return { static_cast<size_t>(w), static_cast<size_t>(h) };
 }
 
 } // namespace graphics

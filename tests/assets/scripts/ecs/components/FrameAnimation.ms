@@ -69,8 +69,8 @@ let FrameAnimation = {
             return res;
         }
 
-        res.right = res.left + ca.frameSize.w;
-        res.bottom = res.top + ca.frameSize.h;
+        res.right = res.left + ca.frameSize.size.x;
+        res.bottom = res.top + ca.frameSize.size.y;
 
         return res;
     },

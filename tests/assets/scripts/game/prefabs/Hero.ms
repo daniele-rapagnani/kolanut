@@ -22,21 +22,21 @@ let Hero = {
 
         fa->addAnimation({
             name = "die",
-            frameSize = Rect.create(0, 0, 16, 16),
+            frameSize = Rect.create(Vector2.create(0, 0), Vector2.create(16, 16)),
             totalFrames = 8,
             duration = 0.15
         });
 
         fa->addAnimation({
             name = "idle",
-            frameSize = Rect.create(0, 16 * 4, 16, 16),
+            frameSize = Rect.create(Vector2.create(0, 16 * 4), Vector2.create(16, 16)),
             totalFrames = 4,
             duration = 0.15
         });
 
         fa->addAnimation({
             name = "hit",
-            frameSize = Rect.create(0, 16 * 7, 16, 16),
+            frameSize = Rect.create(Vector2.create(0, 16 * 7), Vector2.create(16, 16)),
             totalFrames = 3,
             duration = 0.15
         });

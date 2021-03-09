@@ -14,7 +14,7 @@ Sizei Font::getTextSize(const char* str, size_t len) const
 {
     Sizei r = {};
 
-    long lineHeight = 0;
+    size_t lineHeight = 0;
     long advance = 0;
 
     for (size_t i = 0; i < len; i++)
@@ -22,7 +22,7 @@ Sizei Font::getTextSize(const char* str, size_t len) const
         if (str[i] == '\n')
         {
             r.y += getNativeFontSize();
-            r.x = std::max(r.x, advance);
+            r.x = std::max(static_cast<long>(r.x), advance);
 
             lineHeight = 0;
             advance = 0;
@@ -37,12 +37,12 @@ Sizei Font::getTextSize(const char* str, size_t len) const
             continue;
         }
         
-        lineHeight = std::max(g->textureCoords.w, lineHeight);
+        lineHeight = std::max(g->textureCoords.size.y, lineHeight);
         advance += g->xAdvance;
     }
 
     r.y += lineHeight;
-    r.x = std::max(r.x, advance);
+    r.x = std::max(static_cast<long>(r.x), advance);
 
     return r;
 }

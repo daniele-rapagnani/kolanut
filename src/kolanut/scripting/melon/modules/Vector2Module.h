@@ -10,13 +10,13 @@ extern "C" {
 }
 
 extern "C" {
-TRet vectorModuleInit(VM* vm);
+TRet vector2ModuleInit(VM* vm);
 }
 
 namespace kola {
 namespace scripting {
 
-extern const char* VECTOR_MODULE_SOURCE;
+extern const char* VECTOR2_MODULE_SOURCE;
 
 } // namespace scripting
 } // namespace kola

@@ -18,8 +18,8 @@ public:
     virtual bool doInit(const Config& config) override;
     void doFlip() override;
 
-    Vec2i getResolution() const override;
-    Vec2i getPixelResolution() const override;
+    Sizei getResolution() const override;
+    Sizei getPixelResolution() const override;
 
     GLFWwindow* getWindow() const
     { return this->window; }

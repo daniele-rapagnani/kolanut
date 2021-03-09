@@ -29,35 +29,35 @@ let Goblin = {
 
         fa->addAnimation({
             name = "run",
-            frameSize = Rect.create(0, 0, 16, 16),
+            frameSize = Rect.create(Vector2.create(), Vector2.create(16, 16)),
             totalFrames = 6,
             duration = 0.15
         });
 
         fa->addAnimation({
             name = "die",
-            frameSize = Rect.create(0, 16, 16, 16),
+            frameSize = Rect.create(Vector2.create(0, 16), Vector2.create(16, 16)),
             totalFrames = 6,
             duration = 0.15
         });
 
         fa->addAnimation({
             name = "attack",
-            frameSize = Rect.create(0, 32, 24, 16),
+            frameSize = Rect.create(Vector2.create(0, 32), Vector2.create(24, 16)),
             totalFrames = 4,
             duration = 0.1
         });
 
         fa->addAnimation({
             name = "idle",
-            frameSize = Rect.create(0, 48, 16, 16),
+            frameSize = Rect.create(Vector2.create(0, 48), Vector2.create(16, 16)),
             totalFrames = 4,
             duration = 0.15
         });
 
         fa->addAnimation({
             name = "hit",
-            frameSize = Rect.create(0, 64, 16, 16),
+            frameSize = Rect.create(Vector2.create(0, 64), Vector2.create(16, 16)),
             totalFrames = 3,
             duration = 0.15
         });

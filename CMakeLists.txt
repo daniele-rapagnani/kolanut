@@ -135,10 +135,12 @@ set(
     src/kolanut/scripting/melon/bindings/Font.cpp
     src/kolanut/scripting/melon/bindings/Sound.cpp
     src/kolanut/scripting/melon/bindings/SoundInstance.cpp
+    src/kolanut/scripting/melon/bindings/Transform3D.cpp
     src/kolanut/scripting/melon/modules/KolanutModule.cpp
     src/kolanut/scripting/melon/modules/SourceModule.cpp
-    src/kolanut/scripting/melon/modules/VectorModule.cpp
-    src/kolanut/scripting/melon/modules/SpriteModule.cpp
+    src/kolanut/scripting/melon/modules/Vector2Module.cpp
+    src/kolanut/scripting/melon/modules/Vector3Module.cpp
+    src/kolanut/scripting/melon/modules/Vector4Module.cpp
     src/kolanut/scripting/melon/modules/RectModule.cpp
     src/kolanut/scripting/melon/modules/ColorModule.cpp
 

@@ -1,8 +1,9 @@
 #include "kolanut/core/Logging.h"
 #include "kolanut/scripting/melon/ScriptingEngineMelon.h"
 #include "kolanut/scripting/melon/modules/KolanutModule.h"
-#include "kolanut/scripting/melon/modules/VectorModule.h"
-#include "kolanut/scripting/melon/modules/SpriteModule.h"
+#include "kolanut/scripting/melon/modules/Vector2Module.h"
+#include "kolanut/scripting/melon/modules/Vector3Module.h"
+#include "kolanut/scripting/melon/modules/Vector4Module.h"
 #include "kolanut/scripting/melon/modules/RectModule.h"
 #include "kolanut/scripting/melon/modules/ColorModule.h"
 #include "kolanut/scripting/melon/ffi/FFI.h"
@@ -89,8 +90,9 @@ namespace scripting {
 namespace {
 
 Module KOLANUT_MODULES[] = {
-    { "Vector", vectorModuleInit },
-    { "Sprite", spriteModuleInit },
+    { "Vector2", vector2ModuleInit },
+    { "Vector3", vector3ModuleInit },
+    { "Vector4", vector4ModuleInit },
     { "Rect", rectModuleInit },
     { "Color", colorModuleInit },
     { "Kolanut", kolanutModuleInit },

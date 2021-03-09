@@ -14,19 +14,19 @@ let PanControllerSystem = {
                 let rb = components.Rigidbody;
 
                 if (pc.left) {
-                    rb->setForce(Vector.create(-pc.speed, 0.0));
+                    rb->setForce(Vector2.create(-pc.speed, 0.0));
                 } else if (pc.right) {
-                    rb->setForce(Vector.create(pc.speed, 0.0));
+                    rb->setForce(Vector2.create(pc.speed, 0.0));
                 }
                 
                 if (pc.down) {
-                    rb->setForce(Vector.create(0.0, pc.speed));
+                    rb->setForce(Vector2.create(0.0, pc.speed));
                 } else if (pc.up) {
-                    rb->setForce(Vector.create(0.0, -pc.speed));
+                    rb->setForce(Vector2.create(0.0, -pc.speed));
                 }
 
                 if (!pc.left && !pc.right && !pc.up && !pc.down) {
-                    rb->setForce(Vector.create(0.0, 0.0));
+                    rb->setForce(Vector2.create(0.0, 0.0));
                 }
             }
         );

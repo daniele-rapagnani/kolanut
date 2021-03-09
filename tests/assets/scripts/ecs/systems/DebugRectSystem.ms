@@ -32,10 +32,10 @@ let DebugRectSystem = {
                 continue;
             }
 
-            r.x = bb.left;
-            r.y = bb.top;
-            r.w = bb.right - bb.left;
-            r.h = bb.bottom - bb.top;
+            r.origin.x = bb.left;
+            r.origin.y = bb.top;
+            r.size.x = bb.right - bb.left;
+            r.size.y = bb.bottom - bb.top;
 
             Kolanut.drawRect(r, Color.red);
         }

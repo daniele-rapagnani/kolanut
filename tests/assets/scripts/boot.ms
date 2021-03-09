@@ -57,6 +57,6 @@ let updateUIState = => {
 Kolanut.onDrawUI = => {
     world->drawUI();
     updateUIState();
-    Game.UI.Lives.draw(Vector.create(10, 10), uiState.lives);
-    statsElem->draw(Vector.create(10, 40), statsData);
+    Game.UI.Lives.draw(Vector2.create(10, 10), uiState.lives);
+    statsElem->draw(Vector2.create(10, 40), statsData);
 };

@@ -52,8 +52,8 @@ bool Tilemap::load(const std::string& dir, const std::string& fileName)
         )
         {
             this->mapCache.setCellSize(Sizei {
-                tileset->GetTileWidth(),
-                tileset->GetTileHeight()
+                static_cast<size_t>(tileset->GetTileWidth()),
+                static_cast<size_t>(tileset->GetTileHeight())
             });
         }
     }
@@ -104,10 +104,14 @@ bool Tilemap::instantiateLayer(uint32_t layer, const Vec2f& position, const Vec2
             ;
             
             tile.rect = {
-                (gidIdx % tileset->GetColumns()) * tileset->GetTileWidth(),
-                (gidIdx / tileset->GetColumns()) * tileset->GetTileHeight(),
-                tileset->GetTileWidth(),
-                tileset->GetTileHeight()
+                {
+                    (gidIdx % tileset->GetColumns()) * tileset->GetTileWidth(),
+                    (gidIdx / tileset->GetColumns()) * tileset->GetTileHeight()
+                },
+                {
+                    static_cast<size_t>(tileset->GetTileWidth()),
+                    static_cast<size_t>(tileset->GetTileHeight())
+                }
             };
 
             tile.scale = scale;

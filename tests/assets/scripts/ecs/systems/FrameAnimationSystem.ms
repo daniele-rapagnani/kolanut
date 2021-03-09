@@ -17,7 +17,7 @@ let FrameAnimationSystem = {
                     let ca = fa->getCurAnimation();
 
                     if (ca.totalFrames == null) {
-                        ca.totalFrames = math.round(sr.size.x / ca.frameSize.w);
+                        ca.totalFrames = math.round(sr.size.x / ca.frameSize.size.x);
                     }
 
                     fa.time = fa.time + dt;
@@ -38,10 +38,10 @@ let FrameAnimationSystem = {
                         fa.frame = (fa.frame + 1) % ca.totalFrames;
                     }
 
-                    sr.rect.y = ca.frameSize.y;
-                    sr.rect.x = ca.frameSize.x + (ca.frameSize.w * fa.frame);
-                    sr.rect.w = ca.frameSize.w;
-                    sr.rect.h = ca.frameSize.h;
+                    sr.rect.origin.y = ca.frameSize.origin.y;
+                    sr.rect.origin.x = ca.frameSize.origin.x + (ca.frameSize.size.x * fa.frame);
+                    sr.rect.size.x = ca.frameSize.size.x;
+                    sr.rect.size.y = ca.frameSize.size.y;
                 }
             }
         );

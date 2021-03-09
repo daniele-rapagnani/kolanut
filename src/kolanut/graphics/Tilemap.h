@@ -96,11 +96,11 @@ public:
         {
             bool found = false;
 
-            for (long x = 0; x < rect.z; x++)
+            for (long x = 0; x < rect.size.x; x++)
             {
-                for (long y = 0; y < rect.w; y++)
+                for (long y = 0; y < rect.size.y; y++)
                 {
-                    found = found || remove({ rect.x + x, rect.y + y}, layer);
+                    found = found || remove({ rect.origin.x + x, rect.origin.y + y }, layer);
                 }
             }
 

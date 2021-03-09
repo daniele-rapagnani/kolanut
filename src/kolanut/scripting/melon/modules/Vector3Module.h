@@ -10,13 +10,13 @@ extern "C" {
 }
 
 extern "C" {
-TRet spriteModuleInit(VM* vm);
+TRet vector3ModuleInit(VM* vm);
 }
 
 namespace kola {
 namespace scripting {
 
-extern const char* SPRITE_MODULE_SOURCE;
+extern const char* VECTOR3_MODULE_SOURCE;
 
 } // namespace scripting
 } // namespace kola

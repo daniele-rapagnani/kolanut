@@ -1,4 +1,4 @@
-let screenSize = Vector.create(800, 600);
+let screenSize = Vector2.create(800, 600);
 
 return {
     windowTitle = "Yeah",

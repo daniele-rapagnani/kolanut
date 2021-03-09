@@ -16,7 +16,7 @@ let SpriteRenderer = {
 
         if (this.sprite != null) {
             this.size = this.sprite->getSize();
-            this.rect = Rect.create(0.0, 0.0, this.size.x, this.size.y);
+            this.rect = Rect.create(Vector2.create(), this.size);
         }
     },
 

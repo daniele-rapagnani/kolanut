@@ -110,11 +110,11 @@ public:
     virtual void doClear() = 0;
     virtual void doFlip() = 0;
 
-    virtual Vec2i getResolution() const = 0;
+    virtual Sizei getResolution() const = 0;
     virtual float getPixelsPerPoint() const;
-    virtual Vec2i getPixelResolution() const = 0;
+    virtual Sizei getPixelResolution() const = 0;
 
-    virtual Vec2i getDesignResolution() const
+    virtual Sizei getDesignResolution() const
     { return this->designResolution; }
 
     uint8_t getCurrentFrame() const
@@ -154,7 +154,7 @@ private:
     Config config = {};
     Vec2f cameraPos = {};
     float cameraZoom = 1.0f;
-    Vec2i designResolution = {};
+    Sizei designResolution = {};
     uint8_t currentInFlightFrame = 0;
 
     std::vector<DrawSurface> jobs = {};

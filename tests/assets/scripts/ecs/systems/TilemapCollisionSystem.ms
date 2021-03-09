@@ -37,15 +37,15 @@ let TilemapCollisionSystem = {
 
                     let w = bb.right - bb.left;
                     let h = bb.bottom - bb.top;
-                    let pos = Vector.create(bb.left, bb.top);
+                    let pos = Vector2.create(bb.left, bb.top);
 
                     let topTile = self.tilemap->getTileAt(
                         tc.layer,
-                        pos + Vector.create(w * 0.5, -1.0)
+                        pos + Vector2.create(w * 0.5, -1.0)
                     );
 
                     if (topTile != null) {
-                        let point = (topTile.position.y + topTile.rect.h);
+                        let point = (topTile.position.y + topTile.rect.size.y);
 
                         if (bb.top < point * 1.0) {
                             tr.position.y = point + tr.origin.y;
@@ -58,7 +58,7 @@ let TilemapCollisionSystem = {
 
                     let bottomTile = self.tilemap->getTileAt(
                         tc.layer,
-                        pos + Vector.create(w * 0.5, h + 1.0)
+                        pos + Vector2.create(w * 0.5, h + 1.0)
                     );
 
                     if (bottomTile != null) {
@@ -75,17 +75,17 @@ let TilemapCollisionSystem = {
 
                     let bottomLeftTile = self.tilemap->getTileAt(
                         tc.layer,
-                        pos + Vector.create(-1.0, h + 1.0)
+                        pos + Vector2.create(-1.0, h + 1.0)
                     );
 
                     let bottomRightTile = self.tilemap->getTileAt(
                         tc.layer,
-                        pos + Vector.create(w + 1.0, h + 1.0)
+                        pos + Vector2.create(w + 1.0, h + 1.0)
                     );
 
                     let rightTile = self.tilemap->getTileAt(
                         tc.layer, 
-                        pos + Vector.create(w + 1.0, h * 0.5)
+                        pos + Vector2.create(w + 1.0, h * 0.5)
                     );
 
                     if (rightTile != null) {
@@ -102,11 +102,11 @@ let TilemapCollisionSystem = {
 
                     let leftTile = self.tilemap->getTileAt(
                         tc.layer, 
-                        pos + Vector.create(-1.0, h * 0.5)
+                        pos + Vector2.create(-1.0, h * 0.5)
                     );
 
                     if (leftTile != null) {
-                        let point = leftTile.position.x + leftTile.rect.w;
+                        let point = leftTile.position.x + leftTile.rect.size.x;
 
                         if (bb.left < point) {
                             tr.position.x = point + tr.origin.x;

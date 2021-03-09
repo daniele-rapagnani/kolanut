@@ -3,7 +3,7 @@ let Assets = import("../Assets");
 let Lives = {
     draw = |pos, state| => {
         let sprite = null;
-        let scale = Vector.create(1.0, 1.0);
+        let scale = Vector2.create(1.0, 1.0);
         let padding = 5.0;
 
         for (let i in 0..(state.total ?? 3)) {
@@ -16,11 +16,11 @@ let Lives = {
             let sz = sprite->getSize();
 
             sprite->draw(
-                pos + Vector.create((sz.x * scale.x * i) + (padding * i), 0.0),
+                pos + Vector2.create((sz.x * scale.x * i) + (padding * i), 0.0),
                 0.0,
                 scale,
-                Vector.create(0.0, 0.0),
-                Rect.create(0, 0, sz.x, sz.y),
+                Vector2.create(0.0, 0.0),
+                Rect.create(Vector2.create(), Vector2.create(sz.x, sz.y)),
                 Color.white
             );
         }

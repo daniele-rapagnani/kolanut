@@ -113,7 +113,7 @@ void Renderer::draw(
         angle,
         scale,
         origin,
-        Recti { 0, 0, ts.x, ts.y },
+        Recti { { 0, 0 }, { ts.x, ts.y } },
         {}
     );
 }
@@ -139,22 +139,26 @@ void Renderer::draw(
     Sizei s = t->getSize();
 
     Rectf tcRect = { 
-        rect.x / static_cast<float>(s.x), 
-        rect.y / static_cast<float>(s.y),
-        0.0f,
-        0.0f
+        {
+            rect.origin.x / static_cast<float>(s.x), 
+            rect.origin.y / static_cast<float>(s.y)
+        },
+        {
+            0.0f,
+            0.0f
+        }
     };
     
-    tcRect.z = tcRect.x + (rect.z / static_cast<float>(s.x));
-    tcRect.w = tcRect.y + (rect.w / static_cast<float>(s.y));
+    tcRect.size.x = tcRect.origin.x + (rect.size.x / static_cast<float>(s.x));
+    tcRect.size.y = tcRect.origin.y + (rect.size.y / static_cast<float>(s.y));
 
     std::vector<Vertex> vertices = {
-        { Vec2f { 0.0f, 0.0f }, { tcRect.x, tcRect.y }, color },
-        { Vec2f { 0.0f, rect.w }, { tcRect.x, tcRect.w }, color },
-        { Vec2f { rect.z, 0.0f }, { tcRect.z, tcRect.y }, color },
-        { Vec2f { rect.z, 0.0f }, { tcRect.z, tcRect.y }, color },
-        { Vec2f { 0.0f, rect.w }, { tcRect.x, tcRect.w }, color },
-        { Vec2f { rect.z, rect.w }, { tcRect.z, tcRect.w }, color },
+        { Vec2f { 0.0f, 0.0f }, { tcRect.origin.x, tcRect.origin.y }, color },
+        { Vec2f { 0.0f, rect.size.y }, { tcRect.origin.x, tcRect.size.y }, color },
+        { Vec2f { rect.size.x, 0.0f }, { tcRect.size.x, tcRect.origin.y }, color },
+        { Vec2f { rect.size.x, 0.0f }, { tcRect.size.x, tcRect.origin.y }, color },
+        { Vec2f { 0.0f, rect.size.y }, { tcRect.origin.x, tcRect.size.y }, color },
+        { Vec2f { rect.size.x, rect.size.y }, { tcRect.size.x, tcRect.size.y }, color },
     };
 
     GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
@@ -259,17 +263,17 @@ void Renderer::draw(
     ds.program = getLineProgram();
 
     std::vector<Vertex> vertices = {
-        { rect.xy(), { 0.0f, 0.0f }, color },
-        { rect.xy() + Vec2f{ rect.z, 0.0f }, { 0.0f, 0.0f }, color },
+        { rect.origin, { 0.0f, 0.0f }, color },
+        { rect.origin + Vec2f{ rect.size.x, 0.0f }, { 0.0f, 0.0f }, color },
 
-        { rect.xy() + Vec2f{ rect.z, 0.0f }, { 0.0f, 0.0f }, color },
-        { rect.xy() + Vec2f{ rect.z, rect.w }, { 0.0f, 0.0f }, color },
+        { rect.origin + Vec2f{ rect.size.x, 0.0f }, { 0.0f, 0.0f }, color },
+        { rect.origin + Vec2f{ rect.size.x, rect.size.y }, { 0.0f, 0.0f }, color },
 
-        { rect.xy() + Vec2f{ rect.z, rect.w }, { 0.0f, 0.0f }, color },
-        { rect.xy() + Vec2f{ 0.0f, rect.w }, { 0.0f, 0.0f }, color },
+        { rect.origin + Vec2f{ rect.size.x, rect.size.y }, { 0.0f, 0.0f }, color },
+        { rect.origin + Vec2f{ 0.0f, rect.size.y }, { 0.0f, 0.0f }, color },
 
-        { rect.xy() + Vec2f{ 0.0f, rect.w }, { 0.0f, 0.0f }, color },
-        { rect.xy(), { 0.0f, 0.0f }, color },
+        { rect.origin + Vec2f{ 0.0f, rect.size.y }, { 0.0f, 0.0f }, color },
+        { rect.origin, { 0.0f, 0.0f }, color },
     };
 
     GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
@@ -380,8 +384,8 @@ float Renderer::getCameraZoom() const
 
 float Renderer::getPixelsPerPoint() const
 {
-    Vec2i r = getResolution();
-    Vec2i pr = getPixelResolution();
+    Sizei r = getResolution();
+    Sizei pr = getPixelResolution();
 
     return pr.x / r.x;
 }

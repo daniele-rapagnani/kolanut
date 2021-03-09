@@ -55,6 +55,84 @@ inline bool convert(VM* vm, Vec2i& res, Value* val)
 }
 
 template <>
+inline bool convert(VM* vm, Sizei& res, Value* val)
+{
+    Vec2i v;
+    
+    if (!convert<Vec2i>(vm, v, val))
+    {
+        return false;
+    }
+
+    res.x = v.x;
+    res.y = v.y;
+
+    return true;
+}
+
+template <>
+inline bool convert(VM* vm, Sizef& res, Value* val)
+{
+    Vec2f v;
+    
+    if (!convert<Vec2f>(vm, v, val))
+    {
+        return false;
+    }
+
+    res.x = v.x;
+    res.y = v.y;
+
+    return true;
+}
+
+template <>
+inline bool convert(VM* vm, Vec3f& res, Value* val)
+{
+    if (val->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    return (
+        getInstanceField(vm, val->pack.obj, "x", res.x)
+        && getInstanceField(vm, val->pack.obj, "y", res.y)
+        && getInstanceField(vm, val->pack.obj, "z", res.z)
+    );
+}
+
+template <>
+inline bool convert(VM* vm, glm::vec3& res, Value* val)
+{
+    if (val->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    return (
+        getInstanceField(vm, val->pack.obj, "x", res.x)
+        && getInstanceField(vm, val->pack.obj, "y", res.y)
+        && getInstanceField(vm, val->pack.obj, "z", res.z)
+    );
+}
+
+template <>
+inline bool convert(VM* vm, glm::vec4& res, Value* val)
+{
+    if (val->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    return (
+        getInstanceField(vm, val->pack.obj, "x", res.x)
+        && getInstanceField(vm, val->pack.obj, "y", res.y)
+        && getInstanceField(vm, val->pack.obj, "z", res.z)
+        && getInstanceField(vm, val->pack.obj, "w", res.w)
+    );
+}
+
+template <>
 inline bool convert(VM* vm, Vec4f& res, Value* val)
 {
     if (val->type != MELON_TYPE_OBJECT)
@@ -96,6 +174,34 @@ inline bool convert(VM* vm, Vec4i& res, Value* val)
     res.w = round(h);
 
     return true;
+}
+
+template <>
+inline bool convert(VM* vm, Recti& res, Value* val)
+{
+    if (val->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    return (
+        getInstanceField(vm, val->pack.obj, "origin", res.origin)
+        && getInstanceField(vm, val->pack.obj, "size", res.size)
+    );
+}
+
+template <>
+inline bool convert(VM* vm, Rectf& res, Value* val)
+{
+    if (val->type != MELON_TYPE_OBJECT)
+    {
+        return false;
+    }
+
+    return (
+        getInstanceField(vm, val->pack.obj, "origin", res.origin)
+        && getInstanceField(vm, val->pack.obj, "size", res.size)
+    );
 }
 
 template <>

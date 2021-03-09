@@ -49,13 +49,13 @@ public:
 public:
     bool doInit(const Config& config) override;
     std::shared_ptr<Program> createProgram(DrawMode mode) override;
-    
+
     void drawSurface(const DrawSurface& req) override;
 
     void doClear() override;
     void doFlip() override;
 
-    Vec2i getPixelResolution() const override;
+    Sizei getPixelResolution() const override;
 
     std::shared_ptr<vulkan::Device> getDevice() const
     { return this->device; }

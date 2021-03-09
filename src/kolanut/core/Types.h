@@ -28,11 +28,29 @@ using Vec2f = Vec<float, 2>;
 using Vec3f = Vec<float, 3>;
 using Vec4f = Vec<float, 4>;
 
-using Sizei = Vec2i;
-using Sizef = Vec2f;
+struct Sizei : public Vec<size_t, 2>
+{ 
+    Sizei(size_t x = 0, size_t y = 0) : Vec<size_t, 2>(x, y)
+    { }
+};
 
-using Recti = Vec4i;
-using Rectf = Vec4f;
+struct Sizef : public Vec2f
+{ 
+    Sizef(float x = 0.0f, float y = 0.0f) : Vec2f(x, y)
+    { }
+};
+
+struct Recti
+{
+    Vec2i origin;
+    Sizei size;
+};
+
+struct Rectf
+{
+    Vec2f origin;
+    Sizef size;
+};
 
 struct Colori : public Vec4i {
     Colori(long r = 255, long g = 255, long b = 255, long a = 255) : Vec4i(r, g, b, a) {}

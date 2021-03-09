@@ -493,7 +493,7 @@ void RendererVK::doFlip()
     stats->addSample(stats::StatsEngine::Measure::GPU_TIME, elapsedMs);
 }
 
-Vec2i RendererVK::getPixelResolution() const
+Sizei RendererVK::getPixelResolution() const
 {
     assert(this->physicalDevice);
     assert(this->device);

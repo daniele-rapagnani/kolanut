@@ -1,4 +1,4 @@
-let scale = Vector.create(0.25, 0.25);
+let scale = Vector2.create(0.25, 0.25);
 let DEF_MAX_WIDTH = 100;
 
 let Stats = {
@@ -12,7 +12,7 @@ let Stats = {
     },
 
     draw = |pos, stats| -> {
-        let posText = Vector.create(pos.x + this.maxWidth, pos.y);
+        let posText = Vector2.create(pos.x + this.maxWidth, pos.y);
 
         for (let k in stats) {
             this.font->draw(k, pos, this.size, color);

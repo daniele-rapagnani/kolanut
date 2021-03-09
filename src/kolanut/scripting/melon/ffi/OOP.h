@@ -205,6 +205,8 @@ std::shared_ptr<T> getInstance(VM* vm, GCItem* obj)
     return *getInstancePtr<T>(vm, obj);
 }
 
+bool isa(VM* vm, GCItem* obj, const std::string& module, const std::string& className);
+
 } // namespace ffi
 } // namespace melon
 } // namespace kola
