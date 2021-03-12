@@ -9,13 +9,15 @@ void Stats::init(const Config& config)
 {
     this->config = config;
 
-    addLabel(Measure::CPU_TIME, "CPU_TIME");
-    addLabel(Measure::FRAME_TIME, "FRAME_TIME");
-    addLabel(Measure::GPU_TIME, "GPU_TIME");
-    addLabel(Measure::TRIANGLES, "TRIANGLES");
-    addLabel(Measure::UPDATE_TIME, "UPDATE_TIME");
-    addLabel(Measure::DRAW_TIME, "DRAW_TIME");
-    addLabel(Measure::AUDIO_PROC, "AUDIO_PROC");
+    addLabel(Measure::CPU_TIME, "CPU Time");
+    addLabel(Measure::FRAME_TIME, "Frame Time");
+    addLabel(Measure::GPU_TIME, "GPU Time");
+    addLabel(Measure::TRIANGLES, "Triangles");
+    addLabel(Measure::UPDATE_TIME, "Update Time");
+    addLabel(Measure::DRAW_TIME, "Draw Time");
+    addLabel(Measure::AUDIO_PROC, "Audio Proc.");
+    addLabel(Measure::BATCHED_DRAWS, "Batched Draws");
+    addLabel(Measure::DRAW_CALLS, "Draw Calls");
 }
 
 void Stats::enqueueSample(size_t m, double value, bool addToCurrent /* = false */)

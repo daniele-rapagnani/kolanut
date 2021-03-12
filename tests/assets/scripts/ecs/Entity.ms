@@ -4,6 +4,7 @@ let Entity = {
         return { 
             components = {}, 
             world = null,
+            inView = false,
             getTag = -> { return tag; },
             setTag = |newTag| -> { 
                 if (this.world != null) {
@@ -25,6 +26,37 @@ let Entity = {
 
     getComponent = |type| -> {
         return this.components[type];
+    },
+
+    isInView = -> {
+        return this.inView;
+    },
+
+    getBB = func entityGetBB -> {
+        let sr = this.SpriteRenderer;
+        let fa = this.FrameAnimation;
+        let ca = this.Camera;
+        let tr = this.Transform;
+
+        if (tr == null) {
+            return null;
+        }
+
+        let size = null;
+
+        if (fa != null) {
+            size = fa->getSize();
+        } else if (sr != null) {
+            size = sr->getSize();
+        } else if (ca != null) {
+            return ca->getBB(tr);
+        }
+
+        if (size == null) {
+            return null;
+        }
+
+        return tr->getBB(size);
     },
 
     [object.symbols.getPropertyOperator] = |prop| -> {

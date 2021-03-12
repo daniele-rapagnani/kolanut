@@ -8,5 +8,7 @@ return {
     CollisionSystem = import("./CollisionSystem"),
     TilemapRenderSystem = import("./TilemapRenderSystem"),
     DebugRectSystem = import("./DebugRectSystem"),
-    LabelRenderSystem = import("./LabelRenderSystem")
+    LabelRenderSystem = import("./LabelRenderSystem"),
+    QuadTreeSystem = import("./QuadTreeSystem"),
+    CullingSystem = import("./CullingSystem")
 };

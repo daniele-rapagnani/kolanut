@@ -6,9 +6,9 @@ let Hero = import("./Hero");
 let Kitten = import("./Kitten");
 
 let ParentMap = Map.create({
-    Hero = Hero.create,
+    Hero = Hero.create ,
     Goblin = Goblin.create,
-    Kitten = Kitten.create
+    Kitten = Kitten.create 
 });
 
 let ForestMap = {

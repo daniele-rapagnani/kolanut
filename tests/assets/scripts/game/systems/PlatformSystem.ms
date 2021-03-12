@@ -9,7 +9,7 @@ let PlatformSystem = {
         this.updateWithComponents(
             entities,
             ["Transform", "PlatformController", "TileCollider", "FrameAnimation", "Rigidbody"],
-            |components| => {
+            |components, e| => {
                 let pc = components.PlatformController;
                 let fa = components.FrameAnimation;
                 let rb = components.Rigidbody;

@@ -123,6 +123,8 @@ void RendererOGL::drawSurface(const DrawSurface& req)
     void* offsetUv = reinterpret_cast<void*>(this->geometryBuffer->getBase(h) + sizeof(Vec2f));
     void* offsetColor = reinterpret_cast<void*>(this->geometryBuffer->getBase(h) + sizeof(Vec2f) * 2);
 
+    static bool bound = false;
+
     std::static_pointer_cast<GeometryBufferOGL>(getGeometryBuffer())->bind();
     
     knM_oglCall(glEnableVertexAttribArray(posAtt));

@@ -106,8 +106,7 @@ void Renderer::draw(
 {
     assert(t);
 
-    jobs.emplace_back();
-    DrawSurface& ds = jobs.back();
+    DrawSurface ds;
 
     ds.texture = t;
     ds.program = getProgram();
@@ -140,26 +139,10 @@ void Renderer::draw(
     GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
     ds.vertices = reinterpret_cast<void*>(h);
     ds.verticesCount = vertices.size();
-
-    // // T * S * R * O, outer comes first
-    // ds.transform = glm::translate(
-    //     glm::rotate(
-    //         glm::scale(
-    //             glm::translate(
-    //                 Transform3D { 1.0f },
-    //                 glm::vec3 { position.x, position.y, 0.0f }
-    //             ),
-    //             glm::vec3 { scale.x, scale.y, 0.0f }
-    //         ),
-    //         static_cast<float>(angle * (M_PI / 180.0)),
-    //         glm::vec3 { 0.0f, 0.0f, 1.0f }
-    //     ),
-    //     glm::vec3 { -origin.x, -origin.y, 0.0f }
-    // );
-
     ds.transform = tr;
+    ds.camera = this->cameraTransform;
 
-    createCameraTransform(ds.camera);
+    enqueueDraw(ds);
 }
 
 void Renderer::draw(
@@ -223,23 +206,21 @@ void Renderer::draw(
     const Colori& color
 )
 {
-    jobs.emplace_back();
-    DrawSurface& ds = jobs.back();
-
-    ds.texture = nullptr;
-    ds.program = getLineProgram();
-
-    std::vector<Vertex> vertices = {
+    Vertex vertices[2] = {
         { Vec2f { a.x, a.y }, { 0.0f, 0.0f }, color },
         { Vec2f { b.x, b.y }, { 0.0f, 0.0f }, color },
     };
 
-    GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
-    ds.vertices = reinterpret_cast<void*>(h);
-    ds.verticesCount = vertices.size();
+    DrawSurface ds;
+
+    GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, 2, getCurrentFrame());
     ds.transform = Transform3D { 1.0f };
     ds.mode = DrawMode::LINES;
-    createCameraTransform(ds.camera);
+    ds.vertices = reinterpret_cast<void*>(h);
+    ds.verticesCount = 2;
+    ds.texture = nullptr;
+    ds.program = getLineProgram();
+    ds.camera = this->cameraTransform;
 }
 
 void Renderer::draw(
@@ -247,13 +228,12 @@ void Renderer::draw(
     const Colori& color
 )
 {
-    jobs.emplace_back();
-    DrawSurface& ds = jobs.back();
+    DrawSurface ds;
 
     ds.texture = nullptr;
     ds.program = getLineProgram();
 
-    std::vector<Vertex> vertices = {
+    Vertex vertices[8] = {
         { rect.origin, { 0.0f, 0.0f }, color },
         { rect.origin + Vec2f{ rect.size.x, 0.0f }, { 0.0f, 0.0f }, color },
 
@@ -267,19 +247,41 @@ void Renderer::draw(
         { rect.origin, { 0.0f, 0.0f }, color },
     };
 
-    GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, getCurrentFrame());
+    GeometryBuffer::Handle h = getGeometryBuffer()->addVertices(vertices, 8, getCurrentFrame());
     ds.vertices = reinterpret_cast<void*>(h);
-    ds.verticesCount = vertices.size();
+    ds.verticesCount = 8;
     ds.transform = Transform3D { 1.0f };
     ds.mode = DrawMode::LINES;
-    createCameraTransform(ds.camera);
+    ds.camera = this->cameraTransform;
+
+    enqueueDraw(ds);
 }
 
-void Renderer::createCameraTransform(Transform3D& tr) const
+void Renderer::enqueueDraw(DrawSurface ds)
+{
+    if (!jobs.empty())
+    {
+        if (ds.isBatchableWith(jobs.back()))
+        {
+            DrawSurface& pdf = jobs.back();
+            pdf.verticesCount += ds.verticesCount;
+            
+            di::get<stats::StatsEngine>()
+                ->addToCurrentSample(stats::StatsEngine::Measure::BATCHED_DRAWS, 1)
+            ;
+            
+            return;
+        }
+    }
+
+    jobs.push_back(std::move(ds));
+}
+
+void Renderer::updateCameraTransform() const
 {
     float resScale = getResolution().x / getDesignResolution().x;
 
-    tr = glm::translate(
+    this->cameraTransform = glm::translate(
         glm::scale(
             Transform3D { 1.0f },
             glm::vec3 {
@@ -299,6 +301,7 @@ void Renderer::createCameraTransform(Transform3D& tr) const
 void Renderer::clear()
 {
     this->jobs.clear();
+    di::get<stats::StatsEngine>()->addSample(stats::StatsEngine::Measure::BATCHED_DRAWS, 0);
     getGeometryBuffer()->reset(getCurrentFrame());
 
     doClear();
@@ -308,10 +311,13 @@ void Renderer::flip()
 {
     auto stats = di::get<stats::StatsEngine>();
     stats->addSample(stats::StatsEngine::Measure::TRIANGLES, 0);
+    stats->addSample(stats::StatsEngine::Measure::DRAW_CALLS, 0);
 
     for (const auto& job : this->jobs)
     {
         stats->addToCurrentSample(stats::StatsEngine::Measure::TRIANGLES, job.verticesCount);
+        stats->addToCurrentSample(stats::StatsEngine::Measure::DRAW_CALLS, 1);
+
         drawSurface(job);
     }
 
@@ -356,11 +362,13 @@ std::shared_ptr<Program> Renderer::createLineProgram()
 void Renderer::setCameraPosition(const Vec2f& pos)
 {
     this->cameraPos = pos;
+    updateCameraTransform();
 }
 
 void Renderer::setCameraZoom(float zoom)
 {
     this->cameraZoom = zoom;
+    updateCameraTransform();
 }
 
 Vec2f Renderer::getCameraPosition() const

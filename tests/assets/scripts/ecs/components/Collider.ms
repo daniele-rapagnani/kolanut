@@ -6,7 +6,7 @@ let Collider = {
     },
 
     create = => {
-        return { type = Collider.Types.RendererBB } @ Collider;
+        return { type = Collider.Types.RendererBB, collided = false } @ Collider;
     },
 
     getType = -> {

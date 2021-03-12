@@ -32,6 +32,7 @@ public:
 
         ffi::setInstanceField(vm, obj, "name", val->GetName());
         ffi::setInstanceField(vm, obj, "type", val->GetType());
+        ffi::setInstanceField(vm, obj, "visible", val->IsVisible());
         ffi::setInstanceField(vm, obj, "x", val->GetX());
         ffi::setInstanceField(vm, obj, "y", val->GetY());
         ffi::setInstanceField(vm, obj, "w", val->GetWidth());

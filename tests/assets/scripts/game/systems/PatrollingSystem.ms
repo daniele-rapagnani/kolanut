@@ -11,7 +11,11 @@ let PatrollingSystem = {
         this.updateWithComponents(
             entities,
             ["Transform", "PatrolController", "TileCollider", "PlatformController"],
-            |components| => {
+            |components, e| => {
+                if (!e->isInView()) {
+                    return;
+                }
+
                 let pc = components.PatrolController;
                 let ptc = components.PlatformController;
                 let tr = components.Transform;

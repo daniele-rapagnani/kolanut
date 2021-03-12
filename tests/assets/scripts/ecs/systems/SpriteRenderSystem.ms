@@ -9,7 +9,11 @@ let SpriteRenderSystem = {
         this.updateWithComponents(
             entities, 
             ["Transform", "SpriteRenderer"],
-            |components| => {
+            |components, ent| => {
+                if (!ent->isInView()) {
+                    return;
+                }
+                
                 let tr = components.Transform;
                 let sr = components.SpriteRenderer;
 

@@ -63,53 +63,53 @@ let BoundingBox = {
     contains = |bb| -> {
         return bb.left >= this.left
             && bb.right <= this.right
-            && bb.top <= this.top
-            && bb.bottom >= this.bottom
+            && bb.top >= this.top
+            && bb.bottom <= this.bottom
         ;
     },
 
     [object.symbols.sumOperator] = |other| -> {
-        if (@other == BoundingBox)
-        {
-            let res = BoundingBox.create(
-                this.left,
-                this.top,
-                this.right,
-                this.bottom
-            );
+        if (types.isObject(other)) {
+            if ((@other).create == BoundingBox.create) {
+                let res = BoundingBox.create(
+                    this.left,
+                    this.top,
+                    this.right,
+                    this.bottom
+                );
 
-            if (res.left < other.left) {
-                this.left = other.left;
+                if (res.left < other.left) {
+                    this.left = other.left;
+                }
+
+                if (res.right < other.right) {
+                    this.right = other.right;
+                }
+
+                if (res.top < other.top) {
+                    this.top = other.top;
+                }
+
+                if (res.bottom < other.bottom) {
+                    this.bottom = other.bottom;
+                }
+
+                return res;
+            } else if ((@other).create == Vector2.create) {
+                return BoundingBox.create(
+                    this.left + other.x,
+                    this.top + other.y,
+                    this.right + other.x,
+                    this.bottom + other.y
+                );
             }
-
-            if (res.right < other.right) {
-                this.right = other.right;
-            }
-
-            if (res.top < other.top) {
-                this.top = other.top;
-            }
-
-            if (res.bottom < other.bottom) {
-                this.bottom = other.bottom;
-            }
-
-            return res;
-        }
-        else if (@other == Vector2)
-        {
-            return BoundingBox.create(
-                this.left + other.x,
-                this.top + other.y,
-                this.right + other.x,
-                this.bottom + other.y
-            );
         }
 
         return false;
     },
+
     [object.symbols.mulOperator] = func bbMultiply |other| -> {
-        if (@other == Kolanut.Transform3D) {
+        if (types.isObject(other) && (@other).create == Kolanut.Transform3D.create) {
             let res = BoundingBox.create();
 
             let min = other * Vector4.create(this.left, this.top, 0.0, 1.0);
@@ -132,14 +132,12 @@ let BoundingBox = {
             }
 
             return res;
-        } else if (@other == Vector2) {
-            return BoundingBox.createFromPos(
-                this->getOrigin(),
-                this->getSize() * other
-            );
         }
 
-        return null;
+        return BoundingBox.createFromPos(
+            this->getOrigin(),
+            this->getSize() * other
+        );
     },
     [object.symbols.sizeOperator] = -> {
         return this->getSize().x * this->getSize().y;

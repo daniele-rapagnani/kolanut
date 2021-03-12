@@ -45,42 +45,33 @@ let Vector2 = {
         return Vector2.create(-this.x, -this.y);
     },
     [object.symbols.getIndexOperator] = |idx| -> {
-        if (idx == 0)
-        {
+        if (idx == 0) {
             return this.x;
-        }
-        else if (idx == 1)
-        {
+        } else if (idx == 1) {
             return this.y;
         }
 
         return false;
     },
     [object.symbols.setIndexOperator] = |idx, val| -> {
-        if (!types.isInteger(idx))
-        {
+        if (!types.isInteger(idx)) {
             return false;
         }
 
-        if (idx == 0)
-        {
+        if (idx == 0) {
             this.x = val;
-        }
-        else if (idx == 1)
-        {
+        } else if (idx == 1) {
             this.y = val;
         }
 
         return idx == 0 || idx == 1;
     },
     [object.symbols.compareOperator] = |other| -> {
-        if (!types.isObject(other))
-        {
+        if (!types.isObject(other)) {
             return 1;
         }
         
-        if (this.x == other.x && this.y == other.y)
-        {
+        if (this.x == other.x && this.y == other.y) {
             return 0;
         }
 

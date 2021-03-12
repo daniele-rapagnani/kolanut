@@ -17,11 +17,10 @@ let Camera = {
         let ss = Kolanut.getDesignResolution();
         let zoom = 1.0 / tr.scale.x;
 
-        let bb = {
-            top = tr.position.y - (tr.origin.y * zoom),
-            left = tr.position.x - (tr.origin.x * zoom),
-        };
-
+        let bb = BoundingBox.create();
+        
+        bb.top = tr.position.y - (tr.origin.y * zoom);
+        bb.left = tr.position.x - (tr.origin.x * zoom);
         bb.right = bb.left + (ss.x * zoom);
         bb.bottom = bb.top + (ss.y * zoom);
 

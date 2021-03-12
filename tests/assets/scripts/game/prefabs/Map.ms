@@ -40,7 +40,9 @@ let Map = {
         let spawns = this.tilemap->getObjectsByType(0, "Enemy Spawn");
 
         for (let spawnPoint in spawns) {
-            this->spawnByName(spawnPoint.name, spawnPoint);
+            if (spawnPoint.visible) {
+                this->spawnByName(spawnPoint.name, spawnPoint);
+            }
         }
     },
 

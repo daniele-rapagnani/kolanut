@@ -46,50 +46,37 @@ let Vector3 = {
         return Vector3.create(-this.x, -this.y, -this.z);
     },
     [object.symbols.getIndexOperator] = |idx| -> {
-        if (idx == 0)
-        {
+        if (idx == 0) {
             return this.x;
-        }
-        else if (idx == 1)
-        {
+        } else if (idx == 1) {
             return this.y;
-        }
-        else if (idx == 2)
-        {
+        } else if (idx == 2) {
             return this.z;
         }
 
         return false;
     },
     [object.symbols.setIndexOperator] = |idx, val| -> {
-        if (!types.isInteger(idx))
-        {
+        if (!types.isInteger(idx)) {
             return false;
         }
 
-        if (idx == 0)
-        {
+        if (idx == 0) {
             this.x = val;
-        }
-        else if (idx == 1)
-        {
+        } else if (idx == 1) {
             this.y = val;
-        }
-        else if (idx == 2)
-        {
+        } else if (idx == 2) {
             this.z = val;
         }
 
         return idx == 0 || idx == 1 || idx == 2;
     },
     [object.symbols.compareOperator] = |other| -> {
-        if (!types.isObject(other))
-        {
+        if (!types.isObject(other)) {
             return 1;
         }
         
-        if (this.x == other.x && this.y == other.y && this.z == other.z)
-        {
+        if (this.x == other.x && this.y == other.y && this.z == other.z) {
             return 0;
         }
 

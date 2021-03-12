@@ -27,6 +27,7 @@ let Game = {
     },
 
     initSystems = -> {
+        this.world->addSystem(ECS.Systems.CullingSystem.create("Camera"));
         this.world->addSystem(ECS.Systems.PanControllerSystem.create());
         this.world->addSystem(Systems.PlatformSystem.create());
         this.world->addSystem(Systems.PatrollingSystem.create("Player"));
@@ -40,6 +41,7 @@ let Game = {
         this.world->addSystem(ECS.Systems.TilemapCollisionSystem.create());
         this.world->addSystem(ECS.Systems.TilemapRenderSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.SpriteRenderSystem.create(), ECS.World.Phase.Draw);
+        this.world->addSystem(ECS.Systems.QuadTreeSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.LabelRenderSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.DebugRectSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.LabelRenderSystem.create(), ECS.World.Phase.DrawUI);

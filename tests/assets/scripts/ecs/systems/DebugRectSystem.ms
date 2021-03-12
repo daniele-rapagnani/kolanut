@@ -13,27 +13,11 @@ let DebugRectSystem = {
         let r = Rect.create();
 
         for (let e in entities) {
-            let tr = e.Transform;
-            let sr = e.SpriteRenderer;
-            let fa = e.FrameAnimation;
-
-            if (tr == null) {
+            let bb = e->getBB();
+            
+            if (bb == null) {
                 continue;
             }
-
-            let size = null;
-
-            if (fa != null) {
-                size = fa->getSize();
-            } else if (sr != null) {
-                size = sr->getSize();
-            }
-
-            if (size == null) {
-                continue;
-            }
-
-            let bb = tr->getBB(size);
 
             r.origin.x = bb.left;
             r.origin.y = bb.top;

@@ -7,47 +7,50 @@ let CollisionSystem = {
         return { } @ CollisionSystem;
     },
 
-    getRendererBB = |entity| => {
-        let sr = entity.SpriteRenderer;
-        let fa = entity.FrameAnimation;
-        let tr = entity.Transform;
-
-        if (tr == null) {
-            return null;
-        }
-
-        let size = null;
-
-        if (fa != null) {
-            size = fa->getSize();
-        } else if (sr != null) {
-            size = sr->getSize();
-        }
-
-        return tr->getBB(size);
-    },
-
     update = |dt, entities| -> {
+        let qts = this.world->getSystem("QuadTreeSystem");
+        let qt = qts->getQuadTree();
+
+        for (let e in entities) {
+            if (e.Collider != null) {
+                e.Collider.collided = false;
+            }
+        }
+
         for (let i in 0..#entities) {
+            if (!entities[i]->isInView()) {
+                continue;
+            }
+
             let a = entities[i].Collider;
 
             if (a == null) {
                 continue;
             }
-            
-            for (let j in (i+1)..#entities) {
-                let b = entities[j].Collider;
+
+            let res = [];
+            let thisBB = entities[i]->getBB();
+            qt->query(thisBB, res, entities[i]);
+
+            for (let e in res) {
+                let b = e.entity.Collider;
 
                 if (b == null) {
                     continue;
                 }
 
-                if (a.type == Collider.Types.RendererBB && b.type == a.type) {
-                    let aBB = CollisionSystem.getRendererBB(entities[i]);
-                    let bBB = CollisionSystem.getRendererBB(entities[j]);
+                if (b.collided) {
+                    continue;
+                }
 
-                    if (aBB->overlaps(bBB)) {
-                        Events.Collision->trigger(this.world, entities[i], entities[j]);
+                if (a.type == Collider.Types.RendererBB && b.type == a.type) {
+                    let bBB = e.entity->getBB();
+
+                    a.collided = true;
+                    b.collided = true;
+
+                    if (bBB != null && thisBB->overlaps(bBB)) {
+                        Events.Collision->trigger(this.world, entities[i], e.entity);
                     }
                 }
             }

@@ -11,7 +11,9 @@ let Transform = {
             children = [],
             parent = null,
             worldTransform = Kolanut.Transform3D.create(),
-            dirty = false
+            worldTransformDirty = false,
+            quadtreeDirty = true,
+            inQuadTree = false
         } @ Transform;
     },
 
@@ -33,13 +35,13 @@ let Transform = {
     },
 
     getWorldTransform = |e| -> {
-        if (this.dirty) {
+        if (this.worldTransformDirty) {
             this.transform->identity();
             this.transform->translate(this.position);
             this.transform->scale(this.scale);
             this.transform->rotate(this.angle);
             this.transform->translate(this.origin * -1.0);
-            this.dirty = false;
+            this.worldTransformDirty = false;
         }
 
         if (this.parent == null) {
@@ -51,7 +53,7 @@ let Transform = {
         return this.worldTransform;
     },
 
-    getBB = |size| -> {
+    getBB = func transformGetBB |size| -> {
         let res = BoundingBox.createFromPos(
             Vector2.create(),
             size
@@ -61,8 +63,9 @@ let Transform = {
     },
 
     [object.symbols.setPropertyOperator] = |prop, val| -> {
-        if (prop != "dirty") {
-            this.dirty = true;
+        if (prop != "quadtreeDirty" && prop != "worldTransformDirty") {
+            this.quadtreeDirty = true;
+            this.worldTransformDirty = true;
         }
 
         return false;

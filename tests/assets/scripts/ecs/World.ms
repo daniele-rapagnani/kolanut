@@ -133,7 +133,7 @@ let World = {
             if (!system.enabled) {
                 continue;
             }
-
+            
             system->update(dt, this.entities, World.Phase.Update);
         }
     },

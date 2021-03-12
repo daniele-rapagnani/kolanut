@@ -26,58 +26,41 @@ let Vector4 = {
         return Vector4.create(-this.x, -this.y, -this.z, -this.w);
     },
     [object.symbols.getIndexOperator] = |idx| -> {
-        if (idx == 0)
-        {
+        if (idx == 0) {
             return this.x;
-        }
-        else if (idx == 1)
-        {
+        } else if (idx == 1) {
             return this.y;
-        }
-        else if (idx == 2)
-        {
+        } else if (idx == 2) {
             return this.z;
-        }
-        else if (idx == 3)
-        {
+        } else if (idx == 3) {
             return this.w;
         }
 
         return false;
     },
     [object.symbols.setIndexOperator] = |idx, val| -> {
-        if (!types.isInteger(idx))
-        {
+        if (!types.isInteger(idx)) {
             return false;
         }
 
-        if (idx == 0)
-        {
+        if (idx == 0) {
             this.x = val;
-        }
-        else if (idx == 1)
-        {
+        } else if (idx == 1) {
             this.y = val;
-        }
-        else if (idx == 2)
-        {
+        } else if (idx == 2) {
             this.z = val;
-        }
-        else if (idx == 3)
-        {
+        } else if (idx == 3) {
             this.w = val;
         }
 
         return idx == 0 || idx == 1 || idx == 2 || idx == 3;
     },
     [object.symbols.compareOperator] = |other| -> {
-        if (!types.isObject(other))
-        {
+        if (!types.isObject(other)) {
             return 1;
         }
         
-        if (this.x == other.x && this.y == other.y && this.z == other.z && this.w == other.w)
-        {
+        if (this.x == other.x && this.y == other.y && this.z == other.z && this.w == other.w) {
             return 0;
         }
 

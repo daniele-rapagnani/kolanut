@@ -24,6 +24,8 @@ public:
         UPDATE_TIME,
         DRAW_TIME,
         AUDIO_PROC,
+        BATCHED_DRAWS,
+        DRAW_CALLS,
         MAX_BUILTIN
     };
 

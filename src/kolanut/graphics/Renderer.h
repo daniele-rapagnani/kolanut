@@ -33,6 +33,16 @@ public:
         void* vertices = {};
         DrawMode mode = DrawMode::TRIANGLES;
         size_t verticesCount = 0;
+
+        bool isBatchableWith(const DrawSurface& rhs)
+        {
+            return this->mode == rhs.mode 
+                && this->program == rhs.program
+                && this->texture == rhs.texture
+                && this->transform == rhs.transform
+                && this->camera == rhs.camera
+            ;
+        }
     };
 
 public:
@@ -121,8 +131,6 @@ public:
     std::shared_ptr<GeometryBuffer> getGeometryBuffer() const
     { return this->geometryBuffer; }
 
-    void createCameraTransform(Transform3D& tr) const;
-
 protected:
     virtual std::shared_ptr<Font> createFont() = 0;
     virtual std::shared_ptr<Shader> createShader() = 0;
@@ -133,6 +141,9 @@ protected:
 
     virtual std::string getShadersExt() const
     { return ""; }
+
+    void updateCameraTransform() const;
+    void enqueueDraw(DrawSurface ds);
 
 protected:
     std::shared_ptr<Program> program = {};
@@ -145,6 +156,8 @@ private:
     float cameraZoom = 1.0f;
     Sizei designResolution = {};
     uint8_t currentInFlightFrame = 0;
+
+    mutable Transform3D cameraTransform = {};
 
     std::vector<DrawSurface> jobs = {};
 };
