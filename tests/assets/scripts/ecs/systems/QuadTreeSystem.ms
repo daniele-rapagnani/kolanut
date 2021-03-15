@@ -14,6 +14,7 @@ let QuadTreeSystem = {
     },
 
     update = |dt, entities, phase| -> {
+        Kolanut.Tracy.beginZone("Quadtree update");
         this.quadTree->clear();
 
         for (let e in entities) {
@@ -54,6 +55,8 @@ let QuadTreeSystem = {
                 );
             });
         }
+
+        Kolanut.Tracy.endZone();
     }
 } @ System.create("QuadTreeSystem");
 

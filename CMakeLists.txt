@@ -128,6 +128,7 @@ set(
     src/kolanut/scripting/Scripting.cpp
     src/kolanut/scripting/melon/ScriptingEngineMelon.cpp
     src/kolanut/scripting/melon/ffi/OOP.cpp
+    
     src/kolanut/scripting/melon/bindings/Camera.cpp
     src/kolanut/scripting/melon/bindings/Texture.cpp
     src/kolanut/scripting/melon/bindings/Bindings.cpp
@@ -136,6 +137,8 @@ set(
     src/kolanut/scripting/melon/bindings/Sound.cpp
     src/kolanut/scripting/melon/bindings/SoundInstance.cpp
     src/kolanut/scripting/melon/bindings/Transform3D.cpp
+    src/kolanut/scripting/melon/bindings/Tracy.cpp
+
     src/kolanut/scripting/melon/modules/KolanutModule.cpp
     src/kolanut/scripting/melon/modules/SourceModule.cpp
     src/kolanut/scripting/melon/modules/Vector2Module.cpp

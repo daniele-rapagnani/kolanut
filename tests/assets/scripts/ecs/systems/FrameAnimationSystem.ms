@@ -6,6 +6,7 @@ let FrameAnimationSystem = {
     },
 
     update = |dt, entities| -> {
+        Kolanut.Tracy.beginZone("Frame animation update");
         this.updateWithComponents(
             entities,
             ["SpriteRenderer", "FrameAnimation"],
@@ -45,6 +46,7 @@ let FrameAnimationSystem = {
                 }
             }
         );
+        Kolanut.Tracy.endZone();
     }
 } @ System.create("FrameAnimationSystem");
 

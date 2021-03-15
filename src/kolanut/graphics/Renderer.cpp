@@ -4,6 +4,7 @@
 #include "kolanut/stats/StatsEngine.h"
 #include "kolanut/core/DIContainer.h"
 
+#include <Tracy.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
 #include <cassert>
@@ -313,15 +314,22 @@ void Renderer::flip()
     stats->addSample(stats::StatsEngine::Measure::TRIANGLES, 0);
     stats->addSample(stats::StatsEngine::Measure::DRAW_CALLS, 0);
 
-    for (const auto& job : this->jobs)
     {
-        stats->addToCurrentSample(stats::StatsEngine::Measure::TRIANGLES, job.verticesCount);
-        stats->addToCurrentSample(stats::StatsEngine::Measure::DRAW_CALLS, 1);
+        ZoneScopedN("Draw queue processing")
+    
+        for (const auto& job : this->jobs)
+        {
+            stats->addToCurrentSample(stats::StatsEngine::Measure::TRIANGLES, job.verticesCount);
+            stats->addToCurrentSample(stats::StatsEngine::Measure::DRAW_CALLS, 1);
 
-        drawSurface(job);
+            drawSurface(job);
+        }
     }
 
-    doFlip();
+    {
+        ZoneScopedN("Flip")
+        doFlip();
+    }
 
     this->currentInFlightFrame = 
         (this->currentInFlightFrame + 1) % 

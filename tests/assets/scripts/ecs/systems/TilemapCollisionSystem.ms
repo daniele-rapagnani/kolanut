@@ -44,6 +44,7 @@ let TilemapCollisionSystem = {
     },
 
     update = func tilemapSystemUpdate |dt, entities| -> {
+        Kolanut.Tracy.beginZone("Tilemap collisions update");
         let self = this;
 
         if (this.tilemap == null) {
@@ -156,6 +157,8 @@ let TilemapCollisionSystem = {
                 }
             );
         }
+        
+        Kolanut.Tracy.endZone();
     }
 } @ System.create("TilemapCollisionSystem");
 

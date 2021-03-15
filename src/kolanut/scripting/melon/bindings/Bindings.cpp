@@ -6,6 +6,7 @@
 #include "kolanut/scripting/melon/bindings/Sound.h"
 #include "kolanut/scripting/melon/bindings/SoundInstance.h"
 #include "kolanut/scripting/melon/bindings/Transform3D.h"
+#include "kolanut/scripting/melon/bindings/Tracy.h"
 
 namespace kola {
 namespace melon {
@@ -20,6 +21,7 @@ void registerBindings(VM* vm)
     registerSoundBindings(vm);
     registerSoundInstanceBindings(vm);
     registerTransform3DBindings(vm);
+    registerTracyBindings(vm);
 }
 
 } // namespace binding

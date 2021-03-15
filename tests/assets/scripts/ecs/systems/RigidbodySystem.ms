@@ -6,6 +6,7 @@ let RigidbodySystem = {
     },
 
     update = |dt, entities| -> {
+        Kolanut.Tracy.beginZone("Rigidbody update");
         this.updateWithComponents(
             entities,
             ["Transform", "Rigidbody"],
@@ -30,6 +31,7 @@ let RigidbodySystem = {
                 tr.angle = tr.angle + (rb.angularVelocity * dt);
             }
         );
+        Kolanut.Tracy.endZone();
     }
 } @ System.create("RigidbodySystem");
 

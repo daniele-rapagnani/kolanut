@@ -8,6 +8,8 @@ let CollisionSystem = {
     },
 
     update = |dt, entities| -> {
+        Kolanut.Tracy.beginZone("Collisions update");
+
         let qts = this.world->getSystem("QuadTreeSystem");
         let qt = qts->getQuadTree();
 
@@ -55,6 +57,8 @@ let CollisionSystem = {
                 }
             }
         }
+        
+        Kolanut.Tracy.endZone();
     }
 } @ System.create("CollisionSystem");
 

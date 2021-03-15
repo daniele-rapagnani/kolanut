@@ -6,6 +6,7 @@ let TilemapRenderSystem = {
     },
 
     update = |dt, entities| -> {
+        Kolanut.Tracy.beginZone("Tilemap draw");
         this.updateWithComponents(
             entities, 
             ["Tilemap"],
@@ -13,6 +14,7 @@ let TilemapRenderSystem = {
                 components.Tilemap.tilemap->draw();
             }
         );
+        Kolanut.Tracy.endZone();
     }
 } @ System.create("TilemapRenderSystem");
 

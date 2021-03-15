@@ -183,8 +183,11 @@ void Kolanut::run()
             getEventSystem()->poll();
         }
         
-        getStatsEngine()->processEnqueued();
-        getScriptingEngine()->onUpdate(dt);
+        {
+            ZoneScopedN("Update")
+            getStatsEngine()->processEnqueued();
+            getScriptingEngine()->onUpdate(dt);
+        }
 
         stats->endTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
         stats->startTimeSample(stats::StatsEngine::Measure::DRAW_TIME);

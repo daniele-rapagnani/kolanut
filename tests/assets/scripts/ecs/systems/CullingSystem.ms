@@ -6,6 +6,8 @@ let CullingSystem = {
     },
 
     update = |dt, entities| -> {
+        Kolanut.Tracy.beginZone("Culling update");
+        
         for (let e in entities) {
             e.inView = false;
         }
@@ -34,6 +36,8 @@ let CullingSystem = {
                 entry.entity.inView = true;
             }
         }
+
+        Kolanut.Tracy.endZone();
     }
 } @ System.create("CullingSystem");
 
