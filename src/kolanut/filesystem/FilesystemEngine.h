@@ -26,6 +26,7 @@ public:
     virtual size_t getFileSize(const void* handle) = 0;
     virtual const void* open(const std::string& file, uint32_t mode) = 0;
     virtual size_t read(const void* handle, char* buffer, size_t size) = 0;
+    virtual size_t write(const void* handle, char* buffer, size_t size) = 0;
     virtual void close(const void* handle) = 0;
     virtual bool isFile(const std::string& path) = 0;
     virtual std::string resolvePath(const std::string& path) = 0;

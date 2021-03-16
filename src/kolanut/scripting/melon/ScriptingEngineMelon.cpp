@@ -176,7 +176,7 @@ static TByte openHook(VM* vm)
 
         if (str->len > 0 && str->string[0] == 'w')
         {
-            mode = filesystem::FilesystemEngine::OpenMode::READ;
+            mode = filesystem::FilesystemEngine::OpenMode::WRITE;
         }
         
         if (str->len > 1 && str->string[1] == 'b')
@@ -210,6 +210,7 @@ static TByte closeHook(VM* vm)
     melM_stackEnsure(&vm->stack, vm->stack.top + 1);
     Value* val = melM_stackAllocRaw(&vm->stack);
     val->type = MELON_TYPE_BOOL;
+    val->pack.value.boolean = 0;
 
     Value* handle = melGetValueObject(vm, handleObj->pack.obj, &fileDescSymbol);
 
@@ -282,6 +283,59 @@ static TByte readHook(VM* vm)
     return 1;
 }
 
+static TByte writeHook(VM* vm)
+{
+    melM_arg(vm, fdObj, MELON_TYPE_OBJECT, 0);
+    melM_arg(vm, data, MELON_TYPE_STRING, 1);
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* result = melM_stackAllocRaw(&vm->stack);
+    result->type = MELON_TYPE_BOOL;
+    result->pack.value.boolean = 0;
+
+    Value* fd = melGetValueObject(vm, fdObj->pack.obj, &fileDescSymbol);
+
+    if (!fd || fd->type != MELON_TYPE_NATIVEPTR)
+    {
+        return 1;
+    }
+
+    const void* handle = reinterpret_cast<const void*>(fd->pack.obj);
+
+    String* dataStr = melM_strFromObj(data->pack.obj);
+
+    result->pack.value.boolean = di::get<filesystem::FilesystemEngine>()->write(
+        handle,
+        dataStr->string,
+        dataStr->len
+    ) == dataStr->len;
+
+    return 1;
+}
+
+static TByte sizeHook(VM* vm)
+{
+    melM_arg(vm, fdObj, MELON_TYPE_OBJECT, 0);
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* result = melM_stackAllocRaw(&vm->stack);
+    result->type = MELON_TYPE_NULL;
+
+    Value* fd = melGetValueObject(vm, fdObj->pack.obj, &fileDescSymbol);
+
+    if (!fd || fd->type != MELON_TYPE_NATIVEPTR)
+    {
+        return 1;
+    }
+
+    const void* handle = reinterpret_cast<const void*>(fd->pack.obj);
+
+    result->type = MELON_TYPE_INTEGER;
+    result->pack.value.integer = di::get<filesystem::FilesystemEngine>()->getFileSize(handle);
+
+    return 1;
+}
+
 static TByte isFileHook(VM* vm)
 {
     melM_arg(vm, path, MELON_TYPE_STRING, 0);
@@ -326,6 +380,11 @@ static TByte realPathHook(VM* vm)
     return 1;
 }
 
+static TByte emptyHook(VM* vm)
+{
+    return 0;
+}
+
 }
 
 void ScriptingEngineMelon::hookFs()
@@ -356,8 +415,56 @@ void ScriptingEngineMelon::hookFs()
         this->vm, 
         MELON_TYPE_CLOSURE, 
         "io", 
+        "write",
+        &writeHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
         "close",
         &closeHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "size",
+        &sizeHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "tell",
+        &emptyHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "seek",
+        &emptyHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "flush",
+        &emptyHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "isEOF",
+        &emptyHook
     );
 
     melon::ffi::hookIntoModuleClosure(

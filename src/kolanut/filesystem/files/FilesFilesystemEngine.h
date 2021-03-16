@@ -16,6 +16,8 @@ class FilesFilesystemEngine : public FilesystemEngine
 protected:
     struct Handle
     {
+        ~Handle();
+
         std::string file = {};
 
         cppfs::FileHandle fh = {};
@@ -39,13 +41,13 @@ public:
     virtual size_t getFileSize(const void* handle) override;
     virtual const void* open(const std::string& file, uint32_t mode) override;
     virtual size_t read(const void* handle, char* buffer, size_t size) override;
+    virtual size_t write(const void* handle, char* buffer, size_t size) override;
     virtual void close(const void* handle) override;
     virtual bool isFile(const std::string& path) override;
     virtual std::string resolvePath(const std::string& path) override;
 
 protected:
     cppfs::FilePath getPath(const std::string& path) const;
-    std::string stripRoot(const std::string& path) const;
 
     const std::string& getRoot() const
     { return root; }

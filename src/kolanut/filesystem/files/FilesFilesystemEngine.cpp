@@ -71,19 +71,6 @@ cppfs::FilePath FilesFilesystemEngine::getPath(const std::string& path) const
     return fpath;
 }
 
-std::string FilesFilesystemEngine::stripRoot(const std::string& path) const
-{
-    if (
-        path.size() > getRoot().size() &&
-        path.substr(0, getRoot().size()) == getRoot()
-    )
-    {
-        return path.substr(getRoot().size());
-    }
-
-    return path;
-}
-
 const void* FilesFilesystemEngine::open(const std::string& file, uint32_t mode)
 {
     cppfs::FilePath fpath = getPath(file);
@@ -123,7 +110,7 @@ size_t FilesFilesystemEngine::read(const void* handle, char* buffer, size_t size
 {
     const Handle* h = reinterpret_cast<const Handle*>(handle);
 
-    if (!h || !*h || !h->isReadMode())
+    if (!h || !h->input || !h->isReadMode())
     {
         return 0;
     }
@@ -135,6 +122,24 @@ size_t FilesFilesystemEngine::read(const void* handle, char* buffer, size_t size
 
     h->input->read(buffer, size);
     return h->input->gcount();
+}
+
+size_t FilesFilesystemEngine::write(const void* handle, char* buffer, size_t size)
+{
+    const Handle* h = reinterpret_cast<const Handle*>(handle);
+
+    if (!h || !h->output || !h->isWriteMode())
+    {
+        return 0;
+    }
+
+    if (!h->output->good())
+    {
+        return 0;
+    }
+
+    h->output->write(buffer, size);
+    return size;
 }
 
 void FilesFilesystemEngine::close(const void* handle)
@@ -153,6 +158,14 @@ std::string FilesFilesystemEngine::resolvePath(const std::string& path)
 {
     cppfs::FilePath fpath = path;
     return fpath.resolved();
+}
+
+FilesFilesystemEngine::Handle::~Handle()
+{
+    if (this->output)
+    {
+        this->output->flush();
+    }
 }
 
 } // namespace filesystem
