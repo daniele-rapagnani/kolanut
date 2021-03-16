@@ -3,6 +3,8 @@
 extern "C" {
 #include <melon/core/vm.h>
 #include <melon/core/tstring.h>
+#include <melon/core/closure.h>
+#include <melon/core/function.h>
 #include <melon/modules/modules.h>
 }
 
@@ -83,6 +85,33 @@ inline Value* getValueFromModule(
     melM_stackPop(&vm.stack);
 
     return val;
+}
+
+inline bool hookIntoModuleClosure(
+    VM& vm, 
+    TType type, 
+    const std::string& module, 
+    const std::string& key,
+    NativeFunctionPtr func
+)
+{
+    Value* val = melon::ffi::getValueFromModule(
+        vm, 
+        MELON_TYPE_CLOSURE, 
+        module, 
+        key
+    );
+
+    if (!val)
+    {
+        return false;
+    }
+
+    Closure* cl = melM_closureFromObj(val->pack.obj);
+    Function* fn = melM_functionFromObj(cl->fn);
+    fn->native = func;
+
+    return true;
 }
 
 inline void newSubmodule(

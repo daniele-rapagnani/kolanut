@@ -13,12 +13,13 @@ class FilesystemEngine;
 enum class Engine
 {
     NONE = 0,
-    FILES
+    FILES,
+    ZIPS
 };
 
 struct Config
 {
-    Engine engine = Engine::FILES;
+    Engine engine = Engine::ZIPS;
     std::string root = ".";
 };
 

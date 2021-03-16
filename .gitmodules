@@ -28,3 +28,6 @@
 [submodule "src/kolanut/libs/miniaudio"]
 	path = src/kolanut/libs/miniaudio
 	url = git@github.com:mackron/miniaudio.git
+[submodule "src/kolanut/libs/minizip-ng"]
+	path = src/kolanut/libs/minizip-ng
+	url = https://github.com/zlib-ng/minizip-ng

@@ -33,6 +33,9 @@ public:
         float pan = 0.0f
     ) override;
 
+    void setMasterVolume(float volume) override;
+    float getMasterVolume() override;
+
     const std::list<std::shared_ptr<SoundInstance>>& getPlayingSounds()
     { return this->playing; }
 

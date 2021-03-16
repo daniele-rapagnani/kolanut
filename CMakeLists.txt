@@ -30,6 +30,7 @@ add_subdirectory(src/kolanut/libs/tmxparser)
 add_subdirectory(src/kolanut/libs/glfw)
 add_subdirectory(src/kolanut/libs/glm)
 add_subdirectory(src/kolanut/libs/cppfs)
+add_subdirectory(src/kolanut/libs/minizip-ng)
 
 execute_process(COMMAND src/kolanut/libs/shaderc/utils/git-sync-deps)
 
@@ -124,6 +125,7 @@ set(
     src/kolanut/filesystem/Filesystem.cpp
     src/kolanut/filesystem/FilesystemEngine.cpp
     src/kolanut/filesystem/files/FilesFilesystemEngine.cpp
+    src/kolanut/filesystem/zips/ZipsFilesystemEngine.cpp
     
     src/kolanut/scripting/Scripting.cpp
     src/kolanut/scripting/melon/ScriptingEngineMelon.cpp
@@ -172,6 +174,7 @@ target_include_directories(
     src/kolanut/libs/cppfs/source/cppfs/include/
     ${cppfs_BINARY_DIR}/source/cppfs/include/
     src/kolanut/libs/shaderc/libshaderc/include/
+    src/kolanut/libs/minizip-ng/
     src/kolanut/libs/tracy/
     src/kolanut/libs/miniaudio/
     ${Vulkan_INCLUDE_DIR}
@@ -195,6 +198,6 @@ if (MINGW)
     target_link_options(kolanut PUBLIC ${MINGW_LD_FLAGS})
 endif(MINGW)
 
-set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser cppfs shaderc ${Vulkan_LIBRARIES})
+set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser cppfs shaderc minizip ${Vulkan_LIBRARIES})
 
 target_link_libraries(kolanut ${LINKLIBS})

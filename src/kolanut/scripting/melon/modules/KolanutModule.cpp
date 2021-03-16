@@ -118,6 +118,29 @@ static TByte loadSound(VM* vm)
     return 1;
 }
 
+static TByte setMasterVolume(VM* vm)
+{
+    melM_arg(vm, masterVolVal, MELON_TYPE_NUMBER, 0);
+
+    std::shared_ptr<kola::audio::AudioEngine> audio = 
+        kola::di::get<kola::audio::AudioEngine>()
+    ;
+
+    audio->setMasterVolume(masterVolVal->pack.value.number);
+
+    return 0;
+}
+
+static TByte getMasterVolume(VM* vm)
+{
+    std::shared_ptr<kola::audio::AudioEngine> audio = 
+        kola::di::get<kola::audio::AudioEngine>()
+    ;
+
+    kola::melon::ffi::push(vm, audio->getMasterVolume());
+    return 1;
+}
+
 static TByte getScreenSize(VM* vm)
 {
     std::shared_ptr<kola::graphics::Renderer> renderer = 
@@ -206,6 +229,8 @@ static const ModuleFunction funcs[] = {
     { "loadSprite", 1, 0, &loadSprite },
     { "loadFont", 2, 0, &loadFont },
     { "loadSound", 1, 0, &loadSound },
+    { "setMasterVolume", 1, 0, &setMasterVolume },
+    { "getMasterVolume", 0, 0, &getMasterVolume },
     { "getScreenSize", 0, 0, &getScreenSize },
     { "getDesignResolution", 0, 0, &getDesignResolution },
 

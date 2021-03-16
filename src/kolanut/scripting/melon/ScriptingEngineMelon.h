@@ -29,6 +29,8 @@ private:
         return this->config.scriptsDir + "/" + name + ".ms";
     }
 
+    void hookFs();
+
 private:
     Config config = {};
     VMConfig vmConfig = {};

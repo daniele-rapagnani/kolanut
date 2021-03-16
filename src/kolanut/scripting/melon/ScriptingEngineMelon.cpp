@@ -1,4 +1,5 @@
 #include "kolanut/core/Logging.h"
+#include "kolanut/core/DIContainer.h"
 #include "kolanut/scripting/melon/ScriptingEngineMelon.h"
 #include "kolanut/scripting/melon/modules/KolanutModule.h"
 #include "kolanut/scripting/melon/modules/Vector2Module.h"
@@ -12,10 +13,14 @@
 #include "kolanut/scripting/melon/ffi/PopVectors.h"
 #include "kolanut/scripting/melon/bindings/Bindings.h"
 
+#include "kolanut/filesystem/FilesystemEngine.h"
+
 #include <melon/tools/utils.h>
 
 extern "C" {
 #include <melon/core/tstring.h>
+#include <melon/core/closure.h>
+#include <melon/core/function.h>
 #include <melon/modules/modules.h>
 }
 
@@ -90,6 +95,8 @@ namespace scripting {
 
 namespace {
 
+Value fileDescSymbol;
+
 Module KOLANUT_MODULES[] = {
     { "Vector2", vector2ModuleInit },
     { "Vector3", vector3ModuleInit },
@@ -103,7 +110,7 @@ Module KOLANUT_MODULES[] = {
 
 #include "kolanut/scripting/melon/KeyCodesNames.inl"
 
-} // namesace
+} // namespace
 
 bool ScriptingEngineMelon::init(const Config& config)
 {
@@ -116,6 +123,8 @@ bool ScriptingEngineMelon::init(const Config& config)
 		knM_logFatal("Can't create melon VM");
 		return false;
 	}
+
+    hookFs();
 
     if (melRegisterModules(&this->vm, KOLANUT_MODULES) != 0)
     {
@@ -149,6 +158,230 @@ bool ScriptingEngineMelon::loadConfig(Kolanut::Config& config)
         &MELON_SYMBOLIC_KEYS[MELON_OBJSYM_CALL],
         config,
         getScriptPath(this->config.configScript)
+    );
+}
+
+extern "C" {
+
+static TByte openHook(VM* vm)
+{
+    melM_arg(vm, path, MELON_TYPE_STRING, 0);
+    melM_argOptional(vm, flags, MELON_TYPE_STRING, 1);
+
+    uint32_t mode = filesystem::FilesystemEngine::OpenMode::READ;
+
+    if (flags->type != MELON_TYPE_NULL)
+    {
+        String* str = melM_strFromObj(flags->pack.obj);
+
+        if (str->len > 0 && str->string[0] == 'w')
+        {
+            mode = filesystem::FilesystemEngine::OpenMode::READ;
+        }
+        
+        if (str->len > 1 && str->string[1] == 'b')
+        {
+            mode |= filesystem::FilesystemEngine::OpenMode::BINARY;
+        }
+    }
+    
+    const void* handle = 
+        di::get<filesystem::FilesystemEngine>()->open(melM_strDataFromObj(path->pack.obj), mode)
+    ;
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* val = melM_stackAllocRaw(&vm->stack);
+    val->type = MELON_TYPE_OBJECT;
+    val->pack.obj = melNewObject(vm);
+
+    Value fd = {};
+    fd.type = handle ? MELON_TYPE_NATIVEPTR : MELON_TYPE_NULL;
+    fd.pack.obj = const_cast<GCItem*>(reinterpret_cast<const GCItem*>(handle));
+
+    melSetValueObject(vm, val->pack.obj, &fileDescSymbol, &fd);
+
+    return 1;
+}
+
+static TByte closeHook(VM* vm)
+{
+    melM_arg(vm, handleObj, MELON_TYPE_OBJECT, 0);
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* val = melM_stackAllocRaw(&vm->stack);
+    val->type = MELON_TYPE_BOOL;
+
+    Value* handle = melGetValueObject(vm, handleObj->pack.obj, &fileDescSymbol);
+
+    if (!handle || handle->type != MELON_TYPE_NATIVEPTR)
+    {
+        return 1;
+    }
+
+    di::get<filesystem::FilesystemEngine>()->close(
+        reinterpret_cast<const void*>(handle->pack.obj)
+    );
+
+    val->pack.value.boolean = 1;
+
+    return 1;
+}
+
+static TByte readHook(VM* vm)
+{
+    melM_arg(vm, fdObj, MELON_TYPE_OBJECT, 0);
+    melM_argOptional(vm, sizeVal, MELON_TYPE_INTEGER, 1);
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* result = melM_stackAllocRaw(&vm->stack);
+
+    result->type = MELON_TYPE_NULL;
+
+    TSize count = 0;
+    melon::ffi::convert(vm, count, sizeVal);
+
+    Value* fd = melGetValueObject(vm, fdObj->pack.obj, &fileDescSymbol);
+
+    if (!fd || fd->type != MELON_TYPE_NATIVEPTR)
+    {
+        return 1;
+    }
+
+    const void* handle = reinterpret_cast<const void*>(fd->pack.obj);
+
+    if (count == 0)
+    {
+        count = di::get<filesystem::FilesystemEngine>()->getFileSize(handle);
+    }
+
+    if (count == 0)
+    {
+        return 1;
+    }
+
+    TSize dataSize = count;
+
+    GCItem* strData = melNewDataString(vm, dataSize + 1);
+    char* data = melM_strDataFromObj(strData);
+
+    if (di::get<filesystem::FilesystemEngine>()->read(handle, data, dataSize) == 0)
+    {
+        return 1;
+    }
+
+    data[dataSize] = '\0';
+
+    if (melUpdateStringHash(vm, strData) != 0)
+    {
+        return 1;
+    }
+
+    result->type = strData->type;
+    result->pack.obj = strData;
+
+    return 1;
+}
+
+static TByte isFileHook(VM* vm)
+{
+    melM_arg(vm, path, MELON_TYPE_STRING, 0);
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* result = melM_stackAllocRaw(&vm->stack);
+    result->type = MELON_TYPE_BOOL;
+    result->pack.value.boolean = di::get<filesystem::FilesystemEngine>()->isFile(
+        melM_strDataFromObj(path->pack.obj)
+    );
+
+    return 1;
+}
+
+static TByte existsHook(VM* vm)
+{
+    melM_arg(vm, path, MELON_TYPE_STRING, 0);
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* result = melM_stackAllocRaw(&vm->stack);
+    result->type = MELON_TYPE_BOOL;
+    result->pack.value.boolean = di::get<filesystem::FilesystemEngine>()->exists(
+        melM_strDataFromObj(path->pack.obj)
+    );
+
+    return 1;
+}
+
+static TByte realPathHook(VM* vm)
+{
+    melM_arg(vm, path, MELON_TYPE_STRING, 0);
+    
+    std::string resolved = di::get<filesystem::FilesystemEngine>()->resolvePath(
+        melM_strDataFromObj(path->pack.obj)
+    );
+
+    melM_stackEnsure(&vm->stack, vm->stack.top + 1);
+    Value* result = melM_stackAllocRaw(&vm->stack);
+    result->type = MELON_TYPE_STRING;
+    result->pack.obj = melNewString(vm, resolved.c_str(), resolved.size());
+
+    return 1;
+}
+
+}
+
+void ScriptingEngineMelon::hookFs()
+{
+    if (melCreateGlobalSymbolKey(&this->vm, "Kolanut file descriptor", &fileDescSymbol) != 0)
+    {
+        knM_logFatal("Can't create melon file descriptor symbol key");
+        return;
+    }
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "open",
+        &openHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "read",
+        &readHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "io", 
+        "close",
+        &closeHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "fs", 
+        "isFile",
+        &isFileHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "fs", 
+        "exists",
+        &existsHook
+    );
+
+    melon::ffi::hookIntoModuleClosure(
+        this->vm, 
+        MELON_TYPE_CLOSURE, 
+        "path", 
+        "realpath",
+        &realPathHook
     );
 }
 

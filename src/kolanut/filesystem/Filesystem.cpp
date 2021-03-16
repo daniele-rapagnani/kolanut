@@ -3,6 +3,7 @@
 #include "kolanut/filesystem/Filesystem.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/filesystem/files/FilesFilesystemEngine.h"
+#include "kolanut/filesystem/zips/ZipsFilesystemEngine.h"
 
 #include <cassert>
 
@@ -15,6 +16,9 @@ std::shared_ptr<FilesystemEngine> createFilesystemEngine(const Config& conf)
     {
         case Engine::FILES:
             return std::make_shared<FilesFilesystemEngine>();
+
+        case Engine::ZIPS:
+            return std::make_shared<ZipsFilesystemEngine>();
         
         default:
             assert(false);

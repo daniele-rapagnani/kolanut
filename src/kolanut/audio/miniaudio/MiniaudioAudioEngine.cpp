@@ -236,5 +236,18 @@ std::shared_ptr<SoundInstance> MiniaudioAudioEngine::playSound(
     return si;
 }
 
+void MiniaudioAudioEngine::setMasterVolume(float volume)
+{
+    ma_device_set_master_volume(&this->device, volume);
+}
+
+float MiniaudioAudioEngine::getMasterVolume()
+{
+    float volume = {};
+    ma_device_get_master_volume(&this->device, &volume);
+
+    return volume;
+}
+
 } // namespace audio
 } // namespace kola

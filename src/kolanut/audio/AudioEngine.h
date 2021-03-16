@@ -22,6 +22,9 @@ public:
         float gain = 1.0f, 
         float pan = 0.0f
     ) = 0;
+
+    virtual void setMasterVolume(float volume) = 0;
+    virtual float getMasterVolume() = 0;
 };
 
 } // namespace audio
