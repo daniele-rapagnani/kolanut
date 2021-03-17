@@ -7,7 +7,7 @@ return {
     fullscreen = false,
     graphicBackend = "opengl",
     enableGraphicAPIDebug = false,
-    framesInFlight = 2,
+    framesInFlight = 1,
     maxGeometryBufferVertices = null,
     enableStats = true
 };

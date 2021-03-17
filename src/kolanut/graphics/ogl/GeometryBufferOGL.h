@@ -2,7 +2,7 @@
 
 #include "kolanut/graphics/GeometryBuffer.h"
 
-#include <glad/glad.h>
+#include "kolanut/graphics/ogl/OpenGL.h"
 
 #include <vector>
 #include <string>

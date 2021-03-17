@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kolanut/core/BuildConfig.h"
 #include "kolanut/core/Types.h"
 
 #include <memory>
@@ -13,8 +14,10 @@ class Renderer;
 enum class Engine
 {
     NONE = 0,
-    OGL,
-    VULKAN
+    OGL
+#if defined(_ENABLE_VULKAN)
+    ,VULKAN
+#endif
 };
 
 struct Resolution
@@ -27,7 +30,7 @@ struct Resolution
 
 struct Config
 {
-    Engine renderer = Engine::VULKAN;
+    Engine renderer = Engine::OGL;
     std::string windowTitle;
     Resolution resolution;
     bool enableAPIDebug = false;

@@ -12,5 +12,7 @@ struct Vertex
     Colorf color;
 };
 
+static_assert(sizeof(Vertex) == 4 * 8, "Wrong vertex size");
+
 } // namespace graphics
 } // namespace kola

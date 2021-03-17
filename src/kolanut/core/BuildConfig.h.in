@@ -1,0 +1,6 @@
+#ifndef __melon__build_config_h_h__
+#define __melon__build_config_h_h__
+
+#cmakedefine _ENABLE_VULKAN
+
+#endif // __melon__build_config_h_h__

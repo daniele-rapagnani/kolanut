@@ -2,7 +2,7 @@
 
 #include "kolanut/events/EventSystem.h"
 
-#include <glad/glad.h>
+#include "kolanut/graphics/ogl/OpenGL.h"
 #include <GLFW/glfw3.h>
 #include <memory>
 

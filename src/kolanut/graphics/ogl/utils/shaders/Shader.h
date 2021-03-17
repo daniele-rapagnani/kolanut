@@ -1,6 +1,6 @@
 #pragma once
 
-#include <glad/glad.h>
+#include "kolanut/graphics/ogl/OpenGL.h"
 
 #include <string>
 

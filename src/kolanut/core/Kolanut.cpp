@@ -9,6 +9,10 @@
 #include "kolanut/stats/DummyStats.h"
 #include "kolanut/audio/AudioEngine.h"
 
+#ifdef __EMSCRIPTEN__
+#include <emscripten/emscripten.h>
+#endif
+
 #include <Tracy.hpp>
 
 #include <cassert>
@@ -140,6 +144,77 @@ bool Kolanut::init(const Config& conf)
     return true;
 }
 
+void Kolanut::renderFrame()
+{
+    auto stats = di::get<stats::StatsEngine>();
+
+    stats->addSample(stats::StatsEngine::Measure::AUDIO_PROC, 0);
+    stats->startTimeSample(stats::StatsEngine::Measure::FRAME_TIME);
+    stats->startTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
+
+    {
+        ZoneScopedN("Events polling")
+        getEventSystem()->poll();
+    }
+    
+    {
+        ZoneScopedN("Update")
+        getStatsEngine()->processEnqueued();
+        getScriptingEngine()->onUpdate(this->dt);
+    }
+
+    stats->endTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
+    stats->startTimeSample(stats::StatsEngine::Measure::DRAW_TIME);
+
+    getRenderer()->clear();
+
+    {
+        ZoneScopedN("OnDraw");
+        getScriptingEngine()->onDraw();
+    }
+
+    {
+        ZoneScopedN("OnDrawUI");
+        Vec2f cameraPosTmp = getRenderer()->getCameraPosition();
+        float cameraZoomTmp = getRenderer()->getCameraZoom();
+        getRenderer()->setCameraPosition({});
+        getRenderer()->setCameraZoom(1.0f);
+        getScriptingEngine()->onDrawUI();
+        getRenderer()->setCameraPosition(cameraPosTmp);
+        getRenderer()->setCameraZoom(cameraZoomTmp);
+    }
+    
+    {
+        ZoneScopedN("Swap");
+        getRenderer()->flip();
+    }
+
+    stats->endTimeSample(stats::StatsEngine::Measure::DRAW_TIME);
+
+    uint64_t newFrameTime = getEventSystem()->getTimeMS();
+
+    this->dt = std::min(
+        std::max(
+            static_cast<float>(newFrameTime - lastFrameTime) / 1000.0f,
+            std::numeric_limits<decltype(dt)>::epsilon()
+        ),
+        (1.0f/60.0f) * 5.0f
+    );
+    this->lastFrameTime = newFrameTime;
+
+    FrameMark;
+    stats->endTimeSample(stats::StatsEngine::Measure::FRAME_TIME);
+}
+
+namespace {
+
+void doRenderFrame(void* k)
+{
+    reinterpret_cast<Kolanut*>(k)->renderFrame();
+}
+
+}
+
 void Kolanut::run()
 {
     bool isQuit = false;
@@ -163,73 +238,21 @@ void Kolanut::run()
         getScriptingEngine()->onLoad();
     }
 
-    uint64_t lastFrameTime = getEventSystem()->getTimeMS();
-    uint64_t newFrameTime;
-    float dt = 1.0f/60.0f; // @todo: 60Hz hardcoded
+    this->lastFrameTime = getEventSystem()->getTimeMS();
 
-    Vec2f cameraPosTmp = {};
-    float cameraZoomTmp;
-
-    auto stats = di::get<stats::StatsEngine>();
-
+#ifdef __EMSCRIPTEN__
+    emscripten_set_main_loop_arg(
+        doRenderFrame,
+        reinterpret_cast<void*>(this),
+        -1,
+        true
+    );
+#else
     while(!isQuit)
     {
-        stats->addSample(stats::StatsEngine::Measure::AUDIO_PROC, 0);
-        stats->startTimeSample(stats::StatsEngine::Measure::FRAME_TIME);
-        stats->startTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
-
-        {
-            ZoneScopedN("Events polling")
-            getEventSystem()->poll();
-        }
-        
-        {
-            ZoneScopedN("Update")
-            getStatsEngine()->processEnqueued();
-            getScriptingEngine()->onUpdate(dt);
-        }
-
-        stats->endTimeSample(stats::StatsEngine::Measure::UPDATE_TIME);
-        stats->startTimeSample(stats::StatsEngine::Measure::DRAW_TIME);
-
-        getRenderer()->clear();
-
-        {
-            ZoneScopedN("OnDraw");
-            getScriptingEngine()->onDraw();
-        }
-
-        {
-            ZoneScopedN("OnDrawUI");
-            cameraPosTmp = getRenderer()->getCameraPosition();
-            cameraZoomTmp = getRenderer()->getCameraZoom();
-            getRenderer()->setCameraPosition({});
-            getRenderer()->setCameraZoom(1.0f);
-            getScriptingEngine()->onDrawUI();
-            getRenderer()->setCameraPosition(cameraPosTmp);
-            getRenderer()->setCameraZoom(cameraZoomTmp);
-        }
-        
-        {
-            ZoneScopedN("Swap");
-            getRenderer()->flip();
-        }
-
-        stats->endTimeSample(stats::StatsEngine::Measure::DRAW_TIME);
-
-        newFrameTime = getEventSystem()->getTimeMS();
-        dt = std::min(
-            std::max(
-                static_cast<float>(newFrameTime - lastFrameTime) / 1000.0f,
-                std::numeric_limits<decltype(dt)>::epsilon()
-            ),
-            (1.0f/60.0f) * 5.0f
-        );
-        lastFrameTime = newFrameTime;
-
-        FrameMark;
-        stats->endTimeSample(stats::StatsEngine::Measure::FRAME_TIME);
+        renderFrame();
     }
+#endif
 }
 
 std::shared_ptr<events::EventSystem> Kolanut::getEventSystem() const

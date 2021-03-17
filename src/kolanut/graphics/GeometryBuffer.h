@@ -47,7 +47,15 @@ public:
     }
 
     size_t getBase(Handle h) const
-    { return (h >> 32) & 0xFFFFFFFF; }
+    {
+#if UINTPTR_MAX == UINT64_MAX
+        return (h >> 32) & 0xFFFFFFFF; 
+#elif UINTPTR_MAX == UINT32_MAX
+        return (h >> 16) & 0xFFFF;
+#else
+        #error Unsupported architecture
+#endif
+    }
 
 protected:
     virtual bool createBuffer() = 0;

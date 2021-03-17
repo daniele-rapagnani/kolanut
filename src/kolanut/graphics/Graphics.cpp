@@ -3,7 +3,10 @@
 #include "kolanut/graphics/Graphics.h"
 #include "kolanut/graphics/Renderer.h"
 #include "kolanut/graphics/ogl/RendererOGL.h"
+
+#if defined(_ENABLE_VULKAN)
 #include "kolanut/graphics/vulkan/RendererVK.h"
+#endif
 
 #include <unordered_map>
 #include <cassert>
@@ -15,7 +18,9 @@ namespace {
 
 std::unordered_map<std::string, Engine> ENGINE_NAMES = {
     { "opengl", Engine::OGL },
+#if defined(_ENABLE_VULKAN)
     { "vulkan", Engine::VULKAN },
+#endif
 };
 
 } // namespace
@@ -37,8 +42,10 @@ std::shared_ptr<Renderer> createRenderer(const Config& conf)
         case Engine::OGL:
             return std::make_shared<RendererOGL>();
 
+#if defined(_ENABLE_VULKAN)
         case Engine::VULKAN:
             return std::make_shared<RendererVK>();
+#endif
         
         default:
             assert(false);

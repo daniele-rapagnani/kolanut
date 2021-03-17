@@ -1,4 +1,4 @@
-#include <glad/glad.h>
+#include "kolanut/graphics/ogl/OpenGL.h"
 
 #include "kolanut/graphics/ogl/RendererOGL.h"
 #include "kolanut/graphics/ogl/TextureOGL.h"
@@ -29,7 +29,9 @@ namespace graphics {
 
 RendererOGL::~RendererOGL()
 {
+#ifndef __EMSCRIPTEN__
     knM_oglCall(glDeleteQueries(1, &this->perfQuery));
+#endif
 }
 
 bool RendererOGL::doInit(const Config& config)
@@ -43,11 +45,13 @@ bool RendererOGL::doInit(const Config& config)
 
     glfwMakeContextCurrent(getWindow());
 
+#ifndef __EMSCRIPTEN__
     if (!gladLoadGL())
     {
         knM_logFatal("Can't initialize OpenGL.");
         return false;
     }
+#endif
 
     TracyGpuContext
 
@@ -57,7 +61,9 @@ bool RendererOGL::doInit(const Config& config)
     knM_oglCall(glEnable(GL_BLEND));
     knM_oglCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
+#ifndef __EMSCRIPTEN__
     knM_oglCall(glGenQueries(1, &this->perfQuery));
+#endif
 
     return true;
 }
@@ -155,17 +161,23 @@ void RendererOGL::drawSurface(const DrawSurface& req)
 void RendererOGL::doClear()
 {
     knM_oglCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
+#ifndef __EMSCRIPTEN__
     knM_oglCall(glBeginQuery(GL_TIME_ELAPSED_EXT, this->perfQuery));
+#endif
 }
 
 void RendererOGL::doFlip()
 {
+#ifndef __EMSCRIPTEN__
     knM_oglCall(glEndQuery(GL_TIME_ELAPSED_EXT));
+#endif
 
     RendererGLFW::doFlip();
 
     TracyGpuCollect
 
+#ifndef __EMSCRIPTEN__
     if (glGetQueryObjectui64vEXT)
     {
         GLuint64 elapsed = 0;
@@ -176,6 +188,7 @@ void RendererOGL::doFlip()
         auto stats = di::get<stats::StatsEngine>();
         stats->addSample(stats::StatsEngine::Measure::GPU_TIME, e);
     }
+#endif
 }
 
 std::shared_ptr<Texture> RendererOGL::createTexture()

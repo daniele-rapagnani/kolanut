@@ -3,7 +3,7 @@
 #include "kolanut/core/Types.h"
 #include "kolanut/graphics/ogl/TextureOGL.h"
 
-#include <glad/glad.h>
+#include "kolanut/graphics/ogl/OpenGL.h"
 
 #include <memory>
 

@@ -3,8 +3,11 @@
 #include "kolanut/core/Logging.h"
 #include "kolanut/core/Kolanut.h"
 #include "kolanut/graphics/ogl/RendererOGL.h"
-#include "kolanut/graphics/vulkan/RendererVK.h"
 #include "kolanut/core/DIContainer.h"
+
+#if defined(_ENABLE_VULKAN)
+#include "kolanut/graphics/vulkan/RendererVK.h"
+#endif
 
 #include <cassert>
 #include <unordered_map>
@@ -20,22 +23,31 @@ GLFWwindow* getWindow()
 {
     auto rendererType = di::get<Kolanut>()->getConfig().graphics.renderer;
 
-    if (!(rendererType == graphics::Engine::OGL || rendererType == graphics::Engine::VULKAN))
+    if (!(
+        rendererType == graphics::Engine::OGL
+#if defined(_ENABLE_VULKAN)
+        || rendererType == graphics::Engine::VULKAN
+#endif
+    ))
     {
         knM_logFatal("GLFW event system can be used only with the OGL renderer");
         return nullptr;
     }
 
     std::shared_ptr<graphics::Renderer> renderer = di::get<graphics::Renderer>();
-
+    
+#if defined(_ENABLE_VULKAN)
     if (rendererType == graphics::Engine::OGL)
+#endif
     {
         auto rendererOgl = std::static_pointer_cast<graphics::RendererOGL>(renderer);
         return rendererOgl->getWindow();
     }
 
+#if defined(_ENABLE_VULKAN)
     auto rendererVk = std::static_pointer_cast<graphics::RendererVK>(renderer);
     return rendererVk->getWindow();
+#endif
 }
 
 class EventSystemGLFWEX : public EventSystemGLFW

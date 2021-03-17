@@ -4,7 +4,7 @@
 #include "kolanut/graphics/ogl/utils/shaders/Shader.h"
 #include "kolanut/graphics/ogl/utils/GenericUtils.h"
 
-#include <glad/glad.h>
+#include "kolanut/graphics/ogl/OpenGL.h"
 #include <glm/gtc/type_ptr.hpp>
 
 #include <vector>

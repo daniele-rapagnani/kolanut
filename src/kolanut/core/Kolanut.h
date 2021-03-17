@@ -40,7 +40,9 @@ public:
 
     const Config& getConfig() const
     { return this->config; }
-    
+
+    void renderFrame();
+
 protected:
     std::shared_ptr<events::EventSystem> getEventSystem() const;
     std::shared_ptr<scripting::ScriptingEngine> getScriptingEngine() const;
@@ -49,6 +51,10 @@ protected:
 
     Config config = {};
     BoostrapConfig bootstrapConfig = {};
+    uint64_t lastFrameTime = 0;
+
+    // @todo: Initial dt is 60Hz hardcoded
+    float dt = 1.0/60.0f;
 };
 
 } // namespace kola

@@ -12,9 +12,6 @@
 #include <chrono>
 #include <limits>
 
-#include <immintrin.h>
-#include <emmintrin.h>
-
 namespace kola {
 namespace audio {
 

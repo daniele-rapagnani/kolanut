@@ -842,7 +842,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <glad/glad.h>
+#include "kolanut/graphics/ogl/OpenGL.h"
 
 static void* get_proc(const char *namez);
 

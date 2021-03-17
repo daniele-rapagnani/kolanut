@@ -1,5 +1,6 @@
 #pragma once
 
+#include "kolanut/graphics/ogl/OpenGL.h"
 #include "kolanut/graphics/Program.h"
 #include "kolanut/graphics/ogl/utils/shaders/Program.h"
 

@@ -2,6 +2,18 @@ cmake_minimum_required(VERSION 3.7)
 project(kolanut)
 
 option(ENABLE_TRACY "Builds with Tracy profiling on" OFF)
+option(ENABLE_VULKAN, "Build with Vulkan support" ON)
+
+message(STATUS "URCA2: ${CMAKE_INSTALL_PREFIX}")
+
+if (ENABLE_VULKAN)
+    message(STATUS "Building with Vulkan support")
+    if (NOT EMSCRIPTEN)
+        set(_ENABLE_VULKAN ON)
+    else()
+        message(ERROR "Vulkan is not supported when building for Emscripten")
+    endif (NOT EMSCRIPTEN)
+endif(ENABLE_VULKAN)
 
 if (APPLE)
     set(CMAKE_MACOSX_RPATH 0)
@@ -10,30 +22,73 @@ endif (APPLE)
 
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
 
+if (_ENABLE_VULKAN)
 find_package(Vulkan REQUIRED FATAL_ERROR)
-
-option(DEBUG_GC "" OFF)
-set(DEBUG_GC OFF)
-option(STRESS_GC "" OFF)
-set(STRESS_GC OFF)
-
-add_subdirectory(src/kolanut/libs/melonscript-vm)
+endif (_ENABLE_VULKAN)
 
 option(BUILD_SHARED_LIBS "" OFF)
 set(BUILD_SHARED_LIBS OFF)
 option(BUILD_STATIC_LIBS ON)
 set(BUILD_STATIC_LIBS ON)
-option(BUILD_TINYXML2 "" ON)
-set(BUILD_TINYXML2 ON)
+
+if (EMSCRIPTEN)
+    set(ZLIB_INCLUDE_DIR $ENV{EMSDK}/upstream/emscripten/cache/include)
+    set(ZLIB_LIBRARY $ENV{EMSDK}/upstream/emscripten/cache/wasm/libz.a)
+
+    set(BZIP2_INCLUDE_DIR $ENV{EMSDK}/upstream/emscripten/cache/include)
+    set(BZIP2_LIBRARY $ENV{EMSDK}/upstream/emscripten/cache/wasm/libbz2.a)
+
+    configure_file(
+        ${CMAKE_CURRENT_SOURCE_DIR}/cmake/tinyxml2.em.in
+        ${CMAKE_BINARY_DIR}/thirdparty/tinyxml2/CMakeLists.txt
+    )
+    
+    execute_process(COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/thirdparty/tinyxml2
+    )
+    
+    execute_process(COMMAND make
+        RESULT_VARIABLE result
+        WORKING_DIRECTORY ${CMAKE_BINARY_DIR}/thirdparty/tinyxml2
+    )
+else()
+    option(BUILD_TINYXML2 "" ON)
+    set(BUILD_TINYXML2 ON)
+endif()
+
+if (EMSCRIPTEN)
+    add_compile_options(-Wno-deprecated-declarations)
+endif()
+
 add_subdirectory(src/kolanut/libs/tmxparser)
 
+option(DEBUG_GC "" OFF)
+set(_DEBUG_GC OFF)
+option(STRESS_GC "" OFF)
+set(_STRESS_GC OFF)
+
+add_subdirectory(src/kolanut/libs/melonscript-vm)
+
+if (NOT EMSCRIPTEN)
 add_subdirectory(src/kolanut/libs/glfw)
-add_subdirectory(src/kolanut/libs/glm)
+endif()
+
+option(OPTION_BUILD_TESTS OFF)
 add_subdirectory(src/kolanut/libs/cppfs)
+
+add_subdirectory(src/kolanut/libs/glm)
+
+if (EMSCRIPTEN)
+option(MZ_LZMA OFF)
+option(MZ_OPENSSL OFF)
+option(MZ_ZSTD OFF)
+endif()
+
 add_subdirectory(src/kolanut/libs/minizip-ng)
 
+if (_ENABLE_VULKAN)
 execute_process(COMMAND src/kolanut/libs/shaderc/utils/git-sync-deps)
-
 option(SHADERC_SKIP_TESTS "" ON)
 set(SHADERC_SKIP_TESTS ON)
 option(SHADERC_SKIP_EXAMPLES "" ON)
@@ -41,6 +96,7 @@ set(SHADERC_SKIP_EXAMPLES ON)
 option(SHADERC_SKIP_INSTALL "" ON)
 set(SHADERC_SKIP_INSTALL ON)
 add_subdirectory(src/kolanut/libs/shaderc)
+endif (_ENABLE_VULKAN)
 
 add_compile_options(-Werror=incompatible-pointer-types)
 add_compile_options(-Werror=implicit-function-declaration)
@@ -62,6 +118,49 @@ add_compile_options(-Wno-format)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
 
+if (EMSCRIPTEN)
+    set(CMAKE_EXECUTABLE_SUFFIX ".html")
+endif(EMSCRIPTEN)
+
+configure_file(
+    src/kolanut/core/BuildConfig.h.in 
+    ${CMAKE_BINARY_DIR}/src/kolanut/core/BuildConfig.h
+)
+
+if (ENABLE_VULKAN)
+    set(
+        VULKAN_SRC_FILES
+        src/kolanut/graphics/vulkan/RendererVK.cpp
+        src/kolanut/graphics/vulkan/TextureVK.cpp
+        src/kolanut/graphics/vulkan/FontVK.cpp
+        src/kolanut/graphics/vulkan/ShaderVK.cpp
+        src/kolanut/graphics/vulkan/ProgramVK.cpp
+        src/kolanut/graphics/vulkan/GeometryBufferVK.cpp
+
+        src/kolanut/graphics/vulkan/utils/Instance.cpp
+        src/kolanut/graphics/vulkan/utils/Helpers.cpp
+        src/kolanut/graphics/vulkan/utils/PhysicalDevice.cpp
+        src/kolanut/graphics/vulkan/utils/Device.cpp
+        src/kolanut/graphics/vulkan/utils/Swapchain.cpp
+        src/kolanut/graphics/vulkan/utils/ShaderModule.cpp
+        src/kolanut/graphics/vulkan/utils/RenderPass.cpp
+        src/kolanut/graphics/vulkan/utils/Pipeline.cpp
+        src/kolanut/graphics/vulkan/utils/Pipeline2D.cpp
+        src/kolanut/graphics/vulkan/utils/Queue.cpp
+        src/kolanut/graphics/vulkan/utils/Semaphore.cpp
+        src/kolanut/graphics/vulkan/utils/Fence.cpp
+        src/kolanut/graphics/vulkan/utils/MemoryManager.cpp
+        src/kolanut/graphics/vulkan/utils/CommandBuffer.cpp
+        src/kolanut/graphics/vulkan/utils/Buffer.cpp
+        src/kolanut/graphics/vulkan/utils/Texture.cpp
+        src/kolanut/graphics/vulkan/utils/DescriptorPool.cpp
+        src/kolanut/graphics/vulkan/utils/DescriptorSet.cpp
+        src/kolanut/graphics/vulkan/utils/StagedBuffer.cpp
+        src/kolanut/graphics/vulkan/utils/UniformsBuffer.cpp
+        src/kolanut/graphics/vulkan/utils/QueryPool.cpp
+    )
+endif(ENABLE_VULKAN)
+
 set(
     SRC_FILES
     src/kolanut/stats/Stats.cpp
@@ -77,7 +176,6 @@ set(
     
     src/kolanut/graphics/glfw/RendererGLFW.cpp
 
-    src/kolanut/graphics/ogl/glad/src/glad.c
     src/kolanut/graphics/ogl/RendererOGL.cpp
     src/kolanut/graphics/ogl/TextureOGL.cpp
     src/kolanut/graphics/ogl/FontOGL.cpp
@@ -86,36 +184,7 @@ set(
     src/kolanut/graphics/ogl/GeometryBufferOGL.cpp
     src/kolanut/graphics/ogl/utils/shaders/Shader.cpp
     src/kolanut/graphics/ogl/utils/shaders/Program.cpp
-    src/kolanut/graphics/ogl/utils/GenericUtils.cpp
-
-    src/kolanut/graphics/vulkan/RendererVK.cpp
-    src/kolanut/graphics/vulkan/TextureVK.cpp
-    src/kolanut/graphics/vulkan/FontVK.cpp
-    src/kolanut/graphics/vulkan/ShaderVK.cpp
-    src/kolanut/graphics/vulkan/ProgramVK.cpp
-    src/kolanut/graphics/vulkan/GeometryBufferVK.cpp
-
-    src/kolanut/graphics/vulkan/utils/Instance.cpp
-    src/kolanut/graphics/vulkan/utils/Helpers.cpp
-    src/kolanut/graphics/vulkan/utils/PhysicalDevice.cpp
-    src/kolanut/graphics/vulkan/utils/Device.cpp
-    src/kolanut/graphics/vulkan/utils/Swapchain.cpp
-    src/kolanut/graphics/vulkan/utils/ShaderModule.cpp
-    src/kolanut/graphics/vulkan/utils/RenderPass.cpp
-    src/kolanut/graphics/vulkan/utils/Pipeline.cpp
-    src/kolanut/graphics/vulkan/utils/Pipeline2D.cpp
-    src/kolanut/graphics/vulkan/utils/Queue.cpp
-    src/kolanut/graphics/vulkan/utils/Semaphore.cpp
-    src/kolanut/graphics/vulkan/utils/Fence.cpp
-    src/kolanut/graphics/vulkan/utils/MemoryManager.cpp
-    src/kolanut/graphics/vulkan/utils/CommandBuffer.cpp
-    src/kolanut/graphics/vulkan/utils/Buffer.cpp
-    src/kolanut/graphics/vulkan/utils/Texture.cpp
-    src/kolanut/graphics/vulkan/utils/DescriptorPool.cpp
-    src/kolanut/graphics/vulkan/utils/DescriptorSet.cpp
-    src/kolanut/graphics/vulkan/utils/StagedBuffer.cpp
-    src/kolanut/graphics/vulkan/utils/UniformsBuffer.cpp
-    src/kolanut/graphics/vulkan/utils/QueryPool.cpp
+    src/kolanut/graphics/ogl/utils/GenericUtils.cpp    
 
     src/kolanut/graphics/Font.cpp
     src/kolanut/events/glfw/EventSystemGLFW.cpp
@@ -160,25 +229,37 @@ set(
     src/kolanut/main.cpp
 )
 
-add_executable(
-    kolanut
-    ${SRC_FILES}
-)
+if (NOT EMSCRIPTEN)
+set(SRC_FILES ${SRC_FILES} src/kolanut/graphics/ogl/glad/src/glad.c)
+endif()
 
-target_include_directories(
-    kolanut PUBLIC
+add_executable(kolanut ${SRC_FILES})
+
+set(
+    KOLANUT_INCLUDE_DIRS
+
     src/
+    ${CMAKE_BINARY_DIR}/src/
     src/kolanut/libs/linalg/
     src/kolanut/libs/stb/
     src/kolanut/graphics/ogl/glad/include/
     src/kolanut/libs/cppfs/source/cppfs/include/
     ${cppfs_BINARY_DIR}/source/cppfs/include/
-    src/kolanut/libs/shaderc/libshaderc/include/
     src/kolanut/libs/minizip-ng/
     src/kolanut/libs/tracy/
     src/kolanut/libs/miniaudio/
+)
+
+if (_ENABLE_VULKAN)
+set(
+    KOLANUT_INCLUDE_DIRS
+    ${KOLANUT_INCLUDE_DIRS}
+    src/kolanut/libs/shaderc/libshaderc/include/
     ${Vulkan_INCLUDE_DIR}
 )
+endif (_ENABLE_VULKAN)
+
+target_include_directories(kolanut PUBLIC ${KOLANUT_INCLUDE_DIRS})
 
 if (MINGW)
     # On MinGW add static linking of system libraries so that the resulting
@@ -198,6 +279,44 @@ if (MINGW)
     target_link_options(kolanut PUBLIC ${MINGW_LD_FLAGS})
 endif(MINGW)
 
-set(LINKLIBS melonscript-vm external cjson glfw glm tmxparser cppfs shaderc minizip ${Vulkan_LIBRARIES})
+set(LINKLIBS 
+    melonscript-vm 
+    external 
+    cjson 
+    glfw 
+    glm 
+    tmxparser 
+    cppfs 
+    minizip
+)
+
+if (ENABLE_VULKAN)
+set(
+    LINKLIBS 
+    ${LINKLIBS}
+    shaderc 
+    ${Vulkan_LIBRARIES}
+)
+endif()
+
+if (EMSCRIPTEN)
+target_link_options(
+    kolanut 
+    PUBLIC 
+    "SHELL:-s USE_GLFW=3" 
+    "SHELL:-s USE_ZLIB=1"
+    "SHELL:-s ALLOW_MEMORY_GROWTH=1"
+    "SHELL:-s DEMANGLE_SUPPORT=1"
+    "SHELL:-g2"
+    "SHELL:-g3"
+    "SHELL:--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/tests/@/"
+)
+endif()
 
 target_link_libraries(kolanut ${LINKLIBS})
+
+target_include_directories(
+    kolanut PUBLIC     
+    src/
+    ${PROJECT_BINARY_DIR}
+)

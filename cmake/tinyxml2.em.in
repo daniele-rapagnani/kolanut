@@ -1,0 +1,14 @@
+cmake_minimum_required(VERSION 3.5)
+
+project(ext_tinyxml2 NONE)
+
+include(ExternalProject)
+
+message(STATUS "URCA: ${CMAKE_INSTALL_PREFIX}")
+
+ExternalProject_Add(tinyxml2
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src/kolanut/libs/tmxparser/thirdparty/tinyxml2
+  INSTALL_DIR ${CMAKE_INSTALL_PREFIX}
+  CMAKE_COMMAND emcmake cmake
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=<INSTALL_DIR>
+  -DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE})
