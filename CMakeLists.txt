@@ -4,8 +4,6 @@ project(kolanut)
 option(ENABLE_TRACY "Builds with Tracy profiling on" OFF)
 option(ENABLE_VULKAN, "Build with Vulkan support" ON)
 
-message(STATUS "URCA2: ${CMAKE_INSTALL_PREFIX}")
-
 if (ENABLE_VULKAN)
     message(STATUS "Building with Vulkan support")
     if (NOT EMSCRIPTEN)
