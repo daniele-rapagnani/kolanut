@@ -1,5 +1,7 @@
 #include "kolanut/core/Types.h"
 #include "kolanut/core/Logging.h"
+#include "kolanut/core/DIContainer.h"
+#include "kolanut/graphics/ogl/utils/Context.h"
 #include "kolanut/graphics/ogl/utils/shaders/Program.h"
 
 #include <functional>
@@ -67,7 +69,7 @@ bool Program::link(std::string& error)
 
 void Program::use() const
 {
-    knM_oglCall(glUseProgram(this->programId));
+    di::get<Context>()->useProgram(this->programId);
 }
 
 GLint Program::getUniformLocation(const std::string& name) const

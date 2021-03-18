@@ -1,6 +1,8 @@
 #include "kolanut/core/Logging.h"
 #include "kolanut/graphics/GeometryBuffer.h"
 
+#include <cassert>
+
 namespace kola {
 namespace graphics {
 
@@ -42,9 +44,11 @@ GeometryBuffer::Handle GeometryBuffer::addVertices(const Vertex* vertices, size_
     this->bufferBase[frame] += realSize;
 
 #if UINTPTR_MAX == UINT64_MAX
-    return (base << 32) | ((realSize & 0xFFFFFFF) << 4) | ((frame + 1) & 0xF);
+    assert(base < 0xFFFFFFFFFFFFFFF);
+    return (base << 4) | ((frame + 1) & 0xF);
 #elif UINTPTR_MAX == UINT32_MAX
-    return (base << 16) | ((realSize & 0xFFF) << 4) | ((frame + 1) & 0xF);
+    assert(base < 0xFFFFFFF);
+    return (base << 4) | ((frame + 1) & 0xF);
 #else
     #error Unsupported architecture
 #endif

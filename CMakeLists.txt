@@ -183,6 +183,7 @@ set(
     src/kolanut/graphics/ogl/utils/shaders/Shader.cpp
     src/kolanut/graphics/ogl/utils/shaders/Program.cpp
     src/kolanut/graphics/ogl/utils/GenericUtils.cpp    
+    src/kolanut/graphics/ogl/utils/Context.cpp    
 
     src/kolanut/graphics/Font.cpp
     src/kolanut/events/glfw/EventSystemGLFW.cpp

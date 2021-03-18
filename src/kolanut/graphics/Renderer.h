@@ -158,6 +158,7 @@ private:
     uint8_t currentInFlightFrame = 0;
 
     mutable Transform3D cameraTransform = {};
+    mutable Rectf cameraBB = {};
 
     std::vector<DrawSurface> jobs = {};
 };

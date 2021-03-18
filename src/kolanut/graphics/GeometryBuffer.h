@@ -49,9 +49,9 @@ public:
     size_t getBase(Handle h) const
     {
 #if UINTPTR_MAX == UINT64_MAX
-        return (h >> 32) & 0xFFFFFFFF; 
+        return (h >> 4) & 0xFFFFFFFFFFFFFFF; 
 #elif UINTPTR_MAX == UINT32_MAX
-        return (h >> 16) & 0xFFFF;
+        return (h >> 4) & 0xFFFFFFF;
 #else
         #error Unsupported architecture
 #endif

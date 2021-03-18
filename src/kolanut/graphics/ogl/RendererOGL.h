@@ -39,7 +39,6 @@ protected:
 
 private:
     GLuint perfQuery = {};
-    std::shared_ptr<Texture> lastTexture = {};
 };
 
 } // namespace graphics

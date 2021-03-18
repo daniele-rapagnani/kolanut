@@ -198,7 +198,7 @@ void Kolanut::renderFrame()
             static_cast<float>(newFrameTime - lastFrameTime) / 1000.0f,
             std::numeric_limits<decltype(dt)>::epsilon()
         ),
-        (1.0f/60.0f) * 5.0f
+        (1.0f/60.0f) * 2.0f
     );
     this->lastFrameTime = newFrameTime;
 

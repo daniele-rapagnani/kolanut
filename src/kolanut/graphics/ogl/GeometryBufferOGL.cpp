@@ -1,6 +1,8 @@
 #include "kolanut/graphics/ogl/GeometryBufferOGL.h"
+#include "kolanut/graphics/ogl/utils/Context.h"
 #include "kolanut/graphics/ogl/utils/GenericUtils.h"
 #include "kolanut/core/Logging.h"
+#include "kolanut/core/DIContainer.h"
 
 #include <cassert>
 
@@ -15,14 +17,14 @@ GeometryBufferOGL::~GeometryBufferOGL()
     }
 }
 
-void GeometryBufferOGL::bind() const
+void GeometryBufferOGL::bind()
 {
-    knM_oglCall(glBindBuffer(GL_ARRAY_BUFFER, this->buffer));
+    di::get<utils::ogl::Context>()->bindBuffer(GL_ARRAY_BUFFER, this->buffer);
 }
 
-void GeometryBufferOGL::unbind() const
+void GeometryBufferOGL::unbind()
 {
-    knM_oglCall(glBindBuffer(GL_ARRAY_BUFFER, 0));
+    di::get<utils::ogl::Context>()->bindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
 bool GeometryBufferOGL::createBuffer()
@@ -44,8 +46,6 @@ bool GeometryBufferOGL::createBuffer()
         return false;
     }
 
-    unbind();
-
     return true;
 }
 
@@ -60,11 +60,6 @@ bool GeometryBufferOGL::copy(const Vertex* vertices, size_t base, size_t size, s
 
     bind();
     glBufferSubData(GL_ARRAY_BUFFER, base, size, vertices);
-
-    if (glGetError() != GL_NO_ERROR)
-    {
-        return false;
-    }
 
     unbind();
     *realSize = size;

@@ -1,5 +1,6 @@
 #include "kolanut/graphics/ogl/TextureOGL.h"
 #include "kolanut/graphics/ogl/RendererOGL.h"
+#include "kolanut/graphics/ogl/utils/Context.h"
 #include "kolanut/graphics/ogl/utils/GenericUtils.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/core/Logging.h"
@@ -24,7 +25,7 @@ bool TextureOGL::doLoad(unsigned char* data, size_t w, size_t h)
         return false;
     }
 
-    knM_oglCall(glBindTexture(GL_TEXTURE_2D, this->texture));
+    bind();
 
     knM_oglCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE));
     knM_oglCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE));
@@ -38,7 +39,7 @@ bool TextureOGL::doLoad(unsigned char* data, size_t w, size_t h)
 
 void TextureOGL::bind() const
 {
-    knM_oglCall(glBindTexture(GL_TEXTURE_2D, this->texture));
+    di::get<utils::ogl::Context>()->bindTexture(GL_TEXTURE_2D, this->texture);
 }
 
 } // namespace graphics

@@ -7,7 +7,7 @@
 
 #include <memory>
 
-#ifndef NDEBUG
+#if !defined(NDEBUG) && !defined(__EMSCRIPTEN__)
 #define knM_oglCall(x) \
     do { \
         x; \

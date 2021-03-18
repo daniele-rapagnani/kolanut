@@ -17,8 +17,8 @@ class GeometryBufferOGL : public GeometryBuffer
 public:
     ~GeometryBufferOGL();
     
-    void bind() const;
-    void unbind() const;
+    void bind();
+    void unbind();
 
 protected:
     bool createBuffer() override;

@@ -5,6 +5,7 @@
 #include "kolanut/graphics/ogl/FontOGL.h"
 #include "kolanut/graphics/ogl/ShaderOGL.h"
 #include "kolanut/graphics/ogl/ProgramOGL.h"
+#include "kolanut/graphics/ogl/utils/Context.h"
 #include "kolanut/graphics/ogl/utils/GenericUtils.h"
 #include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/stats/StatsEngine.h"
@@ -40,6 +41,10 @@ bool RendererOGL::doInit(const Config& config)
     {
         return false;
     }
+
+    di::registerType<utils::ogl::Context>([] {
+        return std::make_shared<utils::ogl::Context>();
+    });
 
     knM_logDebug("Initilizing OpenGL renderer");
 
@@ -140,10 +145,9 @@ void RendererOGL::drawSurface(const DrawSurface& req)
     knM_oglCall(glEnableVertexAttribArray(colAtt));
     knM_oglCall(glVertexAttribPointer(colAtt, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetColor));
 
-    if (texture && texture != this->lastTexture)
+    if (texture)
     {
         texture->bind();
-        this->lastTexture = texture;
     }
 
     switch(req.mode)
