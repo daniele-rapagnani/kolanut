@@ -35,11 +35,11 @@ bool Program::link(std::string& error)
             error.assign("Can't create program");
             return false;
         }
-    }
 
-    for (const auto& shader : this->shaders)
-    {
-        knM_oglCall(glAttachShader(this->programId, shader->getId()));
+        for (const auto& shader : this->shaders)
+        {
+            knM_oglCall(glAttachShader(this->programId, shader->getId()));
+        }
     }
 
     knM_oglCall(glLinkProgram(this->programId));
@@ -85,6 +85,31 @@ GLint Program::getAttributeLocation(const std::string& name) const
     knM_oglCall(attLoc = glGetAttribLocation(this->programId, name.c_str()));
 
     return attLoc;
+}
+
+bool Program::bindAttributeToLocation(const std::string& name, GLuint location) const
+{
+    GLint att = getAttributeLocation(name);
+
+    if (att < 0)
+    {
+        return false;
+    }
+
+    static GLint maxVertAttribs = 0;
+    
+    if (maxVertAttribs == 0)
+    {
+        glGetIntegerv(GL_MAX_VERTEX_ATTRIBS, &maxVertAttribs);
+    }
+
+    if (location >= maxVertAttribs)
+    {
+        return false;
+    }
+
+    knM_oglCall(glBindAttribLocation(this->programId, location, name.c_str()));
+    return true;
 }
 
 } // namespace ogl

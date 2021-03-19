@@ -86,6 +86,7 @@ public:
     }
 
     GLint getAttributeLocation(const std::string& name) const;
+    bool bindAttributeToLocation(const std::string& name, GLuint location) const;
 
     void use() const;
 

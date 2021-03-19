@@ -31,7 +31,10 @@ namespace graphics {
 RendererOGL::~RendererOGL()
 {
 #ifndef __EMSCRIPTEN__
-    knM_oglCall(glDeleteQueries(1, &this->perfQuery));
+    if (this->perfQuery > 0)
+    {
+        knM_oglCall(glDeleteQueries(1, &this->perfQuery));
+    }
 #endif
 }
 
@@ -73,6 +76,19 @@ bool RendererOGL::doInit(const Config& config)
     return true;
 }
 
+bool RendererOGL::init(const Config& config)
+{
+    if (!RendererGLFW::init(config))
+    {
+        return false;
+    }
+
+    bindProgramAttributesLocations(getProgram());
+    bindProgramAttributesLocations(getLineProgram());
+
+    return true;
+}
+
 void RendererOGL::onUpdateWindowSize()
 {
     Sizei resolution = getPixelResolution();
@@ -104,51 +120,25 @@ void RendererOGL::drawSurface(const DrawSurface& req)
     glProgram->setUnifrom("screenSize", Vec2f { getDesignResolution().x, getDesignResolution().y });
     glProgram->setUnifrom("camera", req.camera);
 
-    GLint posAtt = glProgram->getAttributeLocation("a_position");
-
-    if (posAtt < 0)
-    {
-        knM_logError("Can't find a_position attribute in main vertex shader");
-        return;
-    }
-
-    GLint tcAtt = glProgram->getAttributeLocation("a_texCoord");
-
-    if (tcAtt < 0)
-    {
-        knM_logError("Can't find a_texCoord attribute in main vertex shader");
-        return;
-    }
-
-    GLint colAtt = glProgram->getAttributeLocation("a_color");
-
-    if (colAtt < 0)
-    {
-        knM_logError("Can't find a_color attribute in main vertex shader");
-        return;
-    }
-
-    GLuint* buffers = reinterpret_cast<GLuint*>(req.vertices);
-
     void* offset = reinterpret_cast<void*>(this->geometryBuffer->getBase(h));
     void* offsetUv = reinterpret_cast<void*>(this->geometryBuffer->getBase(h) + sizeof(Vec2f));
     void* offsetColor = reinterpret_cast<void*>(this->geometryBuffer->getBase(h) + sizeof(Vec2f) * 2);
 
-    static bool bound = false;
-
     std::static_pointer_cast<GeometryBufferOGL>(getGeometryBuffer())->bind();
     
-    knM_oglCall(glEnableVertexAttribArray(posAtt));
-    knM_oglCall(glVertexAttribPointer(posAtt, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offset));
-    knM_oglCall(glEnableVertexAttribArray(tcAtt));
-    knM_oglCall(glVertexAttribPointer(tcAtt, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetUv));
-    knM_oglCall(glEnableVertexAttribArray(colAtt));
-    knM_oglCall(glVertexAttribPointer(colAtt, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetColor));
+    knM_oglCall(glEnableVertexAttribArray(POS_ATTR_LOC));
+    knM_oglCall(glVertexAttribPointer(POS_ATTR_LOC, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offset));
+    knM_oglCall(glEnableVertexAttribArray(TC_ATTR_LOC));
+    knM_oglCall(glVertexAttribPointer(TC_ATTR_LOC, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetUv));
+    knM_oglCall(glEnableVertexAttribArray(COLOR_ATTR_LOC));
+    knM_oglCall(glVertexAttribPointer(COLOR_ATTR_LOC, 4, GL_FLOAT, GL_FALSE, sizeof(Vertex), offsetColor));
 
     if (texture)
     {
         texture->bind();
     }
+
+    GLuint firstVert = 0; //this->geometryBuffer->getBase(h) / sizeof(Vertex);
 
     switch(req.mode)
     {
@@ -213,6 +203,33 @@ std::shared_ptr<Shader> RendererOGL::createShader()
 std::shared_ptr<Program> RendererOGL::createProgram(DrawMode mode)
 {
     return std::make_shared<ProgramOGL>();
+}
+
+void RendererOGL::bindProgramAttributesLocations(std::shared_ptr<Program> program) const
+{
+    auto glp = std::static_pointer_cast<ProgramOGL>(program)->getGLProgram();
+    
+    if (!glp->bindAttributeToLocation(POS_ATTR_NAME, POS_ATTR_LOC))
+    {
+        knM_logError("Can't find " << POS_ATTR_NAME << " attribute in vertex shader");
+    }
+
+    if (!glp->bindAttributeToLocation(TC_ATTR_NAME, TC_ATTR_LOC))
+    {
+        knM_logError("Can't find " << TC_ATTR_NAME << " attribute in vertex shader");
+    }
+
+    if (!glp->bindAttributeToLocation(COLOR_ATTR_NAME, COLOR_ATTR_LOC))
+    {
+        knM_logError("Can't find " << COLOR_ATTR_NAME << " attribute in vertex shader");
+    }
+
+    std::string linkErr;
+
+    if (!glp->link(linkErr))
+    {
+        knM_logError("Can't link program with new bindings: " << linkErr);
+    }
 }
 
 std::shared_ptr<GeometryBuffer> RendererOGL::createGeometryBuffer()
