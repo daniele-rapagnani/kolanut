@@ -313,7 +313,7 @@ target_link_options(
     "SHELL:-s DEMANGLE_SUPPORT=1"
     "SHELL:-g2"
     "SHELL:-g3"
-    "SHELL:--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/test2/@/"
+    "SHELL:--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/tests/@/"
 )
 endif()
 
