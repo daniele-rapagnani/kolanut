@@ -48,6 +48,7 @@ public:
 
 public:
     bool doInit(const Config& config) override;
+    
     std::shared_ptr<Program> createProgram(DrawMode mode) override;
 
     void drawSurface(const DrawSurface& req) override;

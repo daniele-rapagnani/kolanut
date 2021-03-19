@@ -130,7 +130,7 @@ configure_file(
     ${CMAKE_BINARY_DIR}/src/kolanut/core/BuildConfig.h
 )
 
-if (ENABLE_VULKAN)
+if (_ENABLE_VULKAN)
     set(
         VULKAN_SRC_FILES
         src/kolanut/graphics/vulkan/RendererVK.cpp
@@ -162,7 +162,7 @@ if (ENABLE_VULKAN)
         src/kolanut/graphics/vulkan/utils/UniformsBuffer.cpp
         src/kolanut/graphics/vulkan/utils/QueryPool.cpp
     )
-endif(ENABLE_VULKAN)
+endif(_ENABLE_VULKAN)
 
 set(
     SRC_FILES
@@ -189,6 +189,8 @@ set(
     src/kolanut/graphics/ogl/utils/shaders/Program.cpp
     src/kolanut/graphics/ogl/utils/GenericUtils.cpp    
     src/kolanut/graphics/ogl/utils/Context.cpp    
+
+    ${VULKAN_SRC_FILES}
 
     src/kolanut/graphics/Font.cpp
     src/kolanut/events/glfw/EventSystemGLFW.cpp

@@ -26,7 +26,7 @@ bool GeometryBufferVK::createBuffer()
 
 bool GeometryBufferVK::bind(Handle h, std::shared_ptr<vulkan::CommandBuffer> commandBuf)
 {
-    uint64_t base = (h >> 32) & 0xFFFFFFFF;
+    uint64_t base = getBase(h);
     VkBuffer b = this->buffer->getVkHandle();
 
     vkCmdBindVertexBuffers(commandBuf->getVkHandle(), 0, 1, &b, &base);
