@@ -57,6 +57,7 @@ public:
     void doFlip() override;
 
     Sizei getPixelResolution() const override;
+    void onUpdateWindowSize() override;
 
     std::shared_ptr<vulkan::Device> getDevice() const
     { return this->device; }
@@ -72,6 +73,8 @@ protected:
 
     std::string getShadersExt() const override
     { return ".vk"; }
+
+    bool recreateSwapchain();
 
 private:
     std::shared_ptr<vulkan::Instance> instance = {};

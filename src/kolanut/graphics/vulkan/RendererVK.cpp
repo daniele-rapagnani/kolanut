@@ -197,17 +197,6 @@ bool RendererVK::doInit(const Config& config)
         : this->presQueue
     ;
 
-    if (
-        !this->graphQueue->createCommandBuffers(
-            this->graphCommandBuffers, 
-            this->device->getConfig().framesInFlight
-        )
-    )
-    {
-        knM_logFatal("Can't create graphic command buffers");
-        return false;
-    }
-
     VkSamplerCreateInfo sci = {};
     sci.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
     sci.minFilter = VK_FILTER_NEAREST;
@@ -226,6 +215,51 @@ bool RendererVK::doInit(const Config& config)
     if (vkCreateSampler(this->device->getVkHandle(), &sci, nullptr, &this->sampler) != VK_SUCCESS)
     {
         knM_logFatal("Can't create texture sampler");
+        return false;
+    }
+    
+    return recreateSwapchain();
+}
+
+void RendererVK::onUpdateWindowSize()
+{
+    if (!this->device)
+    {
+        return;
+    }
+
+    vkDeviceWaitIdle(this->device->getVkHandle());
+    this->device->recreateSwapchain(this->surface);
+    recreateSwapchain();
+
+    VkSurfaceCapabilitiesKHR sc = 
+        getDevice()->getPhysicalDevice()->getSurfaceCapabilities(this->surface)
+    ;
+
+    std::static_pointer_cast<ProgramVK>(this->program)->setViewportSize({ sc.currentExtent.width, sc.currentExtent.height });
+    std::static_pointer_cast<ProgramVK>(this->lineProgram)->setViewportSize({ sc.currentExtent.width, sc.currentExtent.height });
+
+    this->program->link();
+    this->lineProgram->link();
+}
+
+bool RendererVK::recreateSwapchain()
+{
+    this->tracyContextes.clear();
+    this->imageReadySemaphores.clear();
+    this->renderCompleteSemaphores.clear();
+    this->frameCompletedFence.clear();
+    this->graphCommandBuffers.clear();
+    this->descriptorSets.clear();
+
+    if (
+        !this->graphQueue->createCommandBuffers(
+            this->graphCommandBuffers, 
+            this->device->getConfig().framesInFlight
+        )
+    )
+    {
+        knM_logFatal("Can't create graphic command buffers");
         return false;
     }
 
@@ -316,8 +350,8 @@ void RendererVK::drawSurface(const DrawSurface& req)
     ;
 
     ViewUniform vu = {};
-    vu.screenSize.x = getDesignResolution().x;
-    vu.screenSize.y = getDesignResolution().y;
+    vu.screenSize.x = getDesignResolution().x * 0.5f;
+    vu.screenSize.y = getDesignResolution().y * 0.5f;
     vu.camera = req.camera;
     vu.transform = req.transform;
 

@@ -93,6 +93,9 @@ void RendererOGL::onUpdateWindowSize()
 {
     Sizei resolution = getPixelResolution();
     knM_oglCall(glViewport(0, 0, resolution.x, resolution.y));
+    knM_logDebug("PR: " << getPixelResolution().x << ", " << getPixelResolution().y);
+    knM_logDebug("R: " << getResolution().x << ", " << getResolution().y);
+    knM_logDebug("D: " << getDesignResolution().x << ", " << getDesignResolution().y);
 }
 
 void RendererOGL::drawSurface(const DrawSurface& req)
@@ -117,7 +120,7 @@ void RendererOGL::drawSurface(const DrawSurface& req)
         return;
     }
 
-    glProgram->setUnifrom("screenSize", Vec2f { getDesignResolution().x, getDesignResolution().y });
+    glProgram->setUnifrom("screenSize", Vec2f { getDesignResolution().x * 0.5f, getDesignResolution().y * 0.5f });
     glProgram->setUnifrom("camera", req.camera);
 
     void* offset = reinterpret_cast<void*>(this->geometryBuffer->getBase(h));

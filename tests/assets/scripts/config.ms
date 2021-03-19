@@ -1,9 +1,9 @@
-let screenSize = Vector2.create(800, 600);
+let screenSize = Vector2.create(400, 300);
 
 return {
     windowTitle = "Yeah",
     screenSize = screenSize,
-    designResolution = screenSize * 0.5,
+    designResolution = Vector2.create(400, 300),
     fullscreen = false,
     graphicBackend = "vulkan",
     enableGraphicAPIDebug = false,

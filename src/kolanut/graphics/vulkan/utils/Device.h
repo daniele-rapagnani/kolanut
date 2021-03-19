@@ -55,6 +55,7 @@ public:
     std::shared_ptr<Queue> getQueue(QueueFamily family, uint32_t index = 0) const;
 
     bool addRenderPass(const RenderPass::Config& config);
+    void recreateSwapchain(VkSurfaceKHR surface);
 
     const std::vector<std::shared_ptr<RenderPass>>& getRenderPasses()
     { return this->renderPasses; }

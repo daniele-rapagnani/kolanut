@@ -82,7 +82,7 @@ bool Device::init(
     }
 
     this->memMgr = make_init_fatal<MemoryManager>(shared_from_this());
-    this->swapchain = make_init_fatal<Swapchain>(surface, shared_from_this(), getConfig().swapchain);
+    recreateSwapchain(surface);
     
     for (auto& gr : this->queueGroups)
     {
@@ -111,6 +111,12 @@ bool Device::init(
     }
 
     return true;
+}
+
+void Device::recreateSwapchain(VkSurfaceKHR surface)
+{
+    this->swapchain = make_init_fatal<Swapchain>(surface, shared_from_this(), getConfig().swapchain);
+    this->renderPasses.clear();
 }
 
 std::shared_ptr<Queue> Device::getQueue(QueueFamily family, uint32_t index /* = 0 */) const
