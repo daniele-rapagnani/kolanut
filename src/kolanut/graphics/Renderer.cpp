@@ -107,6 +107,15 @@ void Renderer::draw(
 {
     assert(t);
 
+    Rectf bb;
+    Rectf sr = { {0, 0}, rect.size };
+    sr.getBB(tr, bb);
+
+    if (!bb.overlaps(this->cameraBB))
+    {
+        return;
+    }
+
     DrawSurface ds;
 
     ds.texture = t;
@@ -284,19 +293,20 @@ void Renderer::updateCameraTransform() const
 
     this->cameraTransform = glm::translate(
         glm::scale(
-            Transform3D { 1.0f },
-            glm::vec3 {
-                resScale * getCameraZoom(),
-                resScale * getCameraZoom(),
-                1.0f
-            }
+            glm::translate(
+                glm::scale(
+                    Transform3D { 1.0f },
+                    glm::vec3 { resScale, resScale, 1.0f }
+                ),
+                glm::vec3 { getCameraOrigin().x, getCameraOrigin().y, 0.0f }
+            ),
+            glm::vec3 { getCameraZoom(), getCameraZoom(), 1.0f }
         ),
-        glm::vec3 {
-            -getCameraPosition().x, 
-            -getCameraPosition().y,
-            0.0f
-        }
-    );   
+        glm::vec3 { -getCameraPosition().x, -getCameraPosition().y, 1.0f }
+    );
+
+    Rectf view = { { 0, 0 }, getResolution() };
+    view.getBB(glm::inverse(this->cameraTransform), this->cameraBB);
 }
 
 void Renderer::clear()
@@ -367,6 +377,15 @@ std::shared_ptr<Program> Renderer::createLineProgram()
     return drawProgram;
 }
 
+void Renderer::setCamera(const Vec2f& pos, const Vec2f& orig, float zoom)
+{
+    this->cameraPos = pos;
+    this->cameraOrigin = orig;
+    this->cameraZoom = zoom;
+
+    updateCameraTransform();
+}
+
 void Renderer::setCameraPosition(const Vec2f& pos)
 {
     this->cameraPos = pos;
@@ -379,9 +398,20 @@ void Renderer::setCameraZoom(float zoom)
     updateCameraTransform();
 }
 
+void Renderer::setCameraOrigin(const Vec2f& orig)
+{
+    this->cameraOrigin = orig;
+    updateCameraTransform();
+}
+
 Vec2f Renderer::getCameraPosition() const
 {
     return this->cameraPos;
+}
+
+Vec2f Renderer::getCameraOrigin() const
+{
+    return this->cameraOrigin;
 }
 
 float Renderer::getCameraZoom() const

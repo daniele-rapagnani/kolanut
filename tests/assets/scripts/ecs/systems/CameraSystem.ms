@@ -26,14 +26,10 @@ let CameraSystem = {
                 let bb = ca->getBB(tr);
 
                 if (ca.bounds.bottom != null && bb.bottom > ca.bounds.bottom) {
-                    //pos.y = pos.y - (bb.bottom - ca.bounds.bottom);
                     tr.position.y = tr.position.y - (bb.bottom - ca.bounds.bottom) * zoom;
                 }
 
-                let pos = tr.position - tr.origin * (1.0 / zoom);
-
-                Kolanut.Camera.setPosition(pos);
-                Kolanut.Camera.setZoom(zoom);
+                Kolanut.Camera.set(tr.position, zoom, tr.origin);
             }
         );
     }

@@ -46,12 +46,52 @@ static TByte getZoom(VM* vm)
     return ffi::push(vm, zoom);
 }
 
+static TByte setOrigin(VM* vm)
+{
+    melM_arg(vm, origVal, MELON_TYPE_OBJECT, 0);
+
+    Vec2f orig;
+    ffi::convert(vm, orig, origVal);
+
+    di::get<graphics::Renderer>()->setCameraOrigin(orig);
+    return 0;
+}
+
+static TByte getOrigin(VM* vm)
+{
+    Vec2f cOrig = di::get<graphics::Renderer>()->getCameraOrigin();
+    return ffi::push(vm, cOrig);
+}
+
+static TByte set(VM* vm)
+{
+    melM_arg(vm, posVal, MELON_TYPE_OBJECT, 0);
+    melM_arg(vm, zoomVal, MELON_TYPE_NUMBER, 1);
+    melM_arg(vm, origVal, MELON_TYPE_OBJECT, 2);
+
+    Vec2f pos;
+    ffi::convert(vm, pos, posVal);
+
+    Vec2f orig;
+    ffi::convert(vm, orig, origVal);
+
+    float zoom;
+    ffi::convert(vm, zoom, zoomVal);
+
+    di::get<graphics::Renderer>()->setCamera(pos, orig, zoom);
+
+    return 0;
+}
+
 static const ModuleFunction funcs[] = {
     // name, args, locals, func
     { "setPosition", 1, 0, &setPosition, 0 },
     { "getPosition", 0, 0, &getPosition, 0 },
     { "setZoom", 1, 0, &setZoom, 0 },
     { "getZoom", 0, 0, &getZoom, 0 },
+    { "setOrigin", 1, 0, &setOrigin, 0 },
+    { "getOrigin", 0, 0, &getOrigin, 0 },
+    { "set", 3, 0, &set, 0 },
     { NULL, 0, 0, NULL }
 };
 

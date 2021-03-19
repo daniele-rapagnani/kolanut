@@ -13,7 +13,11 @@ let LabelRenderSystem = {
             |components| => {
                 let lb = components.Label;
 
-                if (lb.inWorldView && phase != World.Phase.Draw) {
+                if (
+                    (lb.inWorldView && phase != World.Phase.Draw)
+                    || (!lb.inWorldView && phase != World.Phase.DrawUI)
+                )
+                {
                     return;
                 }
 

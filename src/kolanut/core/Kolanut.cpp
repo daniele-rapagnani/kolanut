@@ -176,12 +176,12 @@ void Kolanut::renderFrame()
     {
         ZoneScopedN("OnDrawUI");
         Vec2f cameraPosTmp = getRenderer()->getCameraPosition();
+        Vec2f cameraOrigTmp = getRenderer()->getCameraOrigin();
         float cameraZoomTmp = getRenderer()->getCameraZoom();
-        getRenderer()->setCameraPosition({});
-        getRenderer()->setCameraZoom(1.0f);
+        
+        getRenderer()->setCamera({}, {}, 1.0f);
         getScriptingEngine()->onDrawUI();
-        getRenderer()->setCameraPosition(cameraPosTmp);
-        getRenderer()->setCameraZoom(cameraZoomTmp);
+        getRenderer()->setCamera(cameraPosTmp, cameraOrigTmp, cameraZoomTmp);
     }
     
     {

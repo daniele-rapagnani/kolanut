@@ -98,9 +98,12 @@ public:
 
     virtual void drawSurface(const DrawSurface& req) = 0;
 
+    virtual void setCamera(const Vec2f& pos, const Vec2f& orig, float zoom);
     virtual void setCameraPosition(const Vec2f& pos);
+    virtual void setCameraOrigin(const Vec2f& orig);
     virtual void setCameraZoom(float zoom);
     virtual Vec2f getCameraPosition() const;
+    virtual Vec2f getCameraOrigin() const;
     virtual float getCameraZoom() const;
     
     void clear();
@@ -153,6 +156,7 @@ protected:
 private:
     Config config = {};
     Vec2f cameraPos = {};
+    Vec2f cameraOrigin = {};
     float cameraZoom = 1.0f;
     Sizei designResolution = {};
     uint8_t currentInFlightFrame = 0;
