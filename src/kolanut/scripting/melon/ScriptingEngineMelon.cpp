@@ -15,12 +15,12 @@
 
 #include "kolanut/filesystem/FilesystemEngine.h"
 
-#include <melon/tools/utils.h>
-
 extern "C" {
 #include <melon/core/tstring.h>
 #include <melon/core/closure.h>
 #include <melon/core/function.h>
+#include <melon/core/compiler.h>
+#include <melon/core/vm.h>
 #include <melon/modules/modules.h>
 }
 
@@ -137,11 +137,62 @@ bool ScriptingEngineMelon::init(const Config& config)
     return true;
 }
 
+bool ScriptingEngineMelon::runScript(const std::string& filename)
+{
+    TByte* prog = nullptr;
+    size_t size;
+
+    std::vector<char> data;
+
+    if (!di::get<filesystem::FilesystemEngine>()->getFileContent(filename, data))
+    {
+        return false;
+    }
+
+    Compiler compiler = {};
+
+    if (
+        melCreateCompilerFile(
+            &compiler, 
+            &this->vm, 
+            filename.c_str(), 
+            data.data(),
+            data.size()
+        ) != 0
+    )
+    {
+        knM_logError("Can't create compiler for melon script: " << filename);
+        return false;
+    }
+
+    if (melRunCompiler(&compiler) != 0)
+    {
+        knM_logError("Can't compile melon script: " << filename);
+        return false;
+    }
+
+    if (compiler.hasErrors)
+    {
+        return false;
+    }
+
+    melAddRootGC(&this->vm, &this->vm.gc, compiler.main.func);
+    melTriggerGC(&this->vm, &this->vm.gc);
+
+    if (melRunMainFunctionVM(&this->vm, compiler.main.func) != 0)
+    {
+        knM_logError("Can't run melon script: " << filename);
+        return false;
+    }
+
+    return true;
+}
+
 bool ScriptingEngineMelon::start()
 {
     std::string bootScript = getScriptPath(this->config.bootScript);
 
-    if (!::melon::utils::runScript(&this->vm, bootScript))
+    if (!runScript(bootScript))
     {
         knM_logFatal("Can't load boot script at: '" << bootScript << "'");
         return false;

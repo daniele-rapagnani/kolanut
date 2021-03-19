@@ -41,7 +41,12 @@ let Game = {
         this.world->addSystem(ECS.Systems.TilemapCollisionSystem.create());
         this.world->addSystem(ECS.Systems.TilemapRenderSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.SpriteRenderSystem.create(), ECS.World.Phase.Draw);
-        this.world->addSystem(ECS.Systems.QuadTreeSystem.create(), ECS.World.Phase.Draw);
+
+        this.world->addSystem(
+            ECS.Systems.QuadTreeSystem.create(BoundingBox.create(300, 300, 2500, 2500)), 
+            ECS.World.Phase.Draw
+        );
+
         this.world->addSystem(ECS.Systems.LabelRenderSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.DebugRectSystem.create(), ECS.World.Phase.Draw);
         this.world->addSystem(ECS.Systems.LabelRenderSystem.create(), ECS.World.Phase.DrawUI);

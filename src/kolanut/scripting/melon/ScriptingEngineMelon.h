@@ -23,6 +23,8 @@ public:
     bool onQuit() override;
     void onKeyPressed(events::KeyCode key, bool pressed) override;
 
+    bool runScript(const std::string& filename);
+
 private:
     std::string getScriptPath(const std::string& name) const
     {

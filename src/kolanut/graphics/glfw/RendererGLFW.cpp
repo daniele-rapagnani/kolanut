@@ -68,7 +68,9 @@ bool RendererGLFW::doInit(const Config& config)
         glfwTerminate();
 
         const char* err = nullptr;
+#ifndef __EMSCRIPTEN__
         glfwGetError(&err);
+#endif
 
         knM_logFatal("Can't create window with GLFW: " << (err ? err : "Unknown"));
         return false;

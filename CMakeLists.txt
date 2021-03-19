@@ -4,6 +4,11 @@ project(kolanut)
 option(ENABLE_TRACY "Builds with Tracy profiling on" OFF)
 option(ENABLE_VULKAN, "Build with Vulkan support" ON)
 
+if (ENABLE_TRACY)
+message(STATUS "Enabling Tracy support")
+set(_ENABLE_TRACY ON)
+endif()
+
 if (ENABLE_VULKAN)
     message(STATUS "Building with Vulkan support")
     if (NOT EMSCRIPTEN)
@@ -102,9 +107,9 @@ add_compile_options(-Werror=return-type)
 add_compile_options(-Werror=int-conversion)
 add_definitions(-D_USE_MATH_DEFINES)
 
-if (ENABLE_TRACY)
+if (_ENABLE_TRACY)
 add_definitions(-DTRACY_ENABLE)
-endif (ENABLE_TRACY)
+endif (_ENABLE_TRACY)
 
 if (NOT WIN32)
 add_compile_options(-Werror=macro-redefined)
@@ -308,7 +313,7 @@ target_link_options(
     "SHELL:-s DEMANGLE_SUPPORT=1"
     "SHELL:-g2"
     "SHELL:-g3"
-    "SHELL:--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/tests/@/"
+    "SHELL:--preload-file ${CMAKE_CURRENT_SOURCE_DIR}/test2/@/"
 )
 endif()
 

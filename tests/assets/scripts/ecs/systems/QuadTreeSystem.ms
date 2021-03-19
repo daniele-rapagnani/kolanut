@@ -3,9 +3,9 @@ let QuadTree = import("../QuadTree");
 let World = import("../World");
 
 let QuadTreeSystem = {
-    create = => {
+    create = |bb| => {
         return {
-            quadTree = QuadTree.create(BoundingBox.create(700, 700, 1700, 1400))
+            quadTree = QuadTree.create(bb)
         } @ QuadTreeSystem;
     },
 

@@ -131,9 +131,12 @@ MiniaudioAudioEngine::~MiniaudioAudioEngine()
 
     for (auto ps : this->playing)
     {
-        ma_decoder_uninit(
-            std::static_pointer_cast<MiniaudioSoundInstance>(ps)->getDecoder()
-        );
+        if (ps)
+        {
+            ma_decoder_uninit(
+                std::static_pointer_cast<MiniaudioSoundInstance>(ps)->getDecoder()
+            );
+        }
     }
 
     this->playing.clear();

@@ -1,5 +1,6 @@
 #include "kolanut/graphics/Tilemap.h"
 #include "kolanut/graphics/Renderer.h"
+#include "kolanut/filesystem/FilesystemEngine.h"
 #include "kolanut/core/DIContainer.h"
 #include "kolanut/core/Logging.h"
 
@@ -13,12 +14,21 @@ namespace graphics {
 
 bool Tilemap::load(const std::string& dir, const std::string& fileName)
 {
-    this->map.ParseFile(dir + fileName);
+    std::string path = dir + fileName;
+    std::string source;
+
+    if (!di::get<filesystem::FilesystemEngine>()->getFileContent(path, source))
+    {
+        knM_logError("Can't find tilemap file: " << path);
+        return false;
+    }
+
+    this->map.ParseText(source);
 
     if (this->map.HasError())
     {
         knM_logError(
-            "Can't load tilemap from '" << fileName << "'." << std::endl
+            "Can't load tilemap from '" << path << "'." << std::endl
             << "Error code: " << map.GetErrorCode()
             << "Error message: " << map.GetErrorText()
         );

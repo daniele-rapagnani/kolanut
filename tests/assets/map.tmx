@@ -3,7 +3,9 @@
  <editorsettings>
   <export target="map.tmx" format="tmx"/>
  </editorsettings>
- <tileset firstgid="1" source="Forest 16 Colors.tsx"/>
+ <tileset firstgid="1" name="Forest 16 Colors" tilewidth="16" tileheight="16" tilecount="80" columns="8">
+  <image source="DeepForestTileset.png" trans="ff00ff" width="128" height="160"/>
+ </tileset>
  <layer id="1" name="Tile Layer 1" width="200" height="200">
   <data encoding="base64" compression="zlib">
    eJzt2t1qgzAYBmD3C/sDt27Q+7/SGViZC8ZGrTGdzwPfQWliPPheq7FNAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADAtbn9qbutTwQq9N7VR1eHrU8EgH/rpvm9H8utpfdt59Z0X0gtnrp6nlgvM9c6Zq459/js131XD4l6HJkXX6vja3PJfOSuKR9MNdZTp35qe+PbxLy490rk4xh9lg8uLScfOfPisae9rn69jazl94MahZ56bYZ7eUk+cuZ4/qB2oaeG+iZc/8fec9SUj1LHZ39S+ciZt3U+PH+wtprzMbS3NranJh9cWiofoTf7vdhG36+Rj8/mbxa+MsacGy8fLBF6dqjnQq+Vfj5fu+SDqdba3526lnxQo5ryMbTPfMnyv2OmKpmPoXeG+pealcwHXBv5gDT5gDT5gDT5gDT5gDT5gDT5gLS5+QAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADYi286pBfC
