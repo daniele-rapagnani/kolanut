@@ -20,8 +20,17 @@ enum class Engine
 #endif
 };
 
+enum ResolutionFitMode
+{
+    NONE = 0,
+    CONTAIN,
+    COVER,
+    STRETCH
+};
+
 struct Resolution
 {
+    ResolutionFitMode resizeMode = ResolutionFitMode::CONTAIN;
     Sizei screenSize = { 800, 600 };
     Sizei designResolution = { 800, 600 };
     bool fullScreen = false;
@@ -41,6 +50,7 @@ struct Config
 };
 
 Engine engineFromString(const std::string& s);
+ResolutionFitMode resolutionFitModeFromString(const std::string& s);
 std::shared_ptr<Renderer> createRenderer(const Config& conf);
 
 } // namespace graphics

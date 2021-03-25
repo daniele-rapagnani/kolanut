@@ -16,7 +16,7 @@ bool ProgramVK::link()
         return false;
     }
 
-    if (viewportSize.x == 0 || viewportSize.y == 0)
+    if (viewport.size.x == 0 || viewport.size.y == 0)
     {
         return false;
     }
@@ -25,8 +25,7 @@ bool ProgramVK::link()
     p2dConf.fragmentShader = std::static_pointer_cast<ShaderVK>(fragment)->getVKShader();
     p2dConf.vertexShader = std::static_pointer_cast<ShaderVK>(vertex)->getVKShader();
     p2dConf.renderPass = this->device->getRenderPasses().back();
-    p2dConf.viewportWidth = getViewportSize().x;
-    p2dConf.viewportHeight = getViewportSize().y;
+    p2dConf.viewport = getViewport();
 
     this->pipeline = vulkan::make_init<vulkan::Pipeline2D>(this->device, p2dConf);
 

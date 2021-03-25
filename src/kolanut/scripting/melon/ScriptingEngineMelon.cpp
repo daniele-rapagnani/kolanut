@@ -55,6 +55,14 @@ inline bool convert(VM* vm, Kolanut::Config& res, Value* val)
         events::engineFromString
     );
 
+    getInstanceEnumField<graphics::ResolutionFitMode>(
+        vm, 
+        val->pack.obj,
+        "resolutionFitMode",
+        res.graphics.resolution.resizeMode,
+        graphics::resolutionFitModeFromString
+    );
+
     getInstanceField(vm, val->pack.obj, "windowTitle", res.graphics.windowTitle);
     getInstanceField(vm, val->pack.obj, "screenSize", res.graphics.resolution.screenSize);
     getInstanceField(vm, val->pack.obj, "designResolution", res.graphics.resolution.designResolution);

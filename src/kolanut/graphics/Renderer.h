@@ -115,6 +115,7 @@ public:
     virtual Sizei getResolution() const = 0;
     virtual float getPixelsPerPoint() const;
     virtual Sizei getPixelResolution() const = 0;
+    virtual Recti getViewport() const = 0;
 
     virtual Sizei getDesignResolution() const
     { return this->designResolution; }

@@ -232,12 +232,8 @@ void RendererVK::onUpdateWindowSize()
     this->device->recreateSwapchain(this->surface);
     recreateSwapchain();
 
-    VkSurfaceCapabilitiesKHR sc = 
-        getDevice()->getPhysicalDevice()->getSurfaceCapabilities(this->surface)
-    ;
-
-    std::static_pointer_cast<ProgramVK>(this->program)->setViewportSize({ sc.currentExtent.width, sc.currentExtent.height });
-    std::static_pointer_cast<ProgramVK>(this->lineProgram)->setViewportSize({ sc.currentExtent.width, sc.currentExtent.height });
+    std::static_pointer_cast<ProgramVK>(this->program)->setViewport(getViewport());
+    std::static_pointer_cast<ProgramVK>(this->lineProgram)->setViewport(getViewport());
 
     this->program->link();
     this->lineProgram->link();
@@ -565,10 +561,6 @@ std::shared_ptr<Program> RendererVK::createProgram(DrawMode mode)
 
     auto program = std::make_shared<ProgramVK>();
 
-    VkSurfaceCapabilitiesKHR sc = 
-        getDevice()->getPhysicalDevice()->getSurfaceCapabilities(this->surface)
-    ;
-
     vulkan::Pipeline2D::Config pc = {};
 
     if (mode == DrawMode::LINES)
@@ -578,7 +570,7 @@ std::shared_ptr<Program> RendererVK::createProgram(DrawMode mode)
 
     program->setVKPipelineConfig(pc);
     program->setDevice(this->device);
-    program->setViewportSize({ sc.currentExtent.width, sc.currentExtent.height });
+    program->setViewport(getViewport());
     return program;
 }
 

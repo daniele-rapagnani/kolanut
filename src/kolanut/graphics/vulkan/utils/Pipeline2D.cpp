@@ -16,8 +16,8 @@ bool Pipeline2D::init(
 {
     assert(config.fragmentShader);
     assert(config.vertexShader);
-    assert(config.viewportWidth > 0);
-    assert(config.viewportHeight > 0);
+    assert(config.viewport.size.x > 0);
+    assert(config.viewport.size.y > 0);
     
     VkPipelineShaderStageCreateInfo pssci[2] = {};
     pssci[0].sType = pssci[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
@@ -95,14 +95,16 @@ bool Pipeline2D::init(
     pmsci.rasterizationSamples = VK_SAMPLE_COUNT_1_BIT;
 
     VkViewport viewport = {};
-    viewport.width = config.viewportWidth;
-    viewport.height = config.viewportHeight;
+    viewport.width = config.viewport.size.x;
+    viewport.height = config.viewport.size.y;
+    viewport.x = config.viewport.origin.x;
+    viewport.y = config.viewport.origin.y;
     viewport.minDepth = 0.0f;
     viewport.maxDepth = 1.0f;
     
     VkRect2D scissoring = {};
-    scissoring.extent.width = config.viewportWidth;
-    scissoring.extent.height = config.viewportHeight;
+    scissoring.extent.width = config.viewport.size.x;
+    scissoring.extent.height = config.viewport.size.y;
 
     VkPipelineViewportStateCreateInfo pvsci = {};
     pvsci.sType = VK_STRUCTURE_TYPE_PIPELINE_VIEWPORT_STATE_CREATE_INFO;

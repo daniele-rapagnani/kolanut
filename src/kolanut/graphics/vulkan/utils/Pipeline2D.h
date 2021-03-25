@@ -21,8 +21,7 @@ public:
         std::shared_ptr<ShaderModule> vertexShader = {};
         std::shared_ptr<ShaderModule> fragmentShader = {};
         std::shared_ptr<RenderPass> renderPass = {};
-        uint32_t viewportWidth = {};
-        uint32_t viewportHeight = {};
+        Recti viewport = {};
         VkPrimitiveTopology topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
     };
 

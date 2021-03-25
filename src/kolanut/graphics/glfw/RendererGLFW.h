@@ -20,6 +20,7 @@ public:
 
     Sizei getResolution() const override;
     Sizei getPixelResolution() const override;
+    Recti getViewport() const override;
 
     GLFWwindow* getWindow() const
     { return this->window; }
@@ -32,9 +33,12 @@ public:
     bool isUseNoAPI() const
     { return this->noAPI; }
 
+    void updateViewport(Sizei newScreenSize);
+
 private:
     GLFWwindow* window = {};
     bool noAPI = false;
+    Recti viewport = {};
 };
 
 } // namespace graphics

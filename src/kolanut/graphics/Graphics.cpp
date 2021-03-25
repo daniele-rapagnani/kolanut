@@ -23,16 +23,37 @@ std::unordered_map<std::string, Engine> ENGINE_NAMES = {
 #endif
 };
 
+std::unordered_map<std::string, ResolutionFitMode> RESOLUTION_FIT_NAMES = {
+    { "contain", ResolutionFitMode::CONTAIN },
+    { "cover", ResolutionFitMode::COVER },
+    { "stretch", ResolutionFitMode::STRETCH },
+};
+
+template <typename T>
+T enumFromString(
+    const std::string& s, 
+    const std::unordered_map<std::string, T>& map,
+    T defaultVal
+)
+{
+    if (map.find(s) == map.end())
+    {
+        return defaultVal;
+    }
+
+    return map.at(s);
+}
+
 } // namespace
 
 Engine engineFromString(const std::string& s)
 {
-    if (ENGINE_NAMES.find(s) == ENGINE_NAMES.end())
-    {
-        return Engine::NONE;
-    }
+    return enumFromString(s, ENGINE_NAMES, Engine::NONE);
+}
 
-    return ENGINE_NAMES.at(s);
+ResolutionFitMode resolutionFitModeFromString(const std::string& s)
+{
+    return enumFromString(s, RESOLUTION_FIT_NAMES, ResolutionFitMode::NONE);
 }
 
 std::shared_ptr<Renderer> createRenderer(const Config& conf)

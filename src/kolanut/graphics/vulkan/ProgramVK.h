@@ -19,11 +19,11 @@ public:
     void setDevice(std::shared_ptr<vulkan::Device> device)
     { this->device = device; }
 
-    void setViewportSize(const Sizei& size)
-    { this->viewportSize = size; }
+    void setViewport(const Recti& viewport)
+    { this->viewport = viewport; }
 
-    Sizei getViewportSize() const
-    { return this->viewportSize; }
+    const Recti& getViewport() const
+    { return this->viewport; }
 
     const vulkan::Pipeline2D::Config& getVKPipelineConfig() const
     { return this->pipelineConfig; }
@@ -37,7 +37,7 @@ public:
 private:
     vulkan::Pipeline2D::Config pipelineConfig = {};
     std::shared_ptr<vulkan::Pipeline2D> pipeline = {};
-    Sizei viewportSize = {};
+    Recti viewport = {};
 };
 
 } // namespace graphics

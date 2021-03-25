@@ -91,8 +91,8 @@ bool RendererOGL::init(const Config& config)
 
 void RendererOGL::onUpdateWindowSize()
 {
-    Sizei resolution = getPixelResolution();
-    knM_oglCall(glViewport(0, 0, resolution.x, resolution.y));
+    Recti vp = getViewport();
+    knM_oglCall(glViewport(vp.origin.x, vp.origin.y, vp.size.x, vp.size.y));
 }
 
 void RendererOGL::drawSurface(const DrawSurface& req)
