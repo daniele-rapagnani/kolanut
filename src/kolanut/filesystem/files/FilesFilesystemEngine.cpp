@@ -87,6 +87,12 @@ const void* FilesFilesystemEngine::open(const std::string& file, uint32_t mode)
     fhandle->mode = mode;
     fhandle->file = file;
     fhandle->fh = handle;
+
+    if (fhandle->isReadMode() && !fhandle->fh.isFile())
+    {
+        delete fhandle;
+        return nullptr;
+    }
     
     if (fhandle->isWriteMode())
     {

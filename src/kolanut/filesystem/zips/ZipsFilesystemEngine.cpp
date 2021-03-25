@@ -117,6 +117,11 @@ bool ZipsFilesystemEngine::loadZip(const std::string& path)
 
 bool ZipsFilesystemEngine::isFile(const std::string& path)
 {
+    if (FilesFilesystemEngine::isFile(path))
+    {
+        return true;
+    }
+
     const ZipEntry* e = getEntry(path);
 
     if (e)
@@ -124,24 +129,26 @@ bool ZipsFilesystemEngine::isFile(const std::string& path)
         return !e->directory;
     }
 
-    return FilesFilesystemEngine::isFile(path);
+    return false;
 }
 
 size_t ZipsFilesystemEngine::getFileSize(const void* handle)
 {
-    const ZipHandle* zh = reinterpret_cast<const ZipHandle*>(handle);
+    size_t size = FilesFilesystemEngine::getFileSize(handle);
 
-    if (!zh)
+    if (size > 0)
     {
-        return 0;
+        return size;
     }
 
-    if (zh->entry)
+    const ZipHandle* zh = reinterpret_cast<const ZipHandle*>(handle);
+
+    if (zh && zh->entry)
     {
         return zh->entry->size;
     }
 
-    return FilesFilesystemEngine::getFileSize(handle);
+    return 0;
 }
 
 const ZipsFilesystemEngine::ZipEntry* ZipsFilesystemEngine::getEntry(const std::string& path)
@@ -160,26 +167,26 @@ const ZipsFilesystemEngine::ZipEntry* ZipsFilesystemEngine::getEntry(const std::
 
 const void* ZipsFilesystemEngine::open(const std::string& file, uint32_t mode)
 {
-    const ZipEntry* entry = getEntry(file);
-
     ZipHandle* zh = new ZipHandle();
+
+    auto handle = 
+        reinterpret_cast<const FilesFilesystemEngine::Handle*>(
+            FilesFilesystemEngine::open(file, mode)
+        )
+    ;
+
+    if (handle)
+    {
+        *zh = *handle;
+        return zh;
+    }
+
+    const ZipEntry* entry = getEntry(file);
 
     if (!entry || entry->directory)
     {
-        auto handle = 
-            reinterpret_cast<const FilesFilesystemEngine::Handle*>(
-                FilesFilesystemEngine::open(file, mode)
-            )
-        ;
-
-        if (!handle)
-        {
-            delete zh;
-            return handle;
-        }
-
-        *zh = *handle;
-        return zh;
+        delete zh;
+        return nullptr;
     }
 
     const std::string& archPath = entry->parentZipPath;
@@ -224,38 +231,38 @@ const void* ZipsFilesystemEngine::open(const std::string& file, uint32_t mode)
 
 size_t ZipsFilesystemEngine::read(const void* handle, char* buffer, size_t size)
 {
+    size_t read = FilesFilesystemEngine::read(handle, buffer, size);
+
+    if (read > 0)
+    {
+        return read;
+    }
+
     const ZipHandle* zh = reinterpret_cast<const ZipHandle*>(handle);
 
-    if (!zh)
+    if (!zh || !zh->entry)
     {
         return 0;
     }
 
-    if (!zh->entry)
-    {
-        return FilesFilesystemEngine::read(handle, buffer, size);
-    }
+    read = mz_zip_reader_entry_read(zh->reader, buffer, size);
 
-    size_t bytesRead = mz_zip_reader_entry_read(zh->reader, buffer, size);
-
-    if (bytesRead <= 0)
+    if (read <= 0)
     {
         return 0;
     }
 
-    return bytesRead;
+    return read;
 }
 
 void ZipsFilesystemEngine::close(const void* handle)
 {
-    const ZipHandle* h = reinterpret_cast<const ZipHandle*>(handle);
-
-    if (!h)
+    if (!handle)
     {
         return;
     }
 
-    delete h;
+    delete reinterpret_cast<const ZipHandle*>(handle);
 }
 
 void ZipsFilesystemEngine::ZipHandle::operator=(const FilesFilesystemEngine::Handle& rhs)
