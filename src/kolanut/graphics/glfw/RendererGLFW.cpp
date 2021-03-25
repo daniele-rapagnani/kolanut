@@ -16,7 +16,7 @@ void onWindowResize(GLFWwindow* window, int width, int height)
         << r->getPixelResolution().x << ", " << r->getPixelResolution().y
     );
 
-    r->updateViewport(r->getPixelResolution());
+    r->updateViewport();
     r->onUpdateWindowSize();
 }
 
@@ -58,6 +58,11 @@ RendererGLFW::~RendererGLFW()
         
         glfwTerminate();
     }
+}
+
+void RendererGLFW::updateViewport()
+{
+    updateViewport(getPixelResolution());
 }
 
 void RendererGLFW::updateViewport(Sizei newScreenSize)
@@ -128,8 +133,6 @@ bool RendererGLFW::doInit(const Config& config)
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
     }
 
-    updateViewport(screenSize);
-
     this->window = glfwCreateWindow(
         screenSize.x,
         screenSize.y,
@@ -163,7 +166,6 @@ bool RendererGLFW::doInit(const Config& config)
     }
 
     glfwSetWindowSizeCallback(getWindow(), onWindowResize);
-    glfwSetWindowPosCallback(getWindow(), onWindowResize);
 
     return true;
 }

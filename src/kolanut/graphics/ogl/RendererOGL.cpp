@@ -91,6 +91,8 @@ bool RendererOGL::init(const Config& config)
 
 void RendererOGL::onUpdateWindowSize()
 {
+    RendererGLFW::onUpdateWindowSize();
+    
     Recti vp = getViewport();
     knM_oglCall(glViewport(vp.origin.x, vp.origin.y, vp.size.x, vp.size.y));
 }
@@ -155,6 +157,13 @@ void RendererOGL::drawSurface(const DrawSurface& req)
 void RendererOGL::doClear()
 {
     knM_oglCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
+    // I reset the viewport here every frame to address strange
+    // behaviours that plague OpenGL on macos. Fortunately resetting
+    // the viewport should be fairly cheap.
+    // (one example: https://github.com/glfw/glfw/issues/80)
+
+    onUpdateWindowSize();
 
 #ifndef __EMSCRIPTEN__
     knM_oglCall(glBeginQuery(GL_TIME_ELAPSED_EXT, this->perfQuery));

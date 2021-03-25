@@ -103,6 +103,8 @@ bool Pipeline2D::init(
     viewport.maxDepth = 1.0f;
     
     VkRect2D scissoring = {};
+    scissoring.offset.x = config.viewport.origin.x;
+    scissoring.offset.y = config.viewport.origin.y;
     scissoring.extent.width = config.viewport.size.x;
     scissoring.extent.height = config.viewport.size.y;
 

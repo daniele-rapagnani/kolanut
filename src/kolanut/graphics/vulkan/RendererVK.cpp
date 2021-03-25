@@ -228,6 +228,8 @@ void RendererVK::onUpdateWindowSize()
         return;
     }
 
+    RendererGLFW::onUpdateWindowSize();
+
     vkDeviceWaitIdle(this->device->getVkHandle());
     this->device->recreateSwapchain(this->surface);
     recreateSwapchain();
@@ -241,7 +243,15 @@ void RendererVK::onUpdateWindowSize()
 
 bool RendererVK::recreateSwapchain()
 {
+    updateViewport();
+
+    for (auto ctx : this->tracyContextes)
+    {
+        TracyVkDestroy(ctx);
+    }
+
     this->tracyContextes.clear();
+
     this->imageReadySemaphores.clear();
     this->renderCompleteSemaphores.clear();
     this->frameCompletedFence.clear();
@@ -521,18 +531,6 @@ void RendererVK::doFlip()
 
     auto stats = di::get<stats::StatsEngine>();
     stats->addSample(stats::StatsEngine::Measure::GPU_TIME, elapsedMs);
-}
-
-Sizei RendererVK::getPixelResolution() const
-{
-    assert(this->physicalDevice);
-    assert(this->device);
-
-    auto sc =
-        this->physicalDevice->getSurfaceCapabilities(this->device->getSwapchain()->getSurface())
-    ;
-
-    return { sc.currentExtent.width, sc.currentExtent.height };
 }
 
 std::shared_ptr<Texture> RendererVK::createTexture()

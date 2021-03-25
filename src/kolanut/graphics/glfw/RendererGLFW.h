@@ -25,7 +25,10 @@ public:
     GLFWwindow* getWindow() const
     { return this->window; }
 
-    virtual void onUpdateWindowSize() { };
+    virtual void onUpdateWindowSize()
+    { 
+        updateViewport();
+    };
 
     void setUseNoAPI(bool val)
     { this->noAPI = val; }
@@ -34,6 +37,7 @@ public:
     { return this->noAPI; }
 
     void updateViewport(Sizei newScreenSize);
+    void updateViewport();
 
 private:
     GLFWwindow* window = {};

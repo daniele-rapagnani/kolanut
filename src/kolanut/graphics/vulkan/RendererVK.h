@@ -56,7 +56,6 @@ public:
     void doClear() override;
     void doFlip() override;
 
-    Sizei getPixelResolution() const override;
     void onUpdateWindowSize() override;
 
     std::shared_ptr<vulkan::Device> getDevice() const
