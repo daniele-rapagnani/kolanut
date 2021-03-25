@@ -350,8 +350,8 @@ void RendererVK::drawSurface(const DrawSurface& req)
     ;
 
     ViewUniform vu = {};
-    vu.screenSize.x = getDesignResolution().x * 0.5f;
-    vu.screenSize.y = getDesignResolution().y * 0.5f;
+    vu.screenSize.x = getDesignResolution().x;
+    vu.screenSize.y = getDesignResolution().y;
     vu.camera = req.camera;
     vu.transform = req.transform;
 

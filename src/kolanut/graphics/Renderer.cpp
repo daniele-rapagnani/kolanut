@@ -289,18 +289,10 @@ void Renderer::enqueueDraw(DrawSurface ds)
 
 void Renderer::updateCameraTransform() const
 {
-    float resScale =
-         static_cast<float>(getConfig().resolution.screenSize.x) 
-         / static_cast<float>(getDesignResolution().x)
-    ;
-
     this->cameraTransform = glm::translate(
         glm::scale(
             glm::translate(
-                glm::scale(
-                    Transform3D { 1.0f },
-                    glm::vec3 { 1.0f, 1.0f, 1.0f }
-                ),
+                Transform3D { 1.0f },
                 glm::vec3 { getCameraOrigin().x, getCameraOrigin().y, 0.0f }
             ),
             glm::vec3 { getCameraZoom(), getCameraZoom(), 1.0f }
@@ -308,7 +300,11 @@ void Renderer::updateCameraTransform() const
         glm::vec3 { -getCameraPosition().x, -getCameraPosition().y, 1.0f }
     );
 
-    Rectf view = { { 0, 0 }, { getDesignResolution().x * 2.0f, getDesignResolution().y * 2.0f } };
+    Rectf view = { 
+        { 0, 0 }, 
+        getDesignResolution() 
+    };
+    
     view.getBB(glm::inverse(this->cameraTransform), this->cameraBB);
 }
 

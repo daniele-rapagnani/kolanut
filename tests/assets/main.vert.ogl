@@ -14,8 +14,8 @@ void main() {
     vec4 pos = mv * vec4(a_position.xy, 0.0, 1.0);
 
     pos.xy /= screenSize;
-    pos.xy -= vec2(1.0, 1.0);
-    pos.y *= -1.0;
+    pos.xy -= vec2(0.5, 0.5);
+    pos.xy *= vec2(2.0, -2.0);
 
     gl_Position.xy = pos.xy;
     gl_Position.zw = vec2(0.0, 1.0);

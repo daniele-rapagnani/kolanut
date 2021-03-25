@@ -11,6 +11,8 @@ RendererGLFW::~RendererGLFW()
     {
         glfwDestroyWindow(this->window);
         this->window = nullptr;
+        
+        glfwTerminate();
     }
 }
 

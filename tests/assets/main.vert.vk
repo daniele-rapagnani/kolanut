@@ -18,8 +18,10 @@ layout(location = 1) out vec4 v_vertColor;
 void main() {
     mat4 mv = camera * transform;
     vec4 pos = mv * vec4(a_position.xy, 0.0, 1.0);
+
     pos.xy /= screenSize;
-    pos.xy -= vec2(1.0, 1.0);
+    pos.xy -= vec2(0.5, 0.5);
+    pos.xy *= 2.0;
 
     gl_Position = vec4(pos.xy, 0.0, 1.0);
     v_texCoord = a_texCoord;
