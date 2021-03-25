@@ -17,7 +17,7 @@ enum class Engine
 struct Config
 {
     Engine scripting = Engine::MELON;
-    std::string scriptsDir = "assets/scripts";
+    std::string scriptsDir = "scripts";
     std::string bootScript = "boot";
     std::string configScript = "config";
 };

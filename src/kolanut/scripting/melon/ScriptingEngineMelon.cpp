@@ -74,6 +74,10 @@ inline bool convert(VM* vm, Kolanut::Config& res, Value* val)
     getInstanceField(vm, val->pack.obj, "jobQueueInitialSize", res.graphics.jobQueueInitialSize);
     getInstanceField(vm, val->pack.obj, "forceGPU", res.graphics.forceGPU);
     getInstanceField(vm, val->pack.obj, "enableStats", res.enableStats);
+    getInstanceField(vm, val->pack.obj, "mainVertexShaderPath", res.graphics.mainVertexShaderPath);
+    getInstanceField(vm, val->pack.obj, "mainFragmentShaderPath", res.graphics.mainFragmentShaderPath);
+    getInstanceField(vm, val->pack.obj, "lineVertexShaderPath", res.graphics.lineVertexShaderPath);
+    getInstanceField(vm, val->pack.obj, "lineFragmentShaderPath", res.graphics.lineFragmentShaderPath);
 
     return true;
 }

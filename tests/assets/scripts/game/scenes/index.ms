@@ -1,3 +1,0 @@
-return {
-    Game = import("./Game")
-};

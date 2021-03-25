@@ -31,3 +31,9 @@
 [submodule "src/kolanut/libs/minizip-ng"]
 	path = src/kolanut/libs/minizip-ng
 	url = https://github.com/zlib-ng/minizip-ng
+[submodule "tests/kolanut-game"]
+	path = tests/kolanut-game
+	url = git@github.com:daniele-rapagnani/kolanut-game.git
+[submodule "src/kolanut/libs/inipp"]
+	path = src/kolanut/libs/inipp
+	url = git@github.com:mcmtroffaes/inipp.git

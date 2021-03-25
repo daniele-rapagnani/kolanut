@@ -234,7 +234,11 @@ void Kolanut::run()
 
     {
         ZoneScopedN("OnLoad")
-        getScriptingEngine()->start();
+        if (!getScriptingEngine()->start())
+        {
+            return;
+        }
+
         getScriptingEngine()->onLoad();
     }
 

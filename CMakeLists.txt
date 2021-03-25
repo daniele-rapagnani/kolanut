@@ -254,6 +254,7 @@ set(
     src/kolanut/libs/minizip-ng/
     src/kolanut/libs/tracy/
     src/kolanut/libs/miniaudio/
+    src/kolanut/libs/inipp/
 )
 
 if (_ENABLE_VULKAN)

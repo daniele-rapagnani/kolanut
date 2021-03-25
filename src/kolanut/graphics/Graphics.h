@@ -47,6 +47,11 @@ struct Config
     size_t maxGeometryBufferVertices = 20000 * 6;
     size_t jobQueueInitialSize = 5000;
     std::string forceGPU = {};
+
+    std::string mainVertexShaderPath = "main.vert";
+    std::string mainFragmentShaderPath = "main.vert";
+    std::string lineVertexShaderPath = "main.vert";
+    std::string lineFragmentShaderPath = "solid.vert";
 };
 
 Engine engineFromString(const std::string& s);

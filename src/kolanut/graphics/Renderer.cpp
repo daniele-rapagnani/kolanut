@@ -348,8 +348,8 @@ void Renderer::flip()
 
 std::shared_ptr<Program> Renderer::createMainProgram()
 {
-    auto vertexShader = loadShader("assets/main.vert", Shader::Type::VERTEX);
-    auto fragmentShader = loadShader("assets/main.frag", Shader::Type::FRAGMENT);
+    auto vertexShader = loadShader(getConfig().mainVertexShaderPath, Shader::Type::VERTEX);
+    auto fragmentShader = loadShader(getConfig().mainFragmentShaderPath, Shader::Type::FRAGMENT);
 
     assert(vertexShader);
     assert(fragmentShader);
@@ -363,8 +363,8 @@ std::shared_ptr<Program> Renderer::createMainProgram()
 
 std::shared_ptr<Program> Renderer::createLineProgram()
 {
-    auto vertexShader = loadShader("assets/main.vert", Shader::Type::VERTEX);
-    auto fragmentShader = loadShader("assets/solid.frag", Shader::Type::FRAGMENT);
+    auto vertexShader = loadShader(getConfig().lineVertexShaderPath, Shader::Type::VERTEX);
+    auto fragmentShader = loadShader(getConfig().lineFragmentShaderPath, Shader::Type::FRAGMENT);
 
     assert(vertexShader);
     assert(fragmentShader);
