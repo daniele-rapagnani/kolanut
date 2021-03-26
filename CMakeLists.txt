@@ -34,6 +34,8 @@ set(BUILD_SHARED_LIBS OFF)
 option(BUILD_STATIC_LIBS ON)
 set(BUILD_STATIC_LIBS ON)
 
+add_compile_options(-Wno-deprecated-declarations)
+
 if (EMSCRIPTEN)
     set(ZLIB_INCLUDE_DIR $ENV{EMSDK}/upstream/emscripten/cache/include)
     set(ZLIB_LIBRARY $ENV{EMSDK}/upstream/emscripten/cache/wasm/libz.a)
@@ -58,10 +60,6 @@ if (EMSCRIPTEN)
 else()
     option(BUILD_TINYXML2 "" ON)
     set(BUILD_TINYXML2 ON)
-endif()
-
-if (EMSCRIPTEN)
-    add_compile_options(-Wno-deprecated-declarations)
 endif()
 
 add_subdirectory(src/kolanut/libs/tmxparser)
