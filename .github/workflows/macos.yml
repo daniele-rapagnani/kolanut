@@ -31,6 +31,11 @@ jobs:
       uses: Symbitic/install-cmake@v0.1.0
       with:
         cmake: "3.14.4"
+
+    - name: "Updates shaderc dependencies"
+      run: |
+        cd "${{ github.workspace }}/src/kolanut/libs/shaderc"
+        ./utils/git-sync-deps
     
     - name: Run CMake
       run: mkdir -p "${{ github.workspace }}/build" && cd "${{ github.workspace }}/build" && cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_VULKAN=On ../
