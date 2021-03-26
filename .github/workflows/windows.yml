@@ -69,7 +69,7 @@ jobs:
         cd "${{ github.workspace }}"
         mkdir build
         cd build
-        cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_VULKAN -G "MSYS Makefiles" ../
+        cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_VULKAN=On -G "MSYS Makefiles" ../
     
     - name: Run Make
       run: |
