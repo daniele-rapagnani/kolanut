@@ -15,6 +15,12 @@ jobs:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
 
     steps:
+    - name: Install Vulkan SDK
+      run: |
+        curl -L https://sdk.lunarg.com/sdk/download/latest/mac/vulkan-sdk.dmg > /tmp/vulkan-sdk.dmg
+        hdiutil attach /tmp/vulkan-sdk.dmg
+        ls /Volumes/
+
     - uses: actions/checkout@v2
       with:
         ssh-key: "${{ secrets.SSH_KEY }}"
