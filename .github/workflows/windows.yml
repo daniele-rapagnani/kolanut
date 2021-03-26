@@ -13,6 +13,7 @@ jobs:
 
     env:
       ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      VULKAN_SDK: "C:\\VulkanSDK\\1.2.170.0"
     
     strategy:
       fail-fast: false
