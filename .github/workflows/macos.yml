@@ -19,7 +19,8 @@ jobs:
       run: |
         curl -L https://sdk.lunarg.com/sdk/download/latest/mac/vulkan-sdk.dmg > /tmp/vulkan-sdk.dmg
         hdiutil attach /tmp/vulkan-sdk.dmg
-        ls /Volumes/
+        cd /Volumes/vulkansdk-*
+        sudo ./install_vulkan.py
 
     - uses: actions/checkout@v2
       with:
@@ -32,7 +33,7 @@ jobs:
         cmake: "3.14.4"
     
     - name: Run CMake
-      run: mkdir -p "${{ github.workspace }}/build" && cd "${{ github.workspace }}/build" && cmake -DCMAKE_BUILD_TYPE=Debug ../
+      run: mkdir -p "${{ github.workspace }}/build" && cd "${{ github.workspace }}/build" && cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_VULKAN=On ../
     
     - name: Run Make
       run: cd "${{ github.workspace }}/build" && make
