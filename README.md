@@ -27,7 +27,7 @@ Kolanut was mainly made as a toy project to test the [melon](https://github.com/
 
 With time I found Kolanut to be really fun to work with and I decided to promote it to a project of its own.
 
-Kolanut's philosophy is to expose only a small set of low-level functions to melon delegating it all the rest of the work. While this decision was mainly made as a result of the need to roat test melon, it made the engine very fun to work with as it can scale with your own need. You can just draw some simple sprites on the screen or use a pre-made engine such as [kolanut-ecs](https://github.com/daniele-rapagnani/kolanut-ecs) to make a full-fledged game.
+Kolanut's philosophy is to expose only a small set of low-level functions to melon, delegating it all the rest of the work. While this decision was mainly made as a result of the need to road test melon, it made the engine very fun to work with as it can scale with your own needs. You can just draw some simple sprites on the screen or use a pre-made engine such as [kolanut-ecs](https://github.com/daniele-rapagnani/kolanut-ecs) to make a full-fledged game.
 
 ## Building
 
