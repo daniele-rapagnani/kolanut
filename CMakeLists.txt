@@ -21,6 +21,7 @@ endif(ENABLE_VULKAN)
 if (APPLE)
     set(CMAKE_MACOSX_RPATH 0)
     set(ENABLE_CUSTOM_COMPILER_FLAGS Off)
+    add_compile_options(-mmacosx-version-min=10.12)
 endif (APPLE)
 
 set(CMAKE_C_FLAGS_RELEASE "-O3 -DNDEBUG")
