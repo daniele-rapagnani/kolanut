@@ -12,7 +12,7 @@
  * @module
  * 
  * This module exposes basic APIs that can be used to
- * interact with he Kolanut engine.
+ * interact with the Kolanut engine.
  */
 
 extern "C" {

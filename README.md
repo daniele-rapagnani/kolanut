@@ -9,6 +9,7 @@
 * [Configuration](#configuration)
 * [Data packs](#data-packs)
 * [API Documentation](#api-documentation)
+* [Examples](#examples)
 
 ## What's this?
 
@@ -261,3 +262,8 @@ If you know you are not going to use it you can disable it in the project's [`bo
 ## API Documentation
 
 You can view the latest API documentation [here](https://github.com/daniele-rapagnani/kolanut/tree/master/src/index.md).
+
+## Examples
+
+To view a non trivial example you can check out [this repository](https://github.com/daniele-rapagnani/kolanut-game/)
+which makes use of [kolanut-ecs](https://github.com/daniele-rapagnani/kolanut-ecs/) build a small platformer game.

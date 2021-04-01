@@ -38,7 +38,7 @@ jobs:
         ./utils/git-sync-deps
     
     - name: Run CMake
-      run: mkdir -p "${{ github.workspace }}/build" && cd "${{ github.workspace }}/build" && cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_VULKAN=On ../
+      run: mkdir -p "${{ github.workspace }}/build" && cd "${{ github.workspace }}/build" && cmake -DCMAKE_BUILD_TYPE=Debug -DENABLE_VULKAN=Off ../
     
     - name: Run Make
       run: cd "${{ github.workspace }}/build" && make
