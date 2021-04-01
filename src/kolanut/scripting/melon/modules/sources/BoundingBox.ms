@@ -1,4 +1,22 @@
+/***
+ * @module
+ * 
+ * This class represents a 2D axis aligned bounding box.
+ */
+
 let BoundingBox = {
+
+    /***
+     * Creates a new BoundingBox object
+     * 
+     * @arg left The min x of this AABB
+     * @arg top The min y of this AABB
+     * @arg right The max x of this AABB
+     * @arg bottom The max y of this AABB
+     *
+     * @returns A new BoundingBox object
+     */
+
     create = func bbCreate |left, top, right, bottom| => {
         return { 
             left = number.fromNumber(left ?? 0),
@@ -7,6 +25,15 @@ let BoundingBox = {
             bottom = number.fromNumber(bottom ?? 0)
         } @ BoundingBox;
     },
+
+    /***
+     * Creates a new BoundingBox given a position and a size
+     * 
+     * @arg position A `Vector2` with the AABB position
+     * @arg size A `Vector2` holding the AABB's size
+     *
+     * @returns A new BoundingBox object
+     */
     
     createFromPos = func bbCreateFromPos |position, size| => {
         return BoundingBox.create(
@@ -17,9 +44,23 @@ let BoundingBox = {
         );
     },
 
+    /***
+     * Creates a new BoundingBox from a given `Rect`.
+     * 
+     * @arg rect A `Rect` holding the coordinates of this AABB.
+     *
+     * @returns A new BoundingBox object
+     */
+
     createFromRect = func bbCreateFromRect |rect| => {
         return BoundingBox.createFromPos(rect.origin, rect.size);
     },
+
+    /***
+     * Gets the size of this AABB.
+     *
+     * @returns A `Vector2` holding the size of this AABB
+     */
 
     getSize = -> {
         return Vector2.create(
@@ -28,9 +69,23 @@ let BoundingBox = {
         );
     },
 
+    /***
+     * Gets the origin of this AABB.
+     *
+     * @returns A `Vector2` holding the origin of this AABB
+     */
+
     getOrigin = -> {
         return Vector2.create(this.left, this.top);
     },
+
+    /***
+     * Checks whether this AABB overlaps another.
+     *
+     * @arg bb The other AABB that may overlap this.
+     *
+     * @returns `true` if they overlap, `false` otherwise
+     */
 
     overlaps = |bb| -> {
         let overlapH = (this.left < bb.right && this.right > bb.left);
@@ -39,6 +94,14 @@ let BoundingBox = {
         return overlapH && overlapV;
     },
 
+    /***
+     * Checks whether this AABB contains another.
+     *
+     * @arg bb The AABB that may be contained by this one.
+     *
+     * @returns `true` if this ABBB contains *bb*, `false` otherwise
+     */
+
     contains = |bb| -> {
         return bb.left >= this.left
             && bb.right <= this.right
@@ -46,6 +109,13 @@ let BoundingBox = {
             && bb.bottom <= this.bottom
         ;
     },
+
+    /***
+     * If the rhs object is another BoundingBox the result 
+     * will be the union of the two AABBs.
+     * If the rhs object is a Vector2 the result will be 
+     * a new AABB translated by that vector.
+     */
 
     [object.symbols.sumOperator] = |other| -> {
         if (types.isObject(other)) {
@@ -87,6 +157,13 @@ let BoundingBox = {
         return false;
     },
 
+    /***
+     * If the rhs object is a `Transform3D` then the result will be
+     * the resulting transformed AABB.
+     * If the rhs value it will be multiplied to the size of the lhs AABB
+     * and a new AABB will be returned.
+     */
+
     [object.symbols.mulOperator] = func bbMultiply |other| -> {
         if (types.isObject(other) && (@other).create == Kolanut.Transform3D.create) {
             let res = BoundingBox.create();
@@ -118,9 +195,14 @@ let BoundingBox = {
             this->getSize() * other
         );
     },
+
+    /***
+     * Returns the area of this AABB
+     */
     [object.symbols.sizeOperator] = -> {
         return this->getSize().x * this->getSize().y;
     },
+
     [object.symbols.compareOperator] = |other| -> {
         if (!types.isObject(other))
         {

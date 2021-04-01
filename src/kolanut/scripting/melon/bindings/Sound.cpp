@@ -9,11 +9,26 @@
 
 #include <cassert>
 
+/***
+ * @module
+ * 
+ * This class represents a sound sample.
+ */
+
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Play this sound.
+ * 
+ * @arg ?gain The gain to use to play the sound, defaults to 1.0
+ * @arg ?pan The pan to use to play the sound: 0.0 is dead center, -1.0 left and 1.0 right
+ * 
+ * @returns An instance of `SoundInstance` that can be used to interact with the played sound.
+ */
 
 static TByte play(VM* vm)
 {

@@ -13,11 +13,23 @@
 
 #include <cassert>
 
+/***
+ * @module
+ * 
+ * This class represents a Tiled tilemap
+ */
+
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Creates a new `Tilemap` instance
+ *
+ * @returns A new `Tilemap` object
+ */
 
 static TByte create(VM* vm)
 {
@@ -33,6 +45,15 @@ static TByte create(VM* vm)
 
     return 1;
 }
+
+/***
+ * Loads a tilemap from file into this instance.
+ * 
+ * @arg assetDir The directory in which the tilemap is located
+ * @arg mapFile The filename of the tilemap to load
+ * 
+ * @returns `true` on success, `false` otherwise
+ */
 
 static TByte load(VM* vm)
 {
@@ -65,6 +86,15 @@ static TByte load(VM* vm)
     return 1;
 }
 
+/***
+ * Instantiate a specific layer.
+ * Only instantiated layers will be drawn when this tilemap is drawn.
+ * 
+ * @arg layerNum The number of the layer to instantiate
+ * @arg position A `Vector2` with the position where the layer should be istantiated
+ * @arg ?scale The scale at which the layer should be instantiated
+ */
+
 static TByte instantiateLayer(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -95,6 +125,14 @@ static TByte instantiateLayer(VM* vm)
     return 0;
 }
 
+/***
+ * Instantiate all layers.
+ * Only instantiated layers will be drawn when this tilemap is drawn.
+ * 
+ * @arg position A `Vector2` with the position where the layers should be istantiated
+ * @arg ?scale The scale at which the layers should be instantiated
+ */
+
 static TByte instantiate(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -120,6 +158,11 @@ static TByte instantiate(VM* vm)
     return 0;
 }
 
+/***
+ * Draw all instantiated layers at their respective positions
+ * and scales
+ */
+
 static TByte draw(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -133,6 +176,12 @@ static TByte draw(VM* vm)
     return 0;
 }
 
+/***
+ * Gets the number of layers in this tilemap.
+ * 
+ * @returns The number of layers in this tilemap.
+ */
+
 static TByte getLayersCount(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -143,6 +192,28 @@ static TByte getLayersCount(VM* vm)
 
     return ffi::push(vm, tm->getLayersCount());
 }
+
+/***
+ * Gets an object in this tilemap.
+ * 
+ * The resulting object will be an object with the following structure:
+ * ```
+ * {
+ *  name: ...
+ *  type: ...
+ *  visible: ...
+ *  x: ...
+ *  y: ...
+ *  w: ...
+ *  h: ...
+ * }
+ * ```
+ * 
+ * @arg group The group of which this object is part of
+ * @arg name The name of the object you are looking for
+ * 
+ * @returns An object or `null`
+ */
 
 static TByte getObjectByName(VM* vm)
 {
@@ -160,6 +231,16 @@ static TByte getObjectByName(VM* vm)
     ));
 }
 
+/***
+ * Gets an objects in this tilemap by type.
+ * See `getObjectByName` for the result's structure.
+ * 
+ * @arg group The parent group of the objects you're looking fore
+ * @arg type The type of the objects you are looking for
+ * 
+ * @returns An array of objects
+ */
+
 static TByte getObjectsByType(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -175,6 +256,25 @@ static TByte getObjectsByType(VM* vm)
         melM_strDataFromObj(type->pack.obj)
     ));
 }
+
+/***
+ * Gets a tile by position.
+ * 
+ * If a tile is found an object with the following structure is returned:
+ * ```
+ * {
+ *  gid: ...
+ *  id: ...
+ *  position: ...
+ *  rect: ...
+ * }
+ * ```
+ * 
+ * @arg layer The layer on which to check for tiles at the specific position
+ * @arg pos A `Vector2` with the position where you want to check for tiles
+ * 
+ * @returns A an object representing the tile or `null` if no tile is present
+ */
 
 static TByte getTileAt(VM* vm)
 {

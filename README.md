@@ -7,6 +7,8 @@
 * [Running](#running)
 * [Boot script](#boot-script)
 * [Configuration](#configuration)
+* [Data packs](#data-packs)
+* [API Documentation](#api-documentation)
 
 ## What's this?
 
@@ -233,3 +235,29 @@ Supported values are:
 | mainFragmentShaderPath | The path to the main fragment shader | a string | `"main.frag"` |
 | lineVertexShaderPath | The path to the vertex shader used to draw vector polygons | a string | `"main.vert"` |
 | lineFragmentShaderPath | The path to the fragment shader used to draw vector polygons | a string | `"solid.frag"` |
+
+## Data packs
+
+You can distribute your game's assets in only one file (plus a `boostrap.ini` if you have one).
+To do this you can simply zip all your game's content and rename the resulting 
+`.zip` archive in `.nut`.
+
+You are not limited to a single `.nut` archive but any such archive found 
+in the filesystem root will be loaded transparently. If a file is contained in more
+than one archive the one from the first loaded archive will be used.
+
+Data packs can be used to emulate static libraries, for example you can export a single
+archive for your game's engine and another one for the game's assets, sharing the engine
+among different projects or simply redistributing it for others to use.
+
+You can also override the content of any archive by creating a file with the same path as
+the one in the archive. If an actual file exists for a requested path it will always win on
+any `.nut` data pack. This can be used to monkey patch some files or simply test different assets
+or make mods.
+
+The data packs filesystem adds a little bit of overhead when opening/closing files.
+If you know you are not going to use it you can disable it in the project's [`bootstrap.ini`](#configuration).
+
+## API Documentation
+
+You can view the latest API documentation [here](https://github.com/daniele-rapagnani/kolanut/tree/master/src/index.md).

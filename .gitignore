@@ -2,5 +2,6 @@
 build/*
 build-*/
 callgrind.out.*
+node_modules/
 /benchmarks/benchmark_*.p
 /benchmarks/benchmark_*.png

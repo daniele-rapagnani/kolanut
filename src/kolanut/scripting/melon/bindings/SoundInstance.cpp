@@ -10,11 +10,24 @@
 
 #include <cassert>
 
+/***
+ * @module
+ * 
+ * This class represents a sound that's playing or has been played.
+ * It can be used to interact with a sound while it's playing.
+ */
+
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Gets the current gain
+ * 
+ * @returns the current gain
+ */
 
 static TByte getGain(VM* vm)
 {
@@ -28,6 +41,12 @@ static TByte getGain(VM* vm)
     return 1;
 }
 
+/***
+ * Gets the current pan
+ * 
+ * @returns the current pan: 0.0 is center, -1.0 is left, 1.0 is right
+ */
+
 static TByte getPan(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -38,6 +57,12 @@ static TByte getPan(VM* vm)
     ffi::push(vm, si->getPan());
     return 1;
 }
+
+/***
+ * Sets the current gain
+ * 
+ * @arg gain The gain value, 1.0 is the original sample's volume
+ */
 
 static TByte setGain(VM* vm)
 {
@@ -54,6 +79,12 @@ static TByte setGain(VM* vm)
     si->setGain(gain);
     return 0;
 }
+
+/***
+ * Sets the current pan
+ * 
+ * @arg pan The pan value, see `getPan`
+ */
 
 static TByte setPan(VM* vm)
 {
@@ -72,6 +103,12 @@ static TByte setPan(VM* vm)
     return 0;
 }
 
+/***
+ * Checks if this sound is still playing
+ * 
+ * @returns `true` if it's playing `false` otherwise
+ */
+
 static TByte isPlaying(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -84,6 +121,13 @@ static TByte isPlaying(VM* vm)
     return 1;
 }
 
+/***
+ * Checks if this sound is paused.
+ * If a sound has been paused it is still playing as it can be resumed.
+ * 
+ * @returns `true` if it's paused `false` otherwise
+ */
+
 static TByte isPaused(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -95,6 +139,12 @@ static TByte isPaused(VM* vm)
     
     return 1;
 }
+
+/***
+ * Pause or resume this sound
+ * 
+ * @arg paused `true` for pausing, `false` for resuming
+ */
 
 static TByte setPaused(VM* vm)
 {
@@ -113,6 +163,12 @@ static TByte setPaused(VM* vm)
     return 0;
 }
 
+/***
+ * Checks if this sound's looping is enabled.
+ * 
+ * @returns `true` if it's looping `false` otherwise
+ */
+
 static TByte isLooping(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -124,6 +180,12 @@ static TByte isLooping(VM* vm)
     
     return 1;
 }
+
+/***
+ * Enable/disables looping for this sound
+ * 
+ * @arg paused `true` for looping, `false` otherwise
+ */
 
 static TByte setLooping(VM* vm)
 {
@@ -142,6 +204,11 @@ static TByte setLooping(VM* vm)
     return 0;
 }
 
+/***
+ * Stop the sound. Once stopped the sound's instance will be released
+ * and you will not be able to play this sound anymore.
+ */
+
 static TByte stop(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -154,6 +221,10 @@ static TByte stop(VM* vm)
     
     return 0;
 }
+
+/***
+ * Restarts playing this sound from the beginning
+ */
 
 static TByte restart(VM* vm)
 {

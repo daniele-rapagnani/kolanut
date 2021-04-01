@@ -9,11 +9,25 @@
 
 #include <cassert>
 
+/***
+ * @module
+ * 
+ * This class represents a 4x4 matrix and can
+ * be used to express 3D affine transformations.
+ */
+
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Creates a new Transform3D intialized
+ * with the identity matrix.
+ * 
+ * @returns A new Transform3D instance
+ */
 
 static TByte create(VM* vm)
 {
@@ -25,6 +39,10 @@ static TByte create(VM* vm)
 
     return 1;
 }
+
+/***
+ * Sets this Transform3D to identity.
+ */
 
 static TByte identity(VM* vm)
 {
@@ -38,6 +56,13 @@ static TByte identity(VM* vm)
 
     return 0;
 }
+
+/***
+ * Multiplies this matrix by a new rotation matrix.
+ * 
+ * @arg angle The angle in degrees
+ * @arg ?axis A `Vector3` with the axis. Defaults to (0, 0, 1).
+ */
 
 static TByte rotate(VM* vm)
 {
@@ -64,6 +89,12 @@ static TByte rotate(VM* vm)
     return 0;
 }
 
+/***
+ * Multiplies this matrix by a new translation matrix.
+ * 
+ * @arg amount A `Vector2` or a `Vector3` with the translation.
+ */
+
 static TByte translate(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -87,6 +118,12 @@ static TByte translate(VM* vm)
     return 0;
 }
 
+/***
+ * Multiplies this matrix by a new scale matrix.
+ * 
+ * @arg amount A `Vector2` or a `Vector3` with the scale. A `Vector2` will only scale `x` and `y`.
+ */
+
 static TByte scale(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -109,6 +146,12 @@ static TByte scale(VM* vm)
     return 0;
 }
 
+/***
+ * Creates a copy of this `Transform3D`s
+ * 
+ * @returns A new `Transform3D` instance
+ */
+
 static TByte copy(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -123,6 +166,10 @@ static TByte copy(VM* vm)
     return 1;
 }
 
+/***
+ * Transposes this transform matrix.
+ */
+
 static TByte transpose(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -135,6 +182,10 @@ static TByte transpose(VM* vm)
 
     return 0;
 }
+
+/***
+ * Inverts this transform matrix.
+ */
 
 static TByte inverse(VM* vm)
 {
@@ -149,6 +200,12 @@ static TByte inverse(VM* vm)
     return 0;
 }
 
+/***
+ * Calculates the determinant of this 4x4 matrix.
+ * 
+ * @returns A scalar with the result of the determinant
+ */
+
 static TByte determinant(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -161,6 +218,20 @@ static TByte determinant(VM* vm)
 
     return 1;
 }
+
+/***
+ * Multiplies this `Transform3D` with another `Transform3D`, 
+ * a `Vector4` or a `Vector3`.
+ * 
+ * If this matrix is multiplied by a vector a new transformed
+ * `Vector3` or `Vector4` is returned. If the right hand side was a `Vector3`
+ * the `w` component is assumed to be `1.0` and a `Vector3` is returned.
+ * 
+ * If this matrix is multiplied by another `Transform3D` the
+ * result is another `Transform3D` with the result of the multiplication.
+ * 
+ * @returns Anotther
+ */
 
 static TByte opMultiply(VM* vm)
 {

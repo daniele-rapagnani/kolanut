@@ -10,11 +10,25 @@
 
 #include <cassert>
 
+/***
+ * @module 
+ * 
+ * This class represents an instance of a loaded texture/sprite
+ */
+
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Draws this sprite on the screen.
+ * 
+ * @arg transform? A `Transform3D` to be used to draw this sprite
+ * @arg rect? The part of this sprite you want to draw
+ * @arg color? The color you want to tint this texture with. Defaults to white (no tint)
+ */
 
 static TByte draw(VM* vm)
 {
@@ -46,6 +60,12 @@ static TByte draw(VM* vm)
 
     return 0;
 }
+
+/***
+ * Gets the size in pixels of this sprite
+ * 
+ * @returns A `Vector2` with the size of this texture in pixels
+ */
 
 static TByte getSize(VM* vm)
 {

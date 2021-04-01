@@ -10,11 +10,23 @@
 
 #include <cassert>
 
+/***
+ * @module
+ * 
+ * This module can be used to interact with the game's camera.
+ */
+
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Sets the position of the camera.
+ * 
+ * @arg pos A `Vector2` with the new position
+ */
 
 static TByte setPosition(VM* vm)
 {
@@ -27,11 +39,23 @@ static TByte setPosition(VM* vm)
     return 0;
 }
 
+/***
+ * Gets the position of the camera.
+ * 
+ * @returns A `Vector2` with the current position
+ */
+
 static TByte getPosition(VM* vm)
 {
     Vec2f cPos = di::get<graphics::Renderer>()->getCameraPosition();
     return ffi::push(vm, cPos);
 }
+
+/***
+ * Sets the camera's zoom.
+ * 
+ * @arg zoom A value of 1.0 corresponds to the design resolution, 2.0 to twice the design resolution.
+ */
 
 static TByte setZoom(VM* vm)
 {
@@ -40,11 +64,23 @@ static TByte setZoom(VM* vm)
     return 0;
 }
 
+/***
+ * Gets the camera's zoom.
+ * 
+ * @returns The current camera zoom
+ */
+
 static TByte getZoom(VM* vm)
 {
     float zoom = di::get<graphics::Renderer>()->getCameraZoom();
     return ffi::push(vm, zoom);
 }
+
+/***
+ * Sets the camera's origin.
+ * 
+ * @arg origin A `Vector2` with the new camera's origin
+ */
 
 static TByte setOrigin(VM* vm)
 {
@@ -57,11 +93,27 @@ static TByte setOrigin(VM* vm)
     return 0;
 }
 
+/***
+ * Gets the camera's origin.
+ * 
+ * @returns A `Vector2` with the current camera's origin
+ */
+
 static TByte getOrigin(VM* vm)
 {
     Vec2f cOrig = di::get<graphics::Renderer>()->getCameraOrigin();
     return ffi::push(vm, cOrig);
 }
+
+/***
+ * Sets position, zoom and origin with one call.
+ * This is more efficient than calling them individually because
+ * the internal camera matrix is calculated only once.
+ * 
+ * @arg pos A `Vector2` with the new camera position
+ * @arg zoom The new zoom, see `setZoom`
+ * @arg origin A `Vector2` with the new camera's origin
+ */
 
 static TByte set(VM* vm)
 {

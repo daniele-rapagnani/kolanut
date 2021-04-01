@@ -8,6 +8,13 @@
 #include "kolanut/audio/Sound.h"
 #include "kolanut/core/DIContainer.h"
 
+/***
+ * @module
+ * 
+ * This module exposes basic APIs that can be used to
+ * interact with he Kolanut engine.
+ */
+
 extern "C" {
 #include <melon/core/tstring.h>
 #include <melon/modules/modules.h>
@@ -15,25 +22,49 @@ extern "C" {
 
 extern "C" {
 
+/***
+ * Called when the assets should be loaded
+ */
+
 static TByte onLoad(VM* vm)
 {
     return 0;
 }
+
+/***
+ * Called when the game should be updated
+ * 
+ * @arg dt The current delta time
+ */
 
 static TByte onUpdate(VM* vm)
 {
     return 0;
 }
 
+/***
+ * Called when the current frame should be drawn
+ */
+
 static TByte onDraw(VM* vm)
 {
     return 0;
 }
 
+/***
+ * Called when the UI should be drawn
+ */
+
 static TByte onDrawUI(VM* vm)
 {
     return 0;
 }
+
+/***
+ * Called when the user tries to close the game.
+ * 
+ * @returns `true` if the game should close, `false` if it shouldn't.
+ */
 
 static TByte onQuit(VM* vm)
 {
@@ -45,10 +76,24 @@ static TByte onQuit(VM* vm)
     return 1;
 }
 
+/***
+ * Called when the user has pressed a key
+ * 
+ * @arg key A string representing the key that has been pressed
+ * @arg pressed `true` if the key has been pressed during this frame or `false` if it has been released.
+ */
+
 static TByte onKeyPressed(VM* vm)
 {
     return 0;
 }
+
+/***
+ * Loads a sprite image from a file
+ * 
+ * @arg path The path of the sprite to load
+ * @returns A valid sprite reference if successfull or `null`
+ */
 
 static TByte loadSprite(VM* vm)
 {
@@ -71,6 +116,14 @@ static TByte loadSprite(VM* vm)
     kola::melon::ffi::pushInstance(vm, "Kolanut", "Texture", texture);
     return 1;
 }
+
+/***
+ * Loads a font from a file
+ * 
+ * @arg path The path of the font to load
+ * @arg ?size The size at which this font will be rendered to bitmap, defaults to 16px
+ * @returns A valid font reference if successfull or `null`
+ */
 
 static TByte loadFont(VM* vm)
 {
@@ -102,6 +155,13 @@ static TByte loadFont(VM* vm)
     return 1;
 }
 
+/***
+ * Loads sound from a file
+ * 
+ * @arg path The path of the sound to load
+ * @returns A valid sound reference if successfull or `null`
+ */
+
 static TByte loadSound(VM* vm)
 {
     melM_arg(vm, file, MELON_TYPE_STRING, 0);
@@ -118,6 +178,12 @@ static TByte loadSound(VM* vm)
     return 1;
 }
 
+/***
+ * Sets the master audio volume, setting this to `0.0` will mute all audio.
+ * 
+ * @arg gain The gain to set, a number between `0.0` and `1.0`
+ */
+
 static TByte setMasterVolume(VM* vm)
 {
     melM_arg(vm, masterVolVal, MELON_TYPE_NUMBER, 0);
@@ -131,6 +197,12 @@ static TByte setMasterVolume(VM* vm)
     return 0;
 }
 
+/***
+ * Gets the current master volume's gain.
+ * 
+ * @returns The current master volume's gain, a number between `0.0` and `1.0`
+ */
+
 static TByte getMasterVolume(VM* vm)
 {
     std::shared_ptr<kola::audio::AudioEngine> audio = 
@@ -140,6 +212,13 @@ static TByte getMasterVolume(VM* vm)
     kola::melon::ffi::push(vm, audio->getMasterVolume());
     return 1;
 }
+
+/***
+ * Gets the size of the window in which the game is rendered
+ * (or the screen if it's fullscreen).
+ * 
+ * @returns A Vector2 with the current size
+ */
 
 static TByte getScreenSize(VM* vm)
 {
@@ -152,6 +231,13 @@ static TByte getScreenSize(VM* vm)
     return 1;
 }
 
+/***
+ * Gets the size the game currently uses to render its content
+ * and that its adapted to the actual window/screen size.
+ * 
+ * @returns A Vector2 with the current size
+ */
+
 static TByte getDesignResolution(VM* vm)
 {
     std::shared_ptr<kola::graphics::Renderer> renderer = 
@@ -163,6 +249,12 @@ static TByte getDesignResolution(VM* vm)
     return 1;
 }
 
+/***
+ * Gets the current time since the game started in milliseconds.
+ * 
+ * @returns Returns an integer representing the number of milliseconds passed.
+ */
+
 static TByte getTime(VM* vm)
 {
     std::shared_ptr<kola::events::EventSystem> eventSystem = 
@@ -173,6 +265,14 @@ static TByte getTime(VM* vm)
 
     return 1;
 }
+
+/***
+ * Draws the wireframe of a rectangle on the screen
+ * using the current camera settings.
+ * 
+ * @args rect A `Rect`, the one to draw
+ * @args ?color The `Color` to use when drawing the rect. Defaults to white.
+ */
 
 static TByte drawRect(VM* vm)
 {
@@ -193,6 +293,15 @@ static TByte drawRect(VM* vm)
 
     return 0;
 }
+
+/***
+ * Draws a line on the screen using the current
+ * camera settings.
+ * 
+ * @args a A `Vector2` with the first point's position
+ * @args b A `Vector2` with the second point's position
+ * @args ?color The `Color` to use when drawing the rect. Defaults to white.
+ */
 
 static TByte drawLine(VM* vm)
 {

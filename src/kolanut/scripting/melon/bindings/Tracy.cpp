@@ -6,16 +6,29 @@
 #include "kolanut/scripting/melon/ffi/PushContainers.h"
 #include "kolanut/scripting/melon/bindings/TilemapFFI.h"
 
-// #define TRACY_ENABLE
-
 #include <Tracy.hpp>
 #include <cassert>
+
+/***
+ * @module
+ * 
+ * This module can be used to interact with Tracy if it's enabled
+ * in the current build.
+ * 
+ * If it's not enabled, the functions in this module will have no effect.
+ */
 
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Starts a zone to be profiled with Tracy.
+ * 
+ * @arg zoneName The name of the zone to start
+ */
 
 static TByte beginZone(VM* vm)
 {
@@ -78,6 +91,10 @@ static TByte beginZone(VM* vm)
 
     return 0;
 }
+
+/***
+ * Ends a zone to be profiled with Tracy.
+ */
 
 static TByte endZone(VM* vm)
 {

@@ -10,11 +10,26 @@
 
 #include <cassert>
 
+/***
+ * @module
+ * 
+ * This class represents an instance of a font.
+ */
+
 namespace kola {
 namespace melon {
 namespace bindings {
 
 extern "C" {
+
+/***
+ * Draws some text using this font.
+ * 
+ * @arg text A string with the text to draw
+ * @arg ?position A `Vector2` with the position where the text should be drawn
+ * @arg ?size The size of the text in pixels, defaults to the size used when loading the font
+ * @arg ?color The `Color` to use to draw
+ */
 
 static TByte draw(VM* vm)
 {
@@ -53,6 +68,14 @@ static TByte draw(VM* vm)
     return 0;
 }
 
+/***
+ * Returns the size of some text rendered with this font at its native size.
+ * 
+ * @arg text The text of which you want to know the size when drawn
+ * 
+ * @returns A `Vector2` with the text size
+ */
+
 static TByte getTextSize(VM* vm)
 {
     melM_this(vm, thisObj);
@@ -69,6 +92,13 @@ static TByte getTextSize(VM* vm)
 
     return 1;
 }
+
+/***
+ * Gets the size at which this font has been rasterized, the same used
+ * to load the font.
+ * 
+ * @returns The size used to rasterize this font in pixels
+ */
 
 static TByte getNativeSize(VM* vm)
 {
